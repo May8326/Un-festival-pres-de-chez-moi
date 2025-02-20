@@ -24,7 +24,7 @@ Avant chaque session de travail, aller dans son dossier cloné sur son travail
 	- Exporter le projet
 		- sur la vue du flow, cliquer sur 'ApplicationFlask' en haut à gauche
 		- en haut à droite : Actions > Exporter 
-		- enregistrer le nouveau `ApplicationFlask.zip` dans sa branche à la place de l'ancien
+		- enregistrer le nouveau `ApplicationFlask.zip` dans sa branche à la place de l'ancien, `git add ApplicationFlask.zip`, `git commit -m "décrire ce qu'on a fait"
 	- Partager à tous
 		- se positionner sur la branche master `git switch master`
 		- merger sa branche avec master `git merge <ma branche>`

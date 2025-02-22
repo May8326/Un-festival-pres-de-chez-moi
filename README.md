@@ -13,6 +13,7 @@ alias <nom_de_mon_alias> = "sudo docker run -u dss -v \$HOME/Documents/Volumes/d
 
 ### Utilisation de Dataiku
 
+> Attention aux fichiers de plus de 100mo qui ne sont pas pris en charge par GitHub et font bugger le push
 
 Avant chaque session de travail, aller dans son dossier cloné sur son travail
 

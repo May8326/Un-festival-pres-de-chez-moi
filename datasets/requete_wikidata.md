@@ -28,7 +28,7 @@ WHERE {
   # et harmoniser les résultats avec la bdd d'origine
   OPTIONAL { ?festival wdt:P582 ?endTime. }
   
-  # Exclut les festivals dont la date de fin renseignée est antérieure au 1ᵉʳ janvier 2019
+  # Exclut les festivals dont la date de fin renseignée est antérieure au 1er janvier 2019
   FILTER(!bound(?endTime) || ?endTime >= "2019-01-01T00:00:00Z"^^xsd:dateTime)
     
   # Récupère le nombre de participants aux festivals quand il est renseigné

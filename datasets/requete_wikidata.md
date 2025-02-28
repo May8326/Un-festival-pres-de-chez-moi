@@ -6,7 +6,8 @@ Celle-ci devait inclure le nombre de participants aux festivals, mais cette donn
 
 ```sparql
 # Cette requête permet de récupérer tous les festivals français enregistrés dans wikidata, 
-# ainsi que le nombre de participants et de followers sur les réseaux sociaux (tous réseaux confondus) quand ils sont renseignés.
+# ainsi que le nombre de participants et de followers sur les réseaux sociaux (tous réseaux confondus)
+# quand ils sont renseignés.
 
 
 # En têtes de l'output et regroupement des colonnes par festival
@@ -23,7 +24,8 @@ WHERE {
   ?festival wdt:P31/wdt:P279* wd:Q132241.
   ?festival wdt:P17 wd:Q142.
   
-  # Recherche de la date de fin des festivals pour pouvoir les filtrer et harmoniser les résultats avec la base de données d'origine
+  # Recherche de la date de fin des festivals pour pouvoir les filtrer
+  # et harmoniser les résultats avec la bdd d'origine
   OPTIONAL { ?festival wdt:P582 ?endTime. }
   
   # Exclut les festivals dont la date de fin renseignée est antérieure au 1ᵉʳ janvier 2019
@@ -41,8 +43,8 @@ WHERE {
   # Récupère le nombre de followers sur les réseaux sociaux quand il est renseigné
   OPTIONAL { ?festival wdt:P8687 ?followers. }
   
-  # Pour éviter d'avoir des festivalLabel avec l'id wikidata du festival quand wikidata ne le trouve pas, lui indique de chercher d'abord en français,
-  # puis en anglais, puis de détecter lui-même la langue la plus appropriée.
+  # Pour éviter d'avoir des festivalLabel avec l'id wikidata du festival quand wikidata ne le trouve pas,
+  # lui indique de chercher d'abord en français, puis en anglais, puis de détecter lui-même la langue la plus appropriée.
   SERVICE wikibase:label { bd:serviceParam wikibase:language "fr, en,[AUTO_LANGUAGE]". }
 }
 

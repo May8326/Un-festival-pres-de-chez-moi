@@ -9,7 +9,8 @@ Celle-ci devait inclure le nombre de participants aux festivals, mais cette donn
 # ainsi que le nombre de participants et de followers sur les réseaux sociaux (tous réseaux confondus) quand ils sont renseignés.
 
 
-# En têtes de l'output et regroupement des colonnes par festival (pour supprimer le bruit des festivals enregistrés plusieurs fois pour chaque année où ils ont eu lieu)
+# En têtes de l'output et regroupement des colonnes par festival
+# (pour supprimer le bruit des festivals enregistrés plusieurs fois pour chaque année où ils ont eu lieu)
 SELECT 
   ?festival 
   ?festivalLabel 
@@ -28,7 +29,8 @@ WHERE {
   # Exclut les festivals dont la date de fin renseignée est antérieure au 1ᵉʳ janvier 2019
   FILTER(!bound(?endTime) || ?endTime >= "2019-01-01T00:00:00Z"^^xsd:dateTime)
     
-  # Récupère le nombre de participants aux festivals quand il est renseigné (laissé car on aurait aimé le trouvé, mais n'est apparemment pas renseigné sur wikidata)
+  # Récupère le nombre de participants aux festivals quand il est renseigné
+  # (laissé car on aurait aimé le trouvé, mais n'est apparemment pas renseigné sur wikidata)
   OPTIONAL {
     ?festival wdt:56512863 ?participants.
   }
@@ -39,7 +41,8 @@ WHERE {
   # Récupère le nombre de followers sur les réseaux sociaux quand il est renseigné
   OPTIONAL { ?festival wdt:P8687 ?followers. }
   
-  # Pour éviter d'avoir des festivalLabel avec l'id wikidata du festival quand wikidata ne le trouve pas, lui indique de chercher d'abord en français, puis en anglais, puis de détecter lui-même la langue la plus appropriée.
+  # Pour éviter d'avoir des festivalLabel avec l'id wikidata du festival quand wikidata ne le trouve pas, lui indique de chercher d'abord en français,
+  # puis en anglais, puis de détecter lui-même la langue la plus appropriée.
   SERVICE wikibase:label { bd:serviceParam wikibase:language "fr, en,[AUTO_LANGUAGE]". }
 }
 

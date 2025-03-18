@@ -1,51 +1,101 @@
-from flask_sqlalchemy import SQLAlchemy
+from ..app import app, db
+from ..utils.transformations import nettoyage_db.String_to_int
 
-db = SQLAlchemy()
 
-# Association Tables
-festival_commune = db.Table(
-    'festival_commune',
-    db.Column('id_festival', db.Integer, db.ForeignKey('festival.id'), primary_key=True),
-    db.Column('id_commune', db.Integer, db.ForeignKey('commune.id'), primary_key=True)
+# db = None  # Assurez-vous d'initialiser db correctement dans votre application Flask
+
+# Déclaration des tables de relation (festival et monument selon la distance en km)
+festival_monument_relation = db.Table(
+    "festival_monuments_geopoint", db.Model.metadata,
+    db.Column('id_monument_historique', db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), primary_key=True),
+    db.Column('id_festival', db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True),
+    db.Column('distance', db.Float)
 )
 
 class Commune(db.Model):
-    __tablename__ = 'commune'
-    id = db.Column(db.Integer, primary_key=True)
-    code_insee = db.Column(db.Integer, unique=True, nullable=False)
-    nom = db.Column(db.String(255), nullable=False)
-    code_departement = db.Column(db.Integer)
-    code_region = db.Column(db.Integer)
+    __tablename__ = 'correspondance_communes'
+
+    id_commune = db.Column(db.Integer, primary_key=True)
+    code_commune_INSEE = db.Column(db.Integer)
+    code_postal = db.Column(db.Integer)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    nom_commune = db.Column(db.String)
+    nom_commune_complet = db.Column(db.String)
+    code_departement = db.Column(db.Integer)
+    nom_departement = db.Column(db.String)
+    code_region = db.Column(db.Integer)
+    nom_region = db.Column(db.String)
 
-    festivals = db.relationship('Festival', secondary=festival_commune, back_populates='communes')
+    festivals = db.relationship("LieuFestival", back_populates="commune")
+    monuments = db.relationship("LieuMonumentHistorique", back_populates="commune")
+
 
 class Festival(db.Model):
-    __tablename__ = 'festival'
-    id = db.Column(db.Integer, primary_key=True)
-    nom = db.Column(db.String(255), nullable=False)
-    annee_creation = db.Column(db.String(10))
-    periode_principale = db.Column(db.String(100))
-    discipline_dominante = db.Column(db.String(255))
+    __tablename__ = 'titre_festival_data_gouv'
 
-    communes = db.relationship('Commune', secondary=festival_commune, back_populates='festivals')
+    id_festival = db.Column(db.Integer, primary_key=True)
+    nom_festival = db.Column(db.String)
+    
+    contact = db.relationship("ContactFestival", back_populates="festival", uselist=False)
+    dates = db.relationship("DateFestival", back_populates="festival", uselist=False)
+    lieu = db.relationship("LieuFestival", back_populates="festival", uselist=False)
+    type = db.relationship("TypeFestival", back_populates="festival", uselist=False)
+    monuments = db.relationship("MonumentHistorique", secondary=festival_monument_relation, back_populates="festivals")
 
+class ContactFestival(db.Model):
+    __tablename__ = 'contact_festival'
+
+    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
+    site_internet_festival = db.Column(db.String)
+    adresse_mail_festival = db.Column(db.String)
+    
+    festival = db.relationship("Festival", back_populates="contact")
+    
+class DateFestival(db.Model):
+    __tablename__ = 'date_festival'
+
+    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
+    annee_creation_festival = db.Column(db.String)
+    periode_principale_deroulement_festival = db.Column(db.String)
+    
+    festival = db.relationship("Festival", back_populates="dates")
+    
+class LieuFestival(db.Model):
+    __tablename__ = 'lieu_festival'
+
+    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
+    code_insee_commune_festival = db.Column(db.Integer, db.ForeignKey('correspondance_communes.code_commune_INSEE'))
+    latitude_festival = db.Column(db.Float)
+    longitude_festival = db.Column(db.Float)
+    
+    festival = db.relationship("Festival", back_populates="lieu")
+    commune = db.relationship("Commune", back_populates="festivals")
+    
+class TypeFestival(db.Model):
+    __tablename__ = 'type_festival'
+
+    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
+    discipline_dominante_festival = db.Column(db.String)
+    
+    festival = db.relationship("Festival", back_populates="type")
+    
 class MonumentHistorique(db.Model):
-    __tablename__ = 'monument_historique'
-    id = db.Column(db.Integer, primary_key=True)
-    denomination = db.Column(db.String(255))
-    domaine = db.Column(db.String(255))
-    statut_juridique = db.Column(db.String(255))
-    precision_protection = db.Column(db.String(255))
-    siecle_construction = db.Column(db.String(50))
-    historique = db.Column(db.Text)
-    auteur = db.Column(db.String(255))
-    adresse = db.Column(db.String(255))
-    latitude = db.Column(db.Float)
-    longitude = db.Column(db.Float)
-    id_commune = db.Column(db.Integer, db.ForeignKey('commune.id'))
+    __tablename__ = 'lieu_monument_historique'
 
-    commune = db.relationship('Commune', back_populates='monuments')
-
-Commune.monuments = db.relationship('MonumentHistorique', back_populates='commune')
+    id_monument_historique = db.Column(db.Integer, primary_key=True)
+    code_insee_edifice_lors_de_protection = db.Column(db.Integer, db.ForeignKey('correspondance_communes.code_commune_INSEE'))
+    latitude_monument_historique = db.Column(db.Float)
+    longitude_monument_historique = db.Column(db.Float)
+    
+    aspects_juridiques = db.relationship("AspectJuridiqueMonumentHistorique", back_populates="monument", uselist=False)
+    commune = db.relationship("Commune", back_populates="monuments")
+    festivals = db.relationship("Festival", secondary=festival_monument_relation, back_populates="monuments")
+    
+class AspectJuridiqueMonumentHistorique(db.Model):
+    __tablename__ = 'aspect_juridique_monument_historique'
+    
+    id_monument_historique = db.Column(db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), primary_key=True)
+    statut_juridique_edifice = db.Column(db.String)
+    
+    monument = db.relationship("MonumentHistorique", back_populates="aspects_juridiques")

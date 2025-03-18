@@ -2,10 +2,10 @@ from ..app import app, db
 from ..utils.transformations import nettoyage_db.String_to_int
 
 
-# db = None  # Assurez-vous d'initialiser db correctement dans votre application Flask
+from ..app import app, db
 
-# Déclaration des tables de relation (festival et monument selon la distance en km)
-festival_monument_relation = db.Table(
+# Déclaration des tables de relation
+festival_monument_geopoint = db.Table(
     "festival_monuments_geopoint", db.Model.metadata,
     db.Column('id_monument_historique', db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), primary_key=True),
     db.Column('id_festival', db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True),
@@ -29,7 +29,6 @@ class Commune(db.Model):
 
     festivals = db.relationship("LieuFestival", back_populates="commune")
     monuments = db.relationship("LieuMonumentHistorique", back_populates="commune")
-
 
 class Festival(db.Model):
     __tablename__ = 'titre_festival_data_gouv'

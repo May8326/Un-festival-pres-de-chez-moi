@@ -1,6 +1,8 @@
-from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SelectMultipleField, TextAreaField, PasswordField
+""" 
+selon ce modèle : import / suppression / gestion des favoris
+"""
 
+"""exemple du cours
 class Recherche(FlaskForm):
     nom_pays = StringField("nom_pays", validators=[]) 
     ressources = SelectField('ressources', choices=[('', ''),('PET', 'pétrole'), ('GOL', 'or')])
@@ -28,4 +30,36 @@ class SuppressionRessource(FlaskForm):
 
 class AjoutUtilisateur(FlaskForm):
     prenom = StringField("prenom", validators=[])
-    password = PasswordField("password", validators=[])
+    password = PasswordField("password", validators=[])"
+""" 
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, SelectField, SelectMultipleField, TextAreaField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Length, Email
+
+class RechercheFestivalMonument(FlaskForm):
+    nom = StringField("Nom", validators=[DataRequired(), Length(min=2, max=100)])
+    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument')])
+    submit = SubmitField('Rechercher')
+
+class AjoutFavori(FlaskForm):
+    nom = StringField("Nom", validators=[DataRequired(), Length(min=2, max=100)])
+    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument')])
+    submit = SubmitField('Ajouter aux favoris')
+
+class ModificationFavori(FlaskForm):
+    ancien_nom = StringField("Ancien Nom", validators=[DataRequired(), Length(min=2, max=100)])
+    nouveau_nom = StringField("Nouveau Nom", validators=[DataRequired(), Length(min=2, max=100)])
+    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument')])
+    submit = SubmitField('Modifier le favori')
+
+class SuppressionFavori(FlaskForm):
+    nom = StringField("Nom", validators=[DataRequired(), Length(min=2, max=100)])
+    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument')])
+    submit = SubmitField('Supprimer des favoris')
+
+class AjoutUtilisateur(FlaskForm):
+    prenom = StringField("Prénom", validators=[DataRequired(), Length(min=2, max=50)])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Mot de passe", validators=[DataRequired(), Length(min=6)])
+    submit = SubmitField('Ajouter l\'utilisateur')

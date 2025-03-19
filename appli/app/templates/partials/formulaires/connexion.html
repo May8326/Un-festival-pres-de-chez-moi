@@ -1,8 +1,9 @@
-<form action="{{url_for('ajout_utilisateur')}}" method="post" name="ajout_utilisateur">  <!--C'est ici qu'on récup le nom et le lien du truc qu'on fait dans la route -->
+<form action="{{url_for('connexion')}}" method="post" name="connexion">
+    {{ form.hidden_tag() }}
 
     <div class="form-group">
         <label for="prenom">Prénom de l'utilisateur</label>
-        <small id="prenom" class="form-text text-muted">Entrer le prénom de l'utilisateur</small> <!--j'ai oublié d'injecter les champs de mon formulaire -->
+        <small id="prenom" class="form-text text-muted">Entrer le prénom</small>
     </div>
 
     <div class="form-group">

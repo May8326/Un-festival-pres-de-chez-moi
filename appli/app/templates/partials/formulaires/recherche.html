@@ -2,23 +2,27 @@
     {{ form.hidden_tag() }}
 
     <div class="form-group">
-        <label for="nom_pays">Nom du pays recherché </label>
-        {{ form.nom_pays(class_="form-control", placeholder_="Pays") }}
-        <small id="nom_pays" class="form-text text-muted">Entrer tout ou partie du nom d'un
-            pays</small>
+        <label for="nom_festival">Nom du festival recherché </label>
+        {{ form.nom(class_="form-control", placeholder_="Festival") }}
+        <small id="nom_festival" class="form-text text-muted">Entrer tout ou partie du nom d'un festival</small>
     </div>
 
     <div class="form-group">
-        <label for="ressources">Ressource possédées</label>
-        {{ form.ressources(class_="form-control") }}
-        <small id="ressources" class="form-text text-muted">Sélectionner une ressource possédée dans le pays</small>
+        <label for="Période">Dates</label>
+        {{ form.periode(class_="form-control") }}
+        <small id="periode" class="form-text text-muted">Indiquez une période</small>
     </div>
 
     <div class="form-group">
-        <label for="continents">Continent d'appartenance</label>
-        {{ form.continents(class_="form-control") }}
-        <small id="continents" class="form-text text-muted">Sélectionner un 
-            continent</small>
+        <label for="Discipline">Discipline</label>
+        {{ form.discipline(class_="form-control") }}
+        <small id="discipline" class="form-text text-muted"> Sélectionnez une discipline</small>
+    </div>
+
+    <div class="form-group">
+        <label for="Lieu">Lieu</label>
+        {{ form.lieu(class_="form-control") }}
+        <small id="discipline" class="form-text text-muted"> Sélectionnez une commune</small>
     </div>
 
     <p><input type="submit" value="Rechercher"></p>

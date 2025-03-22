@@ -1,8 +1,4 @@
 from ..app import app, db
-from ..utils.transformations import nettoyage_db.String_to_int
-
-
-from ..app import app, db
 
 # Déclaration des tables de relation
 festival_monuments_geopoint = db.Table(

@@ -5,3 +5,9 @@ def to_bool(s):
     elif(s.lower() == "false"):
         r = False
     return r
+
+def clean_arg(arg):
+    if arg == "":
+        return None
+    else:
+        return arg

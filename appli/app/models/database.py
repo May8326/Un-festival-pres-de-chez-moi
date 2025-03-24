@@ -94,3 +94,15 @@ class AspectJuridiqueMonumentHistorique(db.Model):
     statut_juridique_edifice = db.Column(db.String)
     
     monument = db.relationship("MonumentHistorique", backref="aspects_juridiques")
+
+class Favoris(db.Model):
+    __tablename__ = 'favoris'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.User.id'), nullable=False)
+    festival_id = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), nullable=True)
+    monument_id = db.Column(db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), nullable=True)
+
+    user = db.relationship("User", backref="favoris")
+    festival = db.relationship("Festival", backref="favoris")
+    monument = db.relationship("MonumentHistorique", backref="favoris")

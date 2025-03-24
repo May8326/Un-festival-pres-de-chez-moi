@@ -5,6 +5,7 @@ from sqlalchemy import or_
 from ..models.database import Commune, Festival, ContactFestival, DateFestival, LieuFestival, TypeFestival, MonumentHistorique,AspectJuridiqueMonumentHistorique
 from ..models.formulaires import RechercheFestivalMonument, AjoutFavori, ModificationFavori, SuppressionFavori, AjoutUtilisateur, Recherche
 from ..utils.transformations import clean_arg
+from ..utils.proximite import proximite
 
 @app.route("/")
 def accueil():
@@ -24,6 +25,7 @@ def recherche(resultats):
             periode =  clean_arg(request.form.get("periode", None))
             discipline =  clean_arg(request.form.get("discipline", None))
             lieu_pre_traitement = clean_arg(request.form.get("lieu",None))
+            dist = clean_arg(request.form.get("dist", None))
 
             if nom_fest or periode or discipline or lieu_pre_traitement:
                 query_results = Festival.query
@@ -33,5 +35,9 @@ def recherche(resultats):
                 if periode:
                     query_results = query_results.filter(Festival.dates.ilike(periode))
                 if discipline:
-                    query_results = query_results.filter(Festival.dates.ilike(periode))
+                    query_results = query_results.filter(Festival.type.ilike(discipline))
+                if lieu_pre_traitement:
+                    lieux = proximite(lieu_pre_traitement,dist) #on appelle la fonction qui trouve les villes à moins de dist km
+                    for i in lieux:
+                        query_results = query_results.filter(Festival.lieu.ilike(i))
                 

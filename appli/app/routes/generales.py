@@ -20,10 +20,18 @@ def recherche(resultats):
 
     try:
         if form.validate_on_submit():
-            nom_festival =  clean_arg(request.form.get("nom", None))
+            nom_fest =  clean_arg(request.form.get("nom", None))
             periode =  clean_arg(request.form.get("periode", None))
             discipline =  clean_arg(request.form.get("discipline", None))
             lieu_pre_traitement = clean_arg(request.form.get("lieu",None))
 
-            if nom_festival or periode or discipline or lieu_pre_traitement:
+            if nom_fest or periode or discipline or lieu_pre_traitement:
                 query_results = Festival.query
+
+                if nom_fest :
+                    query_results = query_results.filter(Festival.nom_festival.ilike("%"+nom_fest+"%"))
+                if periode:
+                    query_results = query_results.filter(Festival.dates.ilike(periode))
+                if discipline:
+                    query_results = query_results.filter(Festival.dates.ilike(periode))
+                

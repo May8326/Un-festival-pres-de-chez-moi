@@ -1,4 +1,4 @@
-def to_bool(s):
+def to_bool(s:str):
     r = False 
     if(s.lower() == "true"):
         r = True

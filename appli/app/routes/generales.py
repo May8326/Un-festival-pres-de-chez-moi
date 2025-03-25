@@ -40,4 +40,4 @@ def recherche(resultats):
                     lieux = proximite(lieu_pre_traitement,dist) #on appelle la fonction qui trouve les villes à moins de dist km
                     for i in lieux:
                         query_results = query_results.filter(Festival.lieu.ilike(i))
-                
+            donnees = query_results.paginate(per_page=app.config["FESTIVALS_PER_PAGE"])

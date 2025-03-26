@@ -82,3 +82,45 @@ def recherche(resultats):
 
     return render_template ("/pages/accueil.html",form=form, donnees = donnees )
         
+
+# ROUTE A COMPLETER
+@app.route("/recherche_rapide")
+@app.route("/recherche_rapide/<int:page>")
+def recherche_rapide():
+    chaine =  request.args.get("chaine", None)
+    try: 
+
+        if chaine:
+            resources = db.session.execute("""select a.id from Festival a 
+                inner join Festival_resources b on b.id = a.id 
+                inner join resources c on c.name = b.resource and (c.name like '%"""+chaine+"""%' or  c.id like '%"""+chaine+"""%')
+                """).fetchall()
+            
+            maps = db.session.execute("""select a.id from Festival a 
+                inner join Festival_map b on b.id = a.id 
+                inner join map  c on c.name = b.map_ref and (c.name like '%"""+chaine+"""%' or  c.id like '%"""+chaine+"""%')
+                """).fetchall()
+
+            resultats = Festival.query.\
+                filter(
+                    or_(
+                        Festival.name.ilike("%"+chaine+"%"),
+                        Festival.type.ilike("%"+chaine+"%"),
+                        Festival.Introduction.ilike("%"+chaine+"%"),
+                        Festival.id.in_([r.id for r in resources] + [m.id for m in maps])
+                    )
+                ).\
+                distinct(Festival.name).\
+                order_by(Festival.name).\
+                paginate(page=page, per_page=app.config["PAYS_PER_PAGE"])
+        else:
+            resultats = None
+            
+        return render_template("pages/resultats_recherche_pays.html", 
+                sous_titre= "Recherche | " + chaine, 
+                donnees=resultats,
+                requete=chaine)
+    
+    except Exception as e:
+        print(e)
+        abort(500)

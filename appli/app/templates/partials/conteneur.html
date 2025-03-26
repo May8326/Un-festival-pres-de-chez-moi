@@ -11,4 +11,37 @@
     {% block js %}{%endblock%}
     {% block css %}{%endblock%}
 
+</head>
+<body>
+    <div class="container">
+        <header>
+            {% include "partials/header.html" %}
+        </header>
+        <main>
+            <div class="container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="row">
+                  <div class="col">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{category}}" role="alert">{{ message }}</div>
+                    {% endfor %}
+                  </div>
+                </div>
+                {% endif %}
+                {% endwith %}
+                <div class="row">
+                  <div class="col">
+                    {% block body %}{% endblock %}
+                  </div>
+                </div>
+              </div>
+        </main>
+        <footer>
+            {% include "partials/footer.html" %}
+        </footer>
+    </div>
+    <body>
+        
+        
 </html>

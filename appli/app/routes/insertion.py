@@ -43,6 +43,11 @@ def insertion_favori():
     
     return render_template("pages/insertion_favori.html", sous_titre="Ajout Favori", form=form)
 
+@app.route("/liste/favoris")
+def liste_favoris():
+    favoris = Favoris.query.filter_by(user_id=current_user.id).all()
+    return render_template("pages/liste_favoris.html", sous_titre="Liste des Favoris", favoris=favoris)
+
 @app.route("/modification/favori", methods=['GET', 'POST'])
 def modification_favori():
     form = ModificationFavori()

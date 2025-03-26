@@ -1,5 +1,6 @@
-from ..app import app, db
+from ..app import app, db, login
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 class Users(db.Model):
     __tablename__ = "users"
@@ -43,3 +44,10 @@ class Users(db.Model):
             return True, utilisateur
         except Exception as erreur:
             return False, [str(erreur)]
+        
+    def get_id(self):
+        return self.id
+    
+    @login.user_loader
+    def get_user_by_id(id):
+        return Users.query.get(int(id))

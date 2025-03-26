@@ -1,4 +1,4 @@
-from ..app import app, db
+from app import app, db
 
 # Déclaration des tables de relation
 festival_monuments_geopoint = db.Table(
@@ -41,7 +41,7 @@ class Festival(db.Model):
 class ContactFestival(db.Model):
     __tablename__ = 'contact_festival'
 
-    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'))
+    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
     site_internet_festival = db.Column(db.String(30))
     adresse_mail_festival = db.Column(db.String(30))
     
@@ -85,7 +85,7 @@ class MonumentHistorique(db.Model):
     
     aspects_juridiques = db.relationship("AspectJuridiqueMonumentHistorique", backref="monument", uselist=False)
     commune = db.relationship("Commune", backref="monuments")
-    festivals = db.relationship("Festival", secondary=festival_monument_relation, backref="monuments")
+    festivals = db.relationship("Festival", secondary=festival_monuments_geopoint, backref="monuments")
     
 class AspectJuridiqueMonumentHistorique(db.Model):
     __tablename__ = 'aspect_juridique_monument_historique'

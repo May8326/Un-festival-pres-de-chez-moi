@@ -38,4 +38,4 @@ class Recherche(FlaskForm):
     lieu = StringField('Lieu', validators=[Optional()])
     if lieu:
         dist=FloatField('Distance maximum', validators=[DataRequired()])
-    #réfléchir avant de faire les lieux(fait)
+    

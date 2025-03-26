@@ -2,7 +2,7 @@ from flask import url_for, render_template, redirect, request, flash
 from ..models.users import Users
 from ..models.formulaires import AjoutUtilisateur
 from ..utils.transformations import  clean_arg
-from ..app import app, db
+from app.app import app
 
 @app.route("/utilisateurs/ajout", methods=["GET", "POST"])
 def ajout_utilisateur():

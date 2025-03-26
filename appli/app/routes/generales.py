@@ -9,8 +9,11 @@ from ..utils.proximite import proximite
 
 @app.route("/")
 def accueil():
-    return render_template ("/pages/accueil.html") #à compléter avec le nom du template d'accueil
+    return redirect(url_for("accueil_festivalchezmoi"))
 
+@app.route("/festivalchezmoi/accueil")
+def accueil_festivalchezmoi():
+    return render_template ("/pages/accueil.html")
 #Ce qui suit est un WIP
 @app.route("/resultats", methods=['GET', 'POST'])
 def recherche(resultats):

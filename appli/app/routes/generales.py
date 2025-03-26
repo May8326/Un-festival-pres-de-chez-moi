@@ -1,6 +1,10 @@
 from app.app import app
 from flask import render_template, request, flash, redirect, url_for, abort
 from sqlalchemy import or_
+from ..app import db, login
+from ..models.users import Users
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user, logout_user, login_required, current_user
 
 from ..models.database import Commune, Festival, ContactFestival, DateFestival, LieuFestival, TypeFestival, MonumentHistorique,AspectJuridiqueMonumentHistorique
 from ..models.formulaires import RechercheFestivalMonument, AjoutFavori, ModificationFavori, SuppressionFavori, AjoutUtilisateur, Recherche

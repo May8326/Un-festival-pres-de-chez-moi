@@ -48,6 +48,6 @@ class Users(db.Model, UserMixin):
     def get_id(self):
         return self.id
     
-    @login.user_loader
-    def get_user_by_id(id):
-        return Users.query.get(int(id))
+@login.user_loader
+def load_by_id(id):
+    return Users.query.get(int(id))

@@ -1,8 +1,10 @@
 from flask import url_for, render_template, redirect, request, flash
 from ..models.users import Users
-from ..models.formulaires import AjoutUtilisateur
+from ..models.formulaires import AjoutUtilisateur, Connexion
 from ..utils.transformations import  clean_arg
 from app.app import app
+from flask_login import login_user, logout_user, current_user
+from app.app import login
 
 @app.route("/utilisateurs/ajout", methods=["GET", "POST"])
 def ajout_utilisateur():
@@ -22,33 +24,35 @@ def ajout_utilisateur():
     else:
         return render_template("pages/ajout_utilisateur.html", form=form)
     
-"""
-@app.route("/utilisateurs/ajout", methods=['GET', 'POST'])
-def ajout_utilisateur(page=1): #nom du formulaire auquel on renvoie, avec l'adresse, GET envoi formulaire, c'est sur ça que ça va faire unpost 
-    form = AjoutUtilisateur()  # Instance du formulaire AjoutUtilisateur
+@app.route("/utilisateurs/connexion", methods=["GET","POST"])
+def connexion():
+    form = Connexion()
 
-    if form.validate_on_submit():  # Si le formulaire est valide (POST et toutes les validations passent)
-        prenom = form.prenom.data
-        password = form.password.data
+    if current_user.is_authenticated is True:
+        flash("Vous êtes déjà connecté", "info")
+        return redirect(url_for("accueil"))
 
-        # Vérifier si un utilisateur avec le même prénom existe déjà
-        if Users.query.filter_by(prenom=prenom).first():
-            flash("Un utilisateur avec ce prénom existe déjà.", "danger")
-            return redirect(url_for("ajout_utilisateur"))
-
-        # Créer un nouvel utilisateur
-        nouvel_utilisateur = Users(
-            prenom=prenom,
-            password=generate_password_hash(password)  # Hacher le mot de passe
+    if form.validate_on_submit():
+        utilisateur = Users.identification(
+            prenom=clean_arg(request.form.get("prenom", None)),
+            password=clean_arg(request.form.get("password", None))
         )
-        try:
-            db.session.add(nouvel_utilisateur)
-            db.session.commit()
-            flash("Utilisateur créé avec succès !", "success")
-            return redirect(url_for("liste_utilisateurs"))  # Rediriger vers la liste des utilisateurs
-        except Exception as e:
-            flash(f"Erreur lors de la création de l'utilisateur : {str(e)}", "danger")
-            db.session.rollback()
+        if utilisateur:
+            flash("Connexion effectuée", "success")
+            login_user(utilisateur)
+            return redirect(url_for("accueil"))
+        else:
+            flash("Les identifiants n'ont pas été reconnus", "error")
+            return render_template("pages/connexion.html", form=form)
 
-    return render_template("pages/ajout_utilisateur.html", form=form)  # Afficher le formulaire (GET)
-"""
+    else:
+        return render_template("pages/connexion.html", form=form)
+
+@app.route("/utilisateurs/deconnexion", methods=["POST", "GET"])
+def deconnexion():
+    if current_user.is_authenticated is True:
+        logout_user()
+    flash("Vous êtes déconnecté", "info")
+    return redirect(url_for("accueil"))
+
+login.login_view = 'connexion'

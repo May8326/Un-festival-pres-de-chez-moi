@@ -1,16 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Festivals en fête</title>
+    <link rel="stylesheet" href="partials/css.html"/>
+    {% include "partials/css.html" %}
+    {% include "partials/metadata.html" %}
+    {% include "partials/js.html" %}
+
+    {% block js %}{%endblock%}
+    {% block css %}{%endblock%}
+
 </head>
 <body>
-    <p> les résultats</p>
+    <div class="container">
+        <header>
+            {% include "partials/header.html" %}
+        </header>
+        <main>
+            <div class="container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="row">
+                  <div class="col">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{category}}" role="alert">{{ message }}</div>
+                    {% endfor %}
+                  </div>
+                </div>
+                {% endif %}
+                {% endwith %}
+                <div class="row">
+                  <div class="col">
+                    {% block body %}{% endblock %}
+                    <p> les résultats</p>
     <table>
         <tbody>
             {{donnees}}
         </tbody>
-    </table>    
-</body>
+    </table>  
+                  </div>
+                </div>
+              </div>
+        </main>
+        <footer>
+            {% include "partials/footer.html" %}
+        </footer>
+    </div>
+    <body>
 </html>

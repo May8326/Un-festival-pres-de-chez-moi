@@ -29,6 +29,11 @@ class AjoutUtilisateur(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(min=6)])
     submit = SubmitField('Ajouter l\'utilisateur')
+
+class Connexion(FlaskForm):
+    prenom = StringField("Prénom", validators=[DataRequired(), Length(min=2, max=50)])
+    password = PasswordField("Mot de passe", validators=[DataRequired(), Length(min=6)])
+    submit = SubmitField('Se connecter')
 #tentative de formulaire multifacette pr trouver un festival
 class Recherche(FlaskForm):
     nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max =50)])

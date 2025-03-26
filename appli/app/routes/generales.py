@@ -9,6 +9,7 @@ from ..utils.proximite import proximite
 
 @app.route("/")
 def accueil():
+    form = Recherche()
     return render_template ("/pages/accueil.html") #à compléter avec le nom du template d'accueil
 
 #Ce qui suit est un WIP

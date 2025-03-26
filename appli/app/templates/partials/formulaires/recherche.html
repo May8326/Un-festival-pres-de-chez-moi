@@ -1,5 +1,5 @@
-<form action="{{url_for('recherche')}}" method="post" name="recherche">
-    {{ form.hidden_tag() }}
+<form action="{{url_for('accueil_festivalchezmoi')}}" method="post" name="recherche">
+   
 
     <div class="form-group">
         <label for="nom_festival">Nom du festival recherché </label>
@@ -25,5 +25,5 @@
         <small id="discipline" class="form-text text-muted"> Sélectionnez une commune</small>
     </div>
 
-    <p><input type="submit" value="Rechercher"></p>
+    <input type="submit" value="Rechercher">
 </form>

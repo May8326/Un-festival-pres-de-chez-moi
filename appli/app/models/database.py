@@ -1,4 +1,4 @@
-from app.app import app, db
+from app.app import db
 
 # Déclaration des tables de relation
 festival_monuments_geopoint = db.Table(

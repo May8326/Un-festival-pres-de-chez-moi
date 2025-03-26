@@ -41,7 +41,7 @@ class Festival(db.Model):
 class ContactFestival(db.Model):
     __tablename__ = 'contact_festival'
 
-    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'))
+    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
     site_internet_festival = db.Column(db.String(30))
     adresse_mail_festival = db.Column(db.String(30))
     

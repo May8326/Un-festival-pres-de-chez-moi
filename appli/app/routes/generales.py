@@ -1,11 +1,11 @@
-from app import app, db
+from app.app import app
 from flask import render_template, request, flash, redirect, url_for, abort
 from sqlalchemy import or_
 
-from models.database import Commune, Festival, ContactFestival, DateFestival, LieuFestival, TypeFestival, MonumentHistorique,AspectJuridiqueMonumentHistorique
-from models.formulaires import RechercheFestivalMonument, AjoutFavori, ModificationFavori, SuppressionFavori, AjoutUtilisateur, Recherche
-from utils.transformations import clean_arg
-from utils.proximite import proximite
+from ..models.database import Commune, Festival, ContactFestival, DateFestival, LieuFestival, TypeFestival, MonumentHistorique,AspectJuridiqueMonumentHistorique
+from ..models.formulaires import RechercheFestivalMonument, AjoutFavori, ModificationFavori, SuppressionFavori, AjoutUtilisateur, Recherche
+from ..utils.transformations import clean_arg
+from ..utils.proximite import proximite
 
 @app.route("/")
 def accueil():

@@ -2,7 +2,7 @@ from ..app import app, db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True, autoincrement=True)
@@ -48,6 +48,6 @@ class Users(db.Model):
     def get_id(self):
         return self.id
     
-    @login.user_loader
-    def get_user_by_id(id):
-        return Users.query.get(int(id))
+@login.user_loader
+def load_by_id(id):
+    return Users.query.get(int(id))

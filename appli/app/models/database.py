@@ -85,7 +85,7 @@ class MonumentHistorique(db.Model):
     
     aspects_juridiques = db.relationship("AspectJuridiqueMonumentHistorique", backref="monument", uselist=False)
     commune = db.relationship("Commune", backref="monuments")
-    festivals = db.relationship("Festival", secondary=festival_monument_relation, backref="monuments")
+    festivals = db.relationship("Festival", secondary=festival_monuments_geopoint, backref="monuments")
     
 class AspectJuridiqueMonumentHistorique(db.Model):
     __tablename__ = 'aspect_juridique_monument_historique'

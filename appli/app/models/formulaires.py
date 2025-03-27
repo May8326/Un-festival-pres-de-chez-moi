@@ -30,6 +30,16 @@ class AjoutUtilisateur(FlaskForm):
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(min=6)])
     submit = SubmitField('Ajouter l\'utilisateur')
 
+class ModificationUtilisateur(FlaskForm):
+    prenom = StringField("Prénom", validators=[DataRequired(), Length(min=2, max=50)])
+    email = StringField("Email", validators=[Optional(), Email()])
+    password = PasswordField("Mot de passe", validators=[Optional(), Length(min=6)])
+    submit = SubmitField('Modifier l\'utilisateur')
+class SuppressionUtilisateur(FlaskForm):
+    prenom = StringField("Prénom", validators=[DataRequired(), Length(min=2, max=50)])
+    password = PasswordField("Mot de passe", validators=[DataRequired(), Length(min=6)])
+    submit = SubmitField('Supprimer l\'utilisateur')
+
 class Connexion(FlaskForm):
     prenom = StringField("Prénom", validators=[DataRequired(), Length(min=2, max=50)])
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(min=6)])

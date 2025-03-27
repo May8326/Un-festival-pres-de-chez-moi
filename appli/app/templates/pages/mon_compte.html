@@ -1,0 +1,35 @@
+{% extends "partials/conteneur.html" %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center">Mon Compte</h1>
+
+        <!-- Informations de l'utilisateur -->
+        <section class="my-4">
+            <h2>Informations personnelles</h2>
+            <p><strong>Nom :</strong> {{ user.nom }}</p>
+            <p><strong>Prénom :</strong> {{ user.prenom }}</p>
+            <p><strong>Email :</strong> {{ user.email }}</p>
+        </section>
+
+        <!-- Formulaire de modification des informations -->
+        {% include "partials/formulaires/modification_utilisateur.html" %}
+        
+
+        <!-- Affichage des favoris -->
+        <section class="my-4">
+            <h2>Mes Favoris</h2>
+            {% if user.favoris %}
+                <ul class="list-group">
+                    {% for favori in user.favoris %}
+                        <li class="list-group-item">
+                            <a href="{{ url_for('detail_festival', id=favori.id) }}">{{ favori.nom }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Vous n'avez pas encore de favoris.</p>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

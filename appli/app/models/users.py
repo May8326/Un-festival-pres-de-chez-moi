@@ -1,13 +1,25 @@
-from ..app import app, db, login
+#from ..app import app
+from app.app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from sqlalchemy import ForeignKey
+from app.models.database import relation_user_favori
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True, autoincrement=True)
     prenom = db.Column(db.Text, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+
+    # Relation many to many avec les festivals (favoris)
+    favoris = db.relationship(
+        'Festival', 
+        secondary=relation_user_favori, 
+        backref='utilisateurs_favoris'
+        
+    )
+
 
     @staticmethod
     def identification(prenom, password):
@@ -48,6 +60,6 @@ class Users(db.Model):
     def get_id(self):
         return self.id
     
-    @login.user_loader
-    def get_user_by_id(id):
-        return Users.query.get(int(id))
+@login.user_loader
+def load_by_id(id):
+    return Users.query.get(int(id))

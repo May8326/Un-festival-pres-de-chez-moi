@@ -1,6 +1,10 @@
 from app.app import app
 from flask import render_template, request, flash, redirect, url_for, abort
 from sqlalchemy import or_
+from ..app import db, login
+from ..models.users import Users
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user, logout_user, login_required, current_user
 
 from ..models.database import Commune, Festival, ContactFestival, DateFestival, LieuFestival, TypeFestival, MonumentHistorique,AspectJuridiqueMonumentHistorique
 from ..models.formulaires import RechercheFestivalMonument, AjoutFavori, ModificationFavori, SuppressionFavori, AjoutUtilisateur, Recherche
@@ -78,31 +82,45 @@ def recherche(resultats):
 
     return render_template ("/pages/accueil.html",form=form, donnees = donnees )
         
-@app.route("/utilisateurs/ajout", methods=['GET', 'POST'])
-def ajout_utilisateur(page=1): #nom du formulaire auquel on renvoie, avec l'adresse, GET envoi formulaire, c'est sur ça que ça va faire unpost 
-    form = AjoutUtilisateur()  # Instance du formulaire AjoutUtilisateur
 
-    if form.validate_on_submit():  # Si le formulaire est valide (POST et toutes les validations passent)
-        prenom = form.prenom.data
-        password = form.password.data
+# ROUTE A COMPLETER
+@app.route("/recherche_rapide")
+@app.route("/recherche_rapide/<int:page>")
+def recherche_rapide():
+    chaine =  request.args.get("chaine", None)
+    try: 
 
-        # Vérifier si un utilisateur avec le même prénom existe déjà
-        if Users.query.filter_by(prenom=prenom).first():
-            flash("Un utilisateur avec ce prénom existe déjà.", "danger")
-            return redirect(url_for("ajout_utilisateur"))
+        if chaine:
+            resources = db.session.execute("""select a.id from Festival a 
+                inner join Festival_resources b on b.id = a.id 
+                inner join resources c on c.name = b.resource and (c.name like '%"""+chaine+"""%' or  c.id like '%"""+chaine+"""%')
+                """).fetchall()
+            
+            maps = db.session.execute("""select a.id from Festival a 
+                inner join Festival_map b on b.id = a.id 
+                inner join map  c on c.name = b.map_ref and (c.name like '%"""+chaine+"""%' or  c.id like '%"""+chaine+"""%')
+                """).fetchall()
 
-        # Créer un nouvel utilisateur
-        nouvel_utilisateur = Users(
-            prenom=prenom,
-            password=generate_password_hash(password)  # Hacher le mot de passe
-        )
-        try:
-            db.session.add(nouvel_utilisateur)
-            db.session.commit()
-            flash("Utilisateur créé avec succès !", "success")
-            return redirect(url_for("liste_utilisateurs"))  # Rediriger vers la liste des utilisateurs
-        except Exception as e:
-            flash(f"Erreur lors de la création de l'utilisateur : {str(e)}", "danger")
-            db.session.rollback()
-
-    return render_template("pages/ajout_utilisateur.html", form=form)  # Afficher le formulaire (GET)
+            resultats = Festival.query.\
+                filter(
+                    or_(
+                        Festival.name.ilike("%"+chaine+"%"),
+                        Festival.type.ilike("%"+chaine+"%"),
+                        Festival.Introduction.ilike("%"+chaine+"%"),
+                        Festival.id.in_([r.id for r in resources] + [m.id for m in maps])
+                    )
+                ).\
+                distinct(Festival.name).\
+                order_by(Festival.name).\
+                paginate(page=page, per_page=app.config["PAYS_PER_PAGE"])
+        else:
+            resultats = None
+            
+        return render_template("pages/resultats_recherche_pays.html", 
+                sous_titre= "Recherche | " + chaine, 
+                donnees=resultats,
+                requete=chaine)
+    
+    except Exception as e:
+        print(e)
+        abort(500)

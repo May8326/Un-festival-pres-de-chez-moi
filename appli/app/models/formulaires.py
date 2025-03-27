@@ -47,11 +47,10 @@ class Connexion(FlaskForm):
 #tentative de formulaire multifacette pr trouver un festival
 
 class Recherche(FlaskForm):
-    nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max =50)])
+    nom = StringField("nom", validators=[Optional()])
     #potentiellement transformer les selectfield qui suivent en radiofield selon comment ça se présente au final
-    periode = SelectField("Période", choices=[('avant','Avant-Saison (1 Janvier-20 Juin)'),('saison','Saison (21 Juin-5 Septembre)'),('apres','Après-saison (6 septembre - 31 décembre)')], validators=[DataRequired(), Length(min=5)])
-    discipline = SelectField('Discipline', choices =[('arts_visu','Arts visuels, arts numériques'),("cinema","Cinéma et audiovisuel"), ("livres","Livres et littérature"),("musique","Musique"),("spectacle_vivant","Spectacle vivant"),("autre","Autres")], validators=[Optional()])
-    lieu = StringField('Lieu', validators=[Optional()])
-    if lieu:
-        dist=FloatField('Distance maximum', validators=[DataRequired()])
+    periode = SelectField("periode", choices=[('avant','Avant-Saison (1 Janvier-20 Juin)'),('saison','Saison (21 Juin-5 Septembre)'),('apres','Après-saison (6 septembre - 31 décembre)')], validators=[DataRequired()])
+    discipline = SelectField('discipline', choices =[('arts_visu','Arts visuels, arts numériques'),("cinema","Cinéma et audiovisuel"), ("livres","Livres et littérature"),("musique","Musique"),("spectacle_vivant","Spectacle vivant"),("autre","Autres")], validators=[Optional()])
+    lieu = StringField('lieu', validators=[Optional()])
+    dist=FloatField('dist', validators=[Optional()])
     

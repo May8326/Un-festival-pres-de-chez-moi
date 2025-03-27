@@ -26,42 +26,43 @@ def accueil_festivalchezmoi():
 @app.route("/recherche", methods = ['GET', 'POST'])
 @app.route("/recherche/<int:page>", methods= [ 'GET', 'POST'])
 
-def recherche():
+def recherche(page=1):
     form = Recherche()
 
     # initialisation des données de retour dans le cas où il n'y ait pas de requête
     donnees = []
 
-    try:
-        if form.validate_on_submit():
-            nom_fest =  clean_arg(request.form.get("nom", None))
-            periode =  clean_arg(request.form.get("periode", None))
-            discipline =  clean_arg(request.form.get("discipline", None))
-            lieu_pre_traitement = clean_arg(request.form.get("lieu",None))
-            dist = clean_arg(request.form.get("dist", None))
+    # try:
+        # 
+        # form.validate_on_submit():
+    nom_fest =  clean_arg(request.form.get("nom", None))
+    periode =  clean_arg(request.form.get("periode", None))
+    discipline =  clean_arg(request.form.get("discipline", None))
+    lieu_pre_traitement = clean_arg(request.form.get("lieu",None))
+    dist = clean_arg(request.form.get("dist", None))
 
-            if nom_fest or periode or discipline or lieu_pre_traitement:
+    if nom_fest or periode or discipline or lieu_pre_traitement:
                 query_results = Festival.query
 
                 if nom_fest :
-                    query_results = query_results.filter(Festival.nom_festival.ilike("%"+nom_fest+"%"))
+                    query_results = query_results.filter(Festival.nom_festival.ilike("%"+nom_fest.lower()+"%"))
                 if periode:
-                    query_results = query_results.filter(Festival.dates.ilike(periode))
+                    query_results = query_results.filter(Festival.dates.ilike(""+periode+""))
                 if discipline:
-                    query_results = query_results.filter(Festival.type.ilike(discipline))
+                    query_results = query_results.filter(Festival.type.ilike(""+discipline+""))
                 if lieu_pre_traitement:
-                    lieux = proximite(lieu_pre_traitement,dist) #on appelle la fonction qui trouve les villes à moins de dist km
-                    for i in lieux:
-                        query_results = query_results.filter(Festival.lieu.ilike(i))
-                donnees = query_results.paginate(per_page=app.config["RESULTATS_PER_PAGE"])
-            #preremplissage à gérer?
-                form.nom.data = nom_fest
-                form.periode.data= periode
-                form.discipline.data= discipline
-                form.lieu.data = lieu_pre_traitement
-    except Exception as e:
-        flash("La recherche a rencontré une erreur "+ str(e), "info")
-
+                  lieux = proximite(lieu_pre_traitement,dist) #on appelle la fonction qui trouve les villes à moins de dist km
+                for i in lieux:
+                    query_results = query_results.filter(Festival.lieu.ilike(i))
+                donnees=query_results.paginate(page=page, per_page=app.config["RESULTATS_PER_PAGE"])
+            # #preremplissage à gérer?
+            #     form.nom.data = nom_fest
+            #     form.periode.data= periode
+            #     form.discipline.data= discipline
+            #     form.lieu.data = lieu_pre_traitement
+    # except Exception as e:
+    #     flash("La recherche a rencontré une erreur "+ str(e), "info")
+    #     donnees= f"erreur de type {e}, le form ne valide pas on submit"
     return render_template ("/pages/resultats.html", form=form, donnees = donnees )
         
 

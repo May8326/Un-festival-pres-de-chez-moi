@@ -1,9 +1,7 @@
-#from ..app import app
 from app.app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from sqlalchemy import ForeignKey, Column, Integer, String, Text, Table
-from app.models.database import relation_user_favori
+from sqlalchemy import or_
 from flask import flash
 
 class Users(db.Model, UserMixin):
@@ -11,17 +9,15 @@ class Users(db.Model, UserMixin):
 
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True, autoincrement=True)
     prenom = db.Column(db.Text, nullable=False)
-    password = db.Column(db.String(100), nullable=False, unique=True)
+    password = db.Column(db.String(100), nullable=False)  # Supprimez unique=True
     email = db.Column(db.String(30), nullable=True, unique=True)
 
     # Relation many to many avec les festivals (favoris)
     favoris = db.relationship(
         'Festival', 
-        secondary=relation_user_favori, 
+        secondary='relation_user_favori', 
         backref='utilisateurs_favoris'
-        
     )
-
 
     @staticmethod
     def identification(identifier, password):
@@ -29,7 +25,7 @@ class Users(db.Model, UserMixin):
         Permet l'identification par prénom ou adresse e-mail.
         """
         utilisateur = Users.query.filter(
-            db.or_(Users.prenom == identifier, Users.email == identifier)
+            or_(Users.prenom == identifier, Users.email == identifier)
         ).first()
         if utilisateur and check_password_hash(utilisateur.password, password):
             flash("Vous êtes connecté", "success")
@@ -49,7 +45,7 @@ class Users(db.Model, UserMixin):
             erreurs.append("Le prénom est vide")
         if not password or len(password) < 6:
             erreurs.append("Le mot de passe est vide ou trop court")
-        if email and not "@" in email:
+        if email and "@" not in email:
             erreurs.append("L'adresse e-mail est invalide")
 
         unique_prenom = Users.query.filter(Users.prenom == prenom).count()
@@ -75,10 +71,11 @@ class Users(db.Model, UserMixin):
             db.session.commit()
             return True, utilisateur
         except Exception as erreur:
+            db.session.rollback()
             return False, [str(erreur)]
         
     def get_id(self):
-        return self.id
+        return str(self.id)  # Convertir en chaîne pour Flask-Login
     
 @login.user_loader
 def load_by_id(id):

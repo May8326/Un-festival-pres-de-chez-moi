@@ -31,8 +31,9 @@ class Commune(db.Model):
     code_region = db.Column(db.Integer)
     nom_region = db.Column(db.String(30))
 
-    festivals = db.relationship("LieuFestival", backref="commune", lazy=True)
-    monuments = db.relationship("LieuMonumentHistorique", backref="commune", lazy=True)
+    # Utilisez back_populates au lieu de backref
+    festivals = db.relationship("LieuFestival", back_populates="commune", lazy=True)
+    monuments = db.relationship("LieuMonumentHistorique", back_populates="commune", lazy=True)
 
 class Festival(db.Model):
     __tablename__ = 'titre_festival_data_gouv'
@@ -73,7 +74,8 @@ class LieuFestival(db.Model):
     longitude_festival = db.Column(db.Float)
     
     festival = db.relationship("Festival", backref="lieu")
-    commune = db.relationship("Commune", backref="festivals")
+    # Utilisez back_populates pour correspondre à la relation dans Commune
+    commune = db.relationship("Commune", back_populates="festivals")
     
 class TypeFestival(db.Model):
     __tablename__ = 'type_festival'

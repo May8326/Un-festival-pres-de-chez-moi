@@ -6,7 +6,7 @@ from app.app import app
 from flask_login import login_user, logout_user, current_user
 from app.app import login
 
-@app.route("/utilisateurs/ajout", methods=["GET", "POST"])
+@app.route("/festivalchezmoi/utilisateurs/ajout", methods=["GET", "POST"])
 def ajout_utilisateur():
     form = AjoutUtilisateur()
 

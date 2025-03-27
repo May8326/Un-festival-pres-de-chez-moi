@@ -1,0 +1,23 @@
+ <!-- affichage en cas d'absence de résultats (lors du premier chargement de la page, ou d'absence de résultats suite à la recherche)-->
+ {% if not donnees %}
+ <div class="row">
+     <div class="col-sm-4"></div>
+     <div class="col-sm-4">
+
+         <h3 data-toggle="collapse" data-target="#collapseExample" aria-expanded="false"
+             aria-controls="collapseExample">
+             Effectuer une recherche <i class="fa-solid fa-caret-down"></i>
+     </h3>
+         <div class="collapse show" id="collapseExample">
+             <div class="card card-body">
+                 {% include "partials/formulaires/recherche.html" %}
+             </div>
+         </div>
+     </div>
+     <div class="col-sm-4"></div>
+ </div>
+
+ {% else %}
+ <h1>Résultats de la recherche </h1>
+ <p> Voila les {{donnees}}</p>
+ {% endif %}

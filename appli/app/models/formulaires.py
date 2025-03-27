@@ -35,6 +35,7 @@ class Connexion(FlaskForm):
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(min=6)])
     submit = SubmitField('Se connecter')
 #tentative de formulaire multifacette pr trouver un festival
+
 class Recherche(FlaskForm):
     nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max =50)])
     #potentiellement transformer les selectfield qui suivent en radiofield selon comment ça se présente au final

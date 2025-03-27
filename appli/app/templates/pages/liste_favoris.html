@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Mes Favoris</h1>
+    
+    {% if favoris %}
+        <div class="row">
+            {% for favori in favoris %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ favori.festival.nom_festival }}</h5>
+                        <p class="card-text">
+                            Lieu : {{ favori.festival.lieu }}<br>
+                            Date : {{ favori.festival.dates }}
+                        </p>
+                        <form action="{{ url_for('supprimer_favori', festival_id=favori.festival_id) }}" method="post">
+                            <button type="submit" class="btn btn-danger">Retirer des favoris</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Vous n'avez pas encore de favoris.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+<!--- bouton pour ajouter un résultat de la recherche aux favoris {% if current_user.is_authenticated %}
+<form action="{{ url_for('ajouter_favori', festival_id=festival.id) }}" method="post">
+    <button type="submit" class="btn btn-primary">
+        Ajouter aux favoris
+    </button>
+</form>
+{% endif %}--->

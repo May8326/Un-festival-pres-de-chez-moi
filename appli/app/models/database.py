@@ -8,6 +8,14 @@ festival_monuments_geopoint = db.Table(
     db.Column('distance', db.Float)
 )
 
+# table de relation many to many pour la gestion des favoris
+relation_user_favori = db.Table('relation_user_favori', db.Model.metadata,
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('id_festival', db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True),
+    db.Column('id_monument_historique', db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), primary_key=True),
+    db.Column('id_commune', db.Integer, db.ForeignKey('correspondance_communes.id_commune'), primary_key=True)
+)
+
 class Commune(db.Model):
     __tablename__ = 'correspondance_communes'
 
@@ -95,6 +103,7 @@ class AspectJuridiqueMonumentHistorique(db.Model):
     
     monument = db.relationship("MonumentHistorique", backref="aspects_juridiques")
 
+"""
 class Favoris(db.Model):
     __tablename__ = 'favoris'
 
@@ -106,3 +115,4 @@ class Favoris(db.Model):
     user = db.relationship("User", backref="favoris")
     festival = db.relationship("Festival", backref="favoris")
     monument = db.relationship("MonumentHistorique", backref="favoris")
+"""

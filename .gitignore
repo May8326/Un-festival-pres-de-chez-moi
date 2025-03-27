@@ -5,7 +5,7 @@
 
 tmp/
 
-
+*.sqlite
 # C extensions 
 *.so
 *- Copie*

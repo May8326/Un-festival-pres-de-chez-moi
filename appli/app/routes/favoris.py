@@ -107,6 +107,7 @@ def insertion_favori():
     return render_template("pages/insertion_favori.html", sous_titre="Ajout Favori", form=form)
 
 @app.route("/liste/favoris")
+@login_required
 def liste_favoris():
     favoris = db.session.query(relation_user_favori).filter(
         relation_user_favori.c.user_id == current_user.id
@@ -114,6 +115,7 @@ def liste_favoris():
     return render_template("pages/liste_favoris.html", sous_titre="Liste des Favoris", favoris=favoris)
 
 @app.route("/modification/favori", methods=['GET', 'POST'])
+@login_required
 def modification_favori():
     form = ModificationFavori()
     form.type.choices = [('festival', 'Festival'), ('monument', 'Monument')]
@@ -164,6 +166,7 @@ def modification_favori():
     return render_template("pages/modification_favori.html", sous_titre="Modification Favori", form=form)
 
 @app.route("/suppression/favori", methods=['GET', 'POST'])
+@login_required
 def suppression_favori():
     form = SuppressionFavori()
     form.type.choices = [('festival', 'Festival'), ('monument', 'Monument')]

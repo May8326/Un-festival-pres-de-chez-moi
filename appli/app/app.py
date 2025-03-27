@@ -14,4 +14,4 @@ login = LoginManager(app)
 login.login_view = 'login'  # assurez-vous que cette route existe
 
 # Importez les routes APRÈS avoir créé db et login
-from .routes import generales, insertion, users
+from .routes import favoris, generales, users

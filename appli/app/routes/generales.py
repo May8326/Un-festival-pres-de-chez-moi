@@ -190,3 +190,36 @@ def resultats():
 
     # Retour par défaut si aucune condition n'est remplie
     return render_template("pages/resultats.html", form=form, festivals=[], monuments=[])
+
+
+@app.route("/test_bdd")
+def test_bdd():
+    try:
+        # Vérifier les données dans la table Commune
+        communes = db.session.query(Commune).limit(10).all()
+        communes_data = [{"id": c.id_commune, "nom": c.nom_commune} for c in communes]
+
+        # Vérifier les données dans la table Festival
+        festivals = db.session.query(Festival).limit(10).all()
+        festivals_data = [{"id": f.id_festival, "nom": f.nom_festival} for f in festivals]
+
+        # Vérifier les jointures entre Festival et Commune via LieuFestival
+        jointures = (
+            db.session.query(Festival, Commune)
+            .select_from(Festival)
+            .join(LieuFestival, Festival.id_festival == LieuFestival.id_festival)
+            .join(Commune, LieuFestival.id_commune == Commune.id_commune)
+            .limit(10)
+            .all()
+        )
+        jointures_data = [
+            {"festival": f.nom_festival, "commune": c.nom_commune} for f, c in jointures
+        ]
+
+        return {
+            "communes": communes_data,
+            "festivals": festivals_data,
+            "jointures": jointures_data,
+        }
+    except Exception as e:
+        return {"error": str(e)}, 500

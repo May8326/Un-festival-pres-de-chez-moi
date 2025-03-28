@@ -109,10 +109,15 @@ def insertion_favori():
 @app.route("/liste/favoris")
 @login_required
 def liste_favoris():
-    # Utilisez relation_user_favori.c.id_commune pour accéder aux colonnes
+    # Récupérer les favoris de l'utilisateur connecté
     favoris = db.session.query(relation_user_favori).filter(
         relation_user_favori.c.user_id == current_user.id
     ).all()
+
+    # Vérifier si la liste est vide et passer cette information au template
+    if not favoris:
+        flash("Vous n'avez pas encore de favori.", "info")
+
     return render_template("pages/liste_favoris.html", sous_titre="Liste des Favoris", favoris=favoris)
 
 @app.route("/suppression/favori", methods=['GET', 'POST'])

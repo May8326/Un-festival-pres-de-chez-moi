@@ -1,23 +1,112 @@
- <!-- affichage en cas d'absence de résultats (lors du premier chargement de la page, ou d'absence de résultats suite à la recherche)-->
- {% if not donnees %}
- <div class="row">
-     <div class="col-sm-4"></div>
-     <div class="col-sm-4">
+{% extends "partials/conteneur.html" %}
+{% block scripts %}
+<!--
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />-->
+{% endblock %}
 
-         <h3 data-toggle="collapse" data-target="#collapseExample" aria-expanded="false"
-             aria-controls="collapseExample">
-             Effectuer une recherche <i class="fa-solid fa-caret-down"></i>
-     </h3>
-         <div class="collapse show" id="collapseExample">
-             <div class="card card-body">
-                 {% include "partials/formulaires/recherche.html" %}
-             </div>
-         </div>
-     </div>
-     <div class="col-sm-4"></div>
- </div>
+{% block body %}
+<div class="container">
+    {% if not donnees.items %}
+    <div class="alert alert-warning" role="alert">
+        Aucun résultat trouvé pour votre recherche.
+    </div>
+    <div class="row">
+        <!-- affichage en cas d'absence de résultats (lors du premier chargement de la page, ou d'absence de résultats suite à la recherche) -->
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <h3 data-toggle="collapse" data-target="#collapseExample" aria-expanded="false"
+                aria-controls="collapseExample">
+                Effectuer une recherche <i class="fa-solid fa-caret-down"></i>
+            </h3>
+            <div class="collapse show" id="collapseExample">
+                <div class="card card-body">
+                    {% include "partials/formulaires/recherche.html" %}
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+    {% else %}
+    <!-- affichage caché du formulaire -->
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <h3 data-toggle="collapse" data-target="#collapseExample" aria-expanded="false"
+                aria-controls="collapseExample">
+                Afficher la recherche <i class="fa-solid fa-caret-down"></i>
+            </h3>
+            <div class="collapse" id="collapseExample">
+                <div class="card card-body">
+                    {% include "partials/formulaires/recherche.html" %}
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
 
- {% else %}
- <h1>Résultats de la recherche </h1>
- <p> Voila les {{donnees}}</p>
- {% endif %}
+    <!-- afficher les résultats -->
+    <div class="container">
+        <h1>Résultats de la recherche</h1>
+
+        <!-- Tableau des résultats -->
+        <h2>Résultats trouvés</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Lieu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for resultat in donnees.items %}
+                <tr>
+                    <td>{{ resultat.nom_festival }}</td>
+                    <td>{{ resultat.lieu.commune.nom_commune }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <nav aria-label="Pagination">
+            <ul class="pagination">
+                {% if donnees.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('recherche', page=donnees.prev_num) }}" aria-label="Précédent">
+                        &laquo; Précédent
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo; Précédent</span>
+                </li>
+                {% endif %}
+
+                {% for page_num in donnees.iter_pages() %}
+                {% if page_num %}
+                <li class="page-item {% if donnees.page == page_num %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('recherche', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+                {% endfor %}
+
+                {% if donnees.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('recherche', page=donnees.next_num) }}" aria-label="Suivant">
+                        Suivant &raquo;
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Suivant &raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

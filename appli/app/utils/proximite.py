@@ -10,3 +10,43 @@ def proximite(nom_ville, dist)->list:
         else:
             pass
     return liste_villes
+
+""" 
+
+from geopy.distance import geodesic
+from app.models.database import Commune
+
+def proximite(lieu, distance_max):
+"""
+ #   Trouve les communes proches d'un lieu donné dans un rayon spécifié.
+#
+#   :param lieu: Nom de la commune de départ.
+#  :param distance_max: Distance maximale en kilomètres.
+# :return: Liste des GeoPoints des communes dans le rayon spécifié.
+"""
+    try:
+        # Récupérer les coordonnées de la commune de départ
+        commune_depart = Commune.query.filter(Commune.nom_commune.ilike(f"%{lieu}%")).first()
+        if not commune_depart:
+            return []
+
+        coord_depart = (commune_depart.geocodage_latitude_commune, commune_depart.geocodage_longitude_commune)
+
+        # Trouver toutes les communes
+        communes = Commune.query.all()
+        communes_proches = []
+
+        for commune in communes:
+            coord_commune = (commune.geocodage_latitude_commune, commune.geocodage_longitude_commune)
+            distance = geodesic(coord_depart, coord_commune).kilometers
+
+            if distance <= float(distance_max):
+                communes_proches.append(commune.GeoPoint_commune)
+
+        return communes_proches
+
+    except Exception as e:
+        print(f"Erreur dans la fonction proximite : {e}")
+        return []
+
+"""

@@ -1,23 +1,120 @@
- <!-- affichage en cas d'absence de résultats (lors du premier chargement de la page, ou d'absence de résultats suite à la recherche)-->
- {% if not donnees %}
- <div class="row">
-     <div class="col-sm-4"></div>
-     <div class="col-sm-4">
+{% extends "partials/conteneur.html" %}
+{% block scripts %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+{% endblock %}
 
-         <h3 data-toggle="collapse" data-target="#collapseExample" aria-expanded="false"
-             aria-controls="collapseExample">
-             Effectuer une recherche <i class="fa-solid fa-caret-down"></i>
-     </h3>
-         <div class="collapse show" id="collapseExample">
-             <div class="card card-body">
-                 {% include "partials/formulaires/recherche.html" %}
-             </div>
-         </div>
-     </div>
-     <div class="col-sm-4"></div>
- </div>
+{% block body %}
+<div class="container">
+    {% if not donnees %}
+    <div class="row">
+        <!-- affichage en cas d'absence de résultats (lors du premier chargement de la page, ou d'absence de résultats suite à la recherche) -->
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <h3 data-toggle="collapse" data-target="#collapseExample" aria-expanded="false"
+                aria-controls="collapseExample">
+                Effectuer une recherche <i class="fa-solid fa-caret-down"></i>
+            </h3>
+            <div class="collapse show" id="collapseExample">
+                <div class="card card-body">
+                    {% include "partials/formulaires/recherche.html" %}
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+    {% else %}
+    <!-- affichage caché du formulaire -->
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <h3 data-toggle="collapse" data-target="#collapseExample" aria-expanded="false"
+                aria-controls="collapseExample">
+                Afficher la recherche <i class="fa-solid fa-caret-down"></i>
+            </h3>
+            <div class="collapse" id="collapseExample">
+                <div class="card card-body">
+                    {% include "partials/formulaires/recherche.html" %}
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
 
- {% else %}
- <h1>Résultats de la recherche </h1>
- <p> Voila les {{donnees}}</p>
- {% endif %}
+    <!-- afficher les résultats -->
+    <div class="container">
+        <h1>Résultats de la recherche</h1>
+
+        <!-- Carte Leaflet -->
+        <div id="map" style="height: 500px; margin-bottom: 20px;"></div>
+
+        <!-- Tableau des festivals -->
+        <h2>Festivals à proximité</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Lieu</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for festival in festivals %}
+                <tr>
+                    <td>{{ festival.nom_festival }}</td>
+                    <td>{{ festival.lieu.commune.nom_commune }}</td>
+                    <td>{{ festival.type}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Tableau des monuments -->
+        <h2>Monuments à proximité</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Lieu</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for monument in monuments %}
+                <tr>
+                    <td>{{ monument.nom_monument }}</td>
+                    <td>{{ monument.commune.nom_commune }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Initialisation de la carte Leaflet
+        var map = L.map('map').setView([48.8566, 2.3522], 6); // Coordonnées par défaut (France)
+
+        // Ajouter une couche de tuiles OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Ajouter les festivals sur la carte
+        {% for festival in festivals %}
+        L.marker([{{ festival.lieu.latitude_festival }}, {{ festival.lieu.longitude_festival }}])
+            .addTo(map)
+            .bindPopup("<b>{{ festival.nom_festival }}</b><br>{{ festival.lieu.commune.nom_commune }}");
+        {% endfor %}
+
+        // Ajouter les monuments sur la carte
+        {% for monument in monuments %}
+        L.marker([{{ monument.latitude_monument_historique }}, {{ monument.longitude_monument_historique }}])
+            .addTo(map)
+            .bindPopup("<b>{{ monument.nom_monument }}</b><br>{{ monument.commune.nom_commune }}");
+        {% endfor %}
+    </script>
+    {% endif %}
+</div>
+{% endblock %}

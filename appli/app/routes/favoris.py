@@ -109,6 +109,7 @@ def insertion_favori():
 @app.route("/liste/favoris")
 @login_required
 def liste_favoris():
+    # Utilisez relation_user_favori.c.id_commune pour accéder aux colonnes
     favoris = db.session.query(relation_user_favori).filter(
         relation_user_favori.c.user_id == current_user.id
     ).all()
@@ -130,27 +131,51 @@ def suppression_favori():
             if type == 'festival':
                 festival = Festival.query.filter(func.lower(Festival.nom_festival).like(f"%{nom.lower()}%")).first()
                 if festival:
-                    favori = db.query.filter_by(user_id=user_id, festival_id=festival.id_festival).first()
+                    favori = db.session.query(relation_user_favori).filter(
+                        and_(
+                            relation_user_favori.c.user_id == user_id,
+                            relation_user_favori.c.id_festival == festival.id_festival
+                        )
+                    ).first()
                 else:
                     flash("Festival non trouvé", 'error')
                     return render_template("pages/suppression_favori.html", sous_titre="Suppression Favori", form=form)
             elif type == 'monument':
                 monument = MonumentHistorique.query.filter(func.lower(MonumentHistorique.nom_monument).like(f"%{nom.lower()}%")).first()
                 if monument:
-                    favori = db.session.query.filter_by(user_id=user_id, monument_id=monument.id_monument_historique).first()
+                    favori = db.session.query(relation_user_favori).filter(
+                        and_(
+                            relation_user_favori.c.user_id == user_id,
+                            relation_user_favori.c.id_monument_historique == monument.id_monument_historique
+                        )
+                    ).first()
                 else:
                     flash("Monument non trouvé", 'error')
                     return render_template("pages/suppression_favori.html", sous_titre="Suppression Favori", form=form)
             elif type == 'commune':
                 commune = Commune.query.filter(func.lower(Commune.nom_commune).like(f"%{nom.lower()}%")).first()
                 if commune:
-                    favori = db.session.query.filter_by(user_id=user_id, commune_id=commune.id_commune).first()
+                    favori = db.session.query(relation_user_favori).filter(
+                        and_(
+                            relation_user_favori.c.user_id == user_id,
+                            relation_user_favori.c.id_commune == commune.id_commune
+                        )
+                    ).first()
                 else:
                     flash("Commune non trouvée", 'error')
                     return render_template("pages/suppression_favori.html", sous_titre="Suppression Favori", form=form)
 
             if favori:
-                db.session.delete(favori)
+                # Supprimez l'entrée de la table de relation
+                delete_stmt = relation_user_favori.delete().where(
+                    and_(
+                        relation_user_favori.c.user_id == user_id,
+                        relation_user_favori.c.id_commune == commune.id_commune if type == 'commune' else True,
+                        relation_user_favori.c.id_festival == festival.id_festival if type == 'festival' else True,
+                        relation_user_favori.c.id_monument_historique == monument.id_monument_historique if type == 'monument' else True
+                    )
+                )
+                db.session.execute(delete_stmt)
                 db.session.commit()
 
                 flash("Le favori a été supprimé avec succès", 'info')

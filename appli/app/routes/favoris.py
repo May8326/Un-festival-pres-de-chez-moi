@@ -7,7 +7,7 @@ from ..models.formulaires import AjoutFavori, ModificationFavori, SuppressionFav
 from ..models.users import Users
 
 
-@app.route("festivalchezmoi/insertion/favori", methods=['GET', 'POST'])
+@app.route("/festivalchezmoi/insertion/favori", methods=['GET', 'POST'])
 @login_required
 def insertion_favori():
     form = AjoutFavori()
@@ -106,7 +106,7 @@ def insertion_favori():
     
     return render_template("pages/insertion_favori.html", sous_titre="Ajout Favori", form=form)
 
-@app.route("festivalchezmoi/liste/favoris")
+@app.route("/festivalchezmoi/liste/favoris")
 @login_required
 def liste_favoris():
     # Récupérer les favoris de l'utilisateur connecté
@@ -120,7 +120,7 @@ def liste_favoris():
 
     return render_template("pages/liste_favoris.html", sous_titre="Liste des Favoris", favoris=favoris)
 
-@app.route("festivalchezmoi/suppression/favori", methods=['GET', 'POST'])
+@app.route("/festivalchezmoi/suppression/favori", methods=['GET', 'POST'])
 @login_required
 def suppression_favori():
     form = SuppressionFavori()

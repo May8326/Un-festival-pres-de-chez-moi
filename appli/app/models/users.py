@@ -81,6 +81,6 @@ class Users(db.Model, UserMixin):
 def load_by_id(id):
     return Users.query.get(int(id))
 
-# Créez les tables
+#Créez les tables
 with app.app_context():
-    db.create_all()
+     db.create_all()

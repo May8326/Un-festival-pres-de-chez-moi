@@ -32,7 +32,7 @@ class Commune(db.Model):
     code_region = db.Column(db.Integer)
     nom_region = db.Column(db.String(30))
 
-    festivals = db.relationship("LieuFestival", back_populates="commune", lazy=True)
+    lieux_festivals = db.relationship("LieuFestival", back_populates="commune")
     monuments = db.relationship("MonumentHistorique", back_populates="commune", lazy=True)
 
 class Festival(db.Model):
@@ -68,14 +68,20 @@ class DateFestival(db.Model):
 class LieuFestival(db.Model):
     __tablename__ = 'lieu_festival'
 
-    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
-    code_insee_commune_festival = db.Column(db.Integer, db.ForeignKey('correspondance_communes.code_commune_INSEE'))
+    #id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
+    #code_insee_commune_festival = db.Column(db.Integer, db.ForeignKey('correspondance_communes.code_commune_INSEE'))
+    
+    # ces trois lignes sont une correction proposée par copilot
+    id_lieu_festival = db.Column(db.Integer, primary_key=True)
+    id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'))
+    id_commune = db.Column(db.Integer, db.ForeignKey('correspondance_communes.id_commune'))
+    
     latitude_festival = db.Column(db.Float)
     longitude_festival = db.Column(db.Float)
     
     festival = db.relationship("Festival", back_populates="lieu")
-    # Utilisez back_populates pour correspondre à la relation dans Commune
-    commune = db.relationship("Commune", back_populates="festivals")
+    # cette ligne est une correction proposée par copilot
+    commune = db.relationship("Commune", back_populates="lieux_festivals")
     
 class TypeFestival(db.Model):
     __tablename__ = 'type_festival'

@@ -6,7 +6,9 @@ festival_monuments_geopoint = db.Table(
     "festival_monuments_geopoint", db.Model.metadata,
     db.Column('id_monument_historique', db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), primary_key=True),
     db.Column('id_festival', db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True),
-    db.Column('distance', db.Float)
+    db.Column('distance', db.Float),
+    db.Column('GeoPoint_monument', db.Text(50)),
+    db.Column('GeoPoint_festival', db.Text(50))
 )
 
 # table de relation many to many pour la gestion des favoris
@@ -14,23 +16,23 @@ relation_user_favori = db.Table('relation_user_favori', db.Model.metadata,
     db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
     db.Column('id_festival', db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True),
     db.Column('id_monument_historique', db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), primary_key=True),
-    db.Column('id_commune', db.Integer, db.ForeignKey('correspondance_communes.id_commune'), primary_key=True)
+    db.Column('id_commune', db.Integer, db.ForeignKey('communes.id_commune'), primary_key=True)
 )
 
-class Commune(db.Model):
-    __tablename__ = 'correspondance_communes'
 
-    id_commune = db.Column(db.Integer, primary_key=True, unique=True)
-    code_commune_INSEE = db.Column(db.Integer)
-    code_postal = db.Column(db.Integer)
-    latitude = db.Column(db.Float)
-    longitude = db.Column(db.Float)
+class Commune(db.Model):
+    __tablename__ = 'communes'
+
+    id_code_insee_commune = db.Column(db.Integer)
+    geocodage_latitude_commune = db.Column(db.Float)
+    geocodage_longitude_commune = db.Column(db.Float)
+    code_commune = db.Column(db.Integer)
     nom_commune = db.Column(db.String(30))
-    nom_commune_complet = db.Column(db.String(30))
     code_departement = db.Column(db.Integer)
     nom_departement = db.Column(db.String(30))
     code_region = db.Column(db.Integer)
     nom_region = db.Column(db.String(30))
+    id_commune = db.Column(db.Integer, primary_key=True, unique=True)
 
     lieux_festivals = db.relationship("LieuFestival", back_populates="commune")
     monuments = db.relationship("MonumentHistorique", back_populates="commune", lazy=True)
@@ -69,12 +71,12 @@ class LieuFestival(db.Model):
     __tablename__ = 'lieu_festival'
 
     #id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
-    #code_insee_commune_festival = db.Column(db.Integer, db.ForeignKey('correspondance_communes.code_commune_INSEE'))
+    #code_insee_commune_festival = db.Column(db.Integer, db.ForeignKey('communes.id_code_insee_commune'))
     
     # ces trois lignes sont une correction proposée par copilot
     id_lieu_festival = db.Column(db.Integer, primary_key=True)
     id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'))
-    id_commune = db.Column(db.Integer, db.ForeignKey('correspondance_communes.id_commune'))
+    id_commune = db.Column(db.Integer, db.ForeignKey('communes.id_commune'))
     
     latitude_festival = db.Column(db.Float)
     longitude_festival = db.Column(db.Float)
@@ -95,7 +97,7 @@ class MonumentHistorique(db.Model):
     __tablename__ = 'lieu_monument_historique'
 
     id_monument_historique = db.Column(db.Integer, primary_key=True)
-    code_insee_edifice_lors_de_protection = db.Column(db.Integer, db.ForeignKey('correspondance_communes.code_commune_INSEE'))
+    code_insee_edifice_lors_de_protection = db.Column(db.Integer, db.ForeignKey('communes.id_code_insee_commune'))
     latitude_monument_historique = db.Column(db.Float)
     longitude_monument_historique = db.Column(db.Float)
     

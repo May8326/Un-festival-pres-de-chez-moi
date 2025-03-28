@@ -1,12 +1,12 @@
 from app.app import app
 from flask import render_template, request, flash, redirect, url_for, abort
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from ..app import db, login
 from ..models.users import Users
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 
-from ..models.database import Commune, Festival, ContactFestival, DateFestival, LieuFestival, TypeFestival, MonumentHistorique,AspectJuridiqueMonumentHistorique
+from ..models.database import festival_monuments_geopoint, Commune, Festival, ContactFestival, DateFestival, LieuFestival, TypeFestival, MonumentHistorique,AspectJuridiqueMonumentHistorique
 from ..models.formulaires import RechercheFestivalMonument, AjoutFavori, ModificationFavori, SuppressionFavori, AjoutUtilisateur, Recherche
 from ..utils.transformations import clean_arg
 from ..utils.proximite import proximite
@@ -23,8 +23,8 @@ def accueil_festivalchezmoi():
     return render_template ("/pages/accueil.html",form=form)
    
 
-@app.route("/recherche", methods = ['GET'])
-@app.route("/recherche/<int:page>", methods= [ 'POST'])
+@app.route("/recherche", methods = ['GET', 'POST'])
+@app.route("/recherche/<int:page>", methods= [ 'GET', 'POST'])
 
 def recherche():
     form = Recherche()
@@ -106,3 +106,87 @@ def recherche_rapide():
     except Exception as e:
         print(e)
         abort(500)
+
+
+@app.route("/resultats", methods=["GET", "POST"])
+def resultats():
+    form = Recherche()
+    festivals = []
+    monuments = []
+
+    try:
+        if form.validate_on_submit():
+            lieu = form.lieu.data
+            distance = form.dist.data or 10  # Distance par défaut : 10 km
+            nom = form.nom.data
+            periode = form.periode.data
+            discipline = form.discipline.data
+
+            app.logger.info(f"Recherche effectuée avec : lieu={lieu}, distance={distance}, nom={nom}, periode={periode}, discipline={discipline}")
+
+            # Construction de la requête de base pour les festivals
+            query_festivals = db.session.query(Festival)
+
+            # Filtres conditionnels
+            if lieu:
+                # Jointure avec LieuFestival et Commune
+                query_festivals = query_festivals.join(LieuFestival).join(Commune).filter(
+                    func.lower(Commune.nom_commune).like(f"%{lieu.lower()}%")
+                )
+
+            if nom:
+                # Recherche sur le nom du festival
+                query_festivals = query_festivals.filter(
+                    func.lower(Festival.nom_festival).like(f"%{nom.lower()}%")
+                )
+
+            if periode:
+                # Jointure avec DateFestival
+                query_festivals = query_festivals.join(DateFestival).filter(
+                    func.lower(DateFestival.periode_principale_deroulement_festival).like(f"%{periode.lower()}%")
+                )
+
+            if discipline:
+                # Jointure avec TypeFestival
+                query_festivals = query_festivals.join(TypeFestival).filter(
+                    func.lower(TypeFestival.discipline_dominante_festival).like(f"%{discipline.lower()}%")
+                )
+
+            # Exécution de la requête
+            festivals = query_festivals.distinct().all()
+
+            # Requête similaire pour les monuments
+            query_monuments = db.session.query(MonumentHistorique)
+
+            if lieu:
+                query_monuments = query_monuments.join(Commune).filter(
+                    func.lower(Commune.nom_commune).like(f"%{lieu.lower()}%")
+                )
+
+            monuments = query_monuments.distinct().all()
+
+            app.logger.info(f"Festivals trouvés : {len(festivals)}, Monuments trouvés : {len(monuments)}")
+
+            return render_template(
+                "pages/resultats.html",
+                form=form,
+                festivals=festivals,
+                monuments=monuments
+            )
+        
+        else:
+            # Gestion des erreurs de validation du formulaire
+            for field, errors in form.errors.items():
+                for error in errors:
+                    app.logger.warning(f"Erreur de validation pour {field}: {error}")
+                    flash(f"Erreur dans le champ {getattr(form, field).label.text}: {error}", "warning")
+
+            return render_template("pages/resultats.html", form=form, festivals=[], monuments=[])
+
+    except Exception as e:
+        app.logger.error(f"Une erreur est survenue : {str(e)}", exc_info=True)
+        flash(f"Une erreur est survenue : {str(e)}", "danger")
+        return render_template("pages/resultats.html", form=form, festivals=[], monuments=[])
+
+    # Retour par défaut si aucune condition n'est remplie
+    return render_template("pages/resultats.html", form=form, festivals=[], monuments=[])

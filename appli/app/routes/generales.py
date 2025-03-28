@@ -11,7 +11,7 @@ from ..models.formulaires import RechercheFestivalMonument, AjoutFavori, Modific
 from ..utils.transformations import clean_arg
 from ..utils.proximite import proximite
 
-@app.route("/festivalchezmoi")
+@app.route("/")
 def accueil():
     return redirect(url_for("accueil_festivalchezmoi"))
 
@@ -21,12 +21,6 @@ def accueil_festivalchezmoi():
 
     form = Recherche() #     flash("La recherche a rencontré une erreur "+ str(e), "info")
     return render_template ("/pages/accueil.html",form=form)
-   
-
-@app.route("/recherche", methods = ['GET', 'POST'])
-@app.route("/recherche/<int:page>", methods= ['GET', 'POST'])
-
-def recherche():
 
 @app.route("/recherche", methods=['GET', 'POST'])
 @app.route("/recherche/<int:page>", methods=['GET', 'POST'])

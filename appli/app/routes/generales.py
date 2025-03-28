@@ -25,7 +25,7 @@ def accueil_festivalchezmoi():
     return render_template("/pages/accueil.html", form=form)
 
 # Route pour effectuer une recherche avec ou sans pagination
-@app.route("/recherche", methods=['GET', 'POST'])
+@app.route("/festivalchezmoi/recherche", methods=['GET', 'POST'])
 @app.route("/recherche/<int:page>", methods=['GET', 'POST'])
 def recherche(page=1):
     form = Recherche()  # Création d'une instance du formulaire de recherche
@@ -95,8 +95,8 @@ def recherche(page=1):
 
 # Route pour effectuer une recherche rapide
 
-@app.route("/recherche_rapide")
-@app.route("/recherche_rapide/resultat")
+@app.route("festivalchezmoi/recherche_rapide")
+@app.route("festivalchezmoi/recherche_rapide/resultat")
 
 def recherche_rapide():
     chaine = request.args.get("chaine", None)  # Récupération de la chaîne de recherche
@@ -141,7 +141,7 @@ def recherche_rapide():
         abort(500)
 
 # Route pour déboguer les données en affichant un échantillon des tables
-@app.route("/debug_donnees")
+@app.route("festivalchezmoi/debug_donnees")
 def debug_donnees():
     try:
         # Récupération des données des différentes tables

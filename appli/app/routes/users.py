@@ -29,7 +29,7 @@ def ajout_utilisateur():
         return render_template("pages/ajout_utilisateur.html", form=form)
 
 # Route pour la connexion d'un utilisateur
-@app.route("/utilisateurs/connexion", methods=["GET", "POST"])
+@app.route("festivalchezmoi/utilisateurs/connexion", methods=["GET", "POST"])
 
 def connexion():
     form = Connexion()  # Formulaire de connexion
@@ -57,7 +57,7 @@ def connexion():
     return render_template("pages/connexion.html", form=form)
 
 # Route pour la déconnexion d'un utilisateur
-@app.route("/utilisateurs/deconnexion", methods=["POST", "GET"])
+@app.route("festivalchezmoi/utilisateurs/deconnexion", methods=["POST", "GET"])
 
 def deconnexion():
     if current_user.is_authenticated is True:  # Si l'utilisateur est connecté
@@ -67,7 +67,7 @@ def deconnexion():
 
 
 # Route pour modifier les informations d'un utilisateur
-@app.route("/utilisateurs/modification", methods=["GET", "POST"])
+@app.route("festivalchezmoi/utilisateurs/modification", methods=["GET", "POST"])
 
 def modification():
     form = ModificationUtilisateur()  # Formulaire de modification
@@ -90,7 +90,7 @@ def modification():
         return render_template("pages/modification_utilisateur.html", form=form)
 
 # Route pour supprimer un utilisateur
-@app.route("/utilisateurs/suppression", methods=["GET", "POST"])
+@app.route("festivalchezmoi/utilisateurs/suppression", methods=["GET", "POST"])
 
 def suppression():
     form = SuppressionUtilisateur()  # Formulaire de suppression

@@ -21,23 +21,21 @@ class Users(db.Model, UserMixin):
         backref='utilisateurs_favoris'
     )
 
+    def check_password(self, password):
+        """
+        Vérifie si le mot de passe fourni correspond au mot de passe haché de l'utilisateur.
+        :param password: Mot de passe en clair à vérifier.
+        :return: True si le mot de passe correspond, False sinon.
+        """
+        return check_password_hash(self.password, password)
+
     # Méthode statique pour l'identification d'un utilisateur
     @staticmethod
-    def identification(identifier, password):
-        """
-        Permet l'identification par prénom ou adresse e-mail.
-        """
-        # Recherche d'un utilisateur par prénom ou e-mail
-        utilisateur = Users.query.filter(
-            or_(Users.prenom == identifier, Users.email == identifier)
-        ).first()
-        # Vérification du mot de passe
-        if utilisateur and check_password_hash(utilisateur.password, password):
-            flash("Vous êtes connecté", "success")  # Message de succès
+    def identification(prenom, password):
+        utilisateur = Users.query.filter_by(prenom=prenom).first()
+        if utilisateur and utilisateur.check_password(password):
             return utilisateur
-        else:
-            flash("Identifiant ou mot de passe incorrect", "error")  # Message d'erreur
-            return None
+        return None
 
     # Méthode statique pour ajouter un nouvel utilisateur
     @staticmethod

@@ -1,4 +1,3 @@
-
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, TextAreaField, PasswordField, SubmitField, FloatField
 from wtforms.validators import DataRequired, Length, Email, Optional
@@ -51,7 +50,7 @@ class Recherche(FlaskForm):
     nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max =50)])
     #potentiellement transformer les selectfield qui suivent en radiofield selon comment ça se présente au final
     periode = SelectField("Période", choices=[('avant','Avant-Saison (1 Janvier-20 Juin)'),('saison','Saison (21 Juin-5 Septembre)'),('apres','Après-saison (6 septembre - 31 décembre)')], validators=[DataRequired(), Length(min=5)])
-    discipline = SelectField('Discipline', choices =[('arts_visu','Arts visuels, arts numériques'),("cinema","Cinéma et audiovisuel"), ("livres","Livres et littérature"),("musique","Musique"),("spectacle_vivant","Spectacle vivant"),("autre","Autres")], validators=[Optional()])
+    discipline = SelectField('Discipline', choices =[('arts_visu','Arts visuels, arts numériques'),("cinema","Cinéma, audiovisuel"), ("livres","Livre, Littérature"),("musique","Musique"),("spectacle_vivant","Spectacle vivant"),("autre","Autres"), ("tout", Tout")], validators=[Optional()])
     lieu = StringField('Lieu', validators=[Optional()])
     if lieu:
         dist=FloatField('Distance maximum', validators=[DataRequired()])
@@ -60,15 +59,15 @@ class Recherche(FlaskForm):
 # correction proposée par Copilot
 class Recherche(FlaskForm):
     nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max=50)])
-    periode = SelectField("Période", choices=[
+    periode = SelectMultipleField("Période", choices=[
         ('avant', 'Avant-Saison (1 Janvier-20 Juin)'),
         ('saison', 'Saison (21 Juin-5 Septembre)'),
         ('apres', 'Après-saison (6 septembre - 31 décembre)')
-    ], validators=[DataRequired(), Length(min=5)])
-    discipline = SelectField('Discipline', choices=[
+    ], validators=[Optional()])
+    discipline = SelectMultipleField('Discipline', choices=[
         ('arts_visu', 'Arts visuels, arts numériques'),
-        ("cinema", "Cinéma et audiovisuel"),
-        ("livres", "Livres et littérature"),
+        ("cinema", "Cinéma, audiovisuel"),
+        ("livre", "Livre, littérature"),
         ("musique", "Musique"),
         ("spectacle_vivant", "Spectacle vivant"),
         ("autre", "Autres")

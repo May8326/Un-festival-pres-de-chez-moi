@@ -1,10 +1,14 @@
-{% extends "base.html" %}
+{% extends "partials/conteneur.html" %}
 
 {% block content %}
 <div class="container">
     <h1>Mes Favoris</h1>
     
-    {% if favoris %}
+    {% if not favoris %}
+    <div class="alert alert-warning" role="alert">
+        Vous n'avez pas encore de favori.
+    </div>
+    {% else %}
         <div class="row">
             {% for favori in favoris %}
             <div class="col-md-4 mb-3">
@@ -23,8 +27,6 @@
             </div>
             {% endfor %}
         </div>
-    {% else %}
-        <p>Vous n'avez pas encore de favoris.</p>
     {% endif %}
 </div>
 {% endblock %}

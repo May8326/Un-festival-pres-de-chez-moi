@@ -1,12 +1,16 @@
 {% extends "partials/conteneur.html" %}
 {% block scripts %}
+<!--
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />-->
 {% endblock %}
 
 {% block body %}
 <div class="container">
-    {% if not donnees %}
+    {% if not donnees.items %}
+    <div class="alert alert-warning" role="alert">
+        Aucun résultat trouvé pour votre recherche.
+    </div>
     <div class="row">
         <!-- affichage en cas d'absence de résultats (lors du premier chargement de la page, ou d'absence de résultats suite à la recherche) -->
         <div class="col-sm-4"></div>
@@ -45,76 +49,64 @@
     <div class="container">
         <h1>Résultats de la recherche</h1>
 
-        <!-- Carte Leaflet -->
-        <div id="map" style="height: 500px; margin-bottom: 20px;"></div>
-
-        <!-- Tableau des festivals -->
-        <h2>Festivals à proximité</h2>
+        <!-- Tableau des résultats -->
+        <h2>Résultats trouvés</h2>
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Nom</th>
                     <th>Lieu</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
                 </tr>
             </thead>
             <tbody>
-                {% for festival in festivals %}
+                {% for resultat in donnees.items %}
                 <tr>
-                    <td>{{ festival.nom_festival }}</td>
-                    <td>{{ festival.lieu.commune.nom_commune }}</td>
-                    <td>{{ festival.type}}</td>
+                    <td>{{ resultat.nom_festival }}</td>
+                    <td>{{ resultat.lieu.commune.nom_commune }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <!-- Tableau des monuments -->
-        <h2>Monuments à proximité</h2>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Lieu</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for monument in monuments %}
-                <tr>
-                    <td>{{ monument.nom_monument }}</td>
-                    <td>{{ monument.commune.nom_commune }}</td>
-                </tr>
+        <!-- Pagination -->
+        <nav aria-label="Pagination">
+            <ul class="pagination">
+                {% if donnees.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('recherche', page=donnees.prev_num) }}" aria-label="Précédent">
+                        &laquo; Précédent
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo; Précédent</span>
+                </li>
+                {% endif %}
+
+                {% for page_num in donnees.iter_pages() %}
+                {% if page_num %}
+                <li class="page-item {% if donnees.page == page_num %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('recherche', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
                 {% endfor %}
-            </tbody>
-        </table>
+
+                {% if donnees.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('recherche', page=donnees.next_num) }}" aria-label="Suivant">
+                        Suivant &raquo;
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Suivant &raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
-
-    <script>
-        // Initialisation de la carte Leaflet
-        var map = L.map('map').setView([48.8566, 2.3522], 6); // Coordonnées par défaut (France)
-
-        // Ajouter une couche de tuiles OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Ajouter les festivals sur la carte
-        {% for festival in festivals %}
-        L.marker([{{ festival.lieu.latitude_festival }}, {{ festival.lieu.longitude_festival }}])
-            .addTo(map)
-            .bindPopup("<b>{{ festival.nom_festival }}</b><br>{{ festival.lieu.commune.nom_commune }}");
-        {% endfor %}
-
-        // Ajouter les monuments sur la carte
-        {% for monument in monuments %}
-        L.marker([{{ monument.latitude_monument_historique }}, {{ monument.longitude_monument_historique }}])
-            .addTo(map)
-            .bindPopup("<b>{{ monument.nom_monument }}</b><br>{{ monument.commune.nom_commune }}");
-        {% endfor %}
-    </script>
     {% endif %}
 </div>
 {% endblock %}

@@ -23,6 +23,8 @@ def accueil_festivalchezmoi():
     return render_template ("/pages/accueil.html",form=form)
    
 
+@app.route("/recherche", methods = ['GET', 'POST'])
+@app.route("/recherche/<int:page>", methods= ['GET', 'POST'])
 
 def recherche():
 

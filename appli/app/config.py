@@ -11,4 +11,4 @@ class Config():
     SQLALCHEMY_ECHO= os.environ.get("SQLALCHEMY_ECHO")
     RESULTATS_PER_PAGE= int(os.environ.get("RESULTATS_PER_PAGE"))
     SECRET_KEY = os.environ.get("SECRET_KEY")
-    WTF_CSRF_ENABLE= to_bool(os.environ.get("WTF_CSRF_ENABLE"))
+    WTF_CSRF_ENABLED= to_bool(os.environ.get("WTF_CSRF_ENABLED"))

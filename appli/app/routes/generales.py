@@ -94,8 +94,10 @@ def recherche(page=1):
     return render_template("/pages/resultats.html", form=form, donnees=donnees)
 
 # Route pour effectuer une recherche rapide
+
 @app.route("/recherche_rapide")
 @app.route("/recherche_rapide/resultat")
+
 def recherche_rapide():
     chaine = request.args.get("chaine", None)  # Récupération de la chaîne de recherche
     try:

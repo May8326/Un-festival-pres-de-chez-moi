@@ -94,12 +94,12 @@ def recherche(page=1):
     return render_template("/pages/resultats.html", form=form, donnees=donnees)
 
 # Route pour effectuer une recherche rapide
-
 @app.route("/festivalchezmoi/recherche_rapide")
 @app.route("/festivalchezmoi/recherche_rapide/resultat")
 def recherche_rapide():
     chaine = request.args.get("chaine", None)  # Récupération de la chaîne de recherche
     try:
+        page = request.args.get("page", 1, type=int)  # Récupération de la page avec une valeur par défaut
         if chaine:
             # Requêtes SQL pour rechercher dans les ressources et les cartes associées aux festivals
             resources = db.session.execute("""select a.id from Festival a 

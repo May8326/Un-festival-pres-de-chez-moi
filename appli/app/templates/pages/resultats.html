@@ -15,6 +15,7 @@
                 <th>Lieu</th>
                 <th>Type</th>
                 <th>Dates</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -24,6 +25,17 @@
                 <td>{{ resultat[1] }}</td> <!-- Nom de la commune -->
                 <td>{{ resultat[2] }}</td> <!-- Type du festival -->
                 <td>{{ resultat[3] }}</td> <!-- Dates du festival -->
+                <td>
+                    {% if current_user.is_authenticated %}
+                    <form action="{{ url_for('insertion_favori') }}" method="post">
+                       
+                        <input type="hidden" name="nom_festival" value="{{ resultat[0] }}">
+                        <button type="submit" class="btn btn-primary btn-sm">Ajouter aux favoris</button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">Connectez-vous pour ajouter aux favoris</span>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>

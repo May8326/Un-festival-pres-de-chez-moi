@@ -73,7 +73,7 @@ class DateFestival(db.Model):
     annee_creation_festival = db.Column(db.Text)
     periode_principale_deroulement_festival = db.Column(db.Text)
     decennie_creation_festival = db.Column(db.Text)
-    
+
     festival = db.relationship("Festival", back_populates="dates")
     
 class LieuFestival(db.Model):
@@ -107,7 +107,7 @@ class TypeFestival(db.Model):
     sous_categorie_musique = db.Column(db.Text(50))
     sous_categorie_cinema_et_audiovisuel = db.Column(db.Text(50))
     sous_categorie_arts_visuels_et_numeriques = db.Column(db.Text(50))
-    sous_categorie_livres_et_litterature = db.Column(db.Text(50))
+    sous_categorie_livre_et_litterature = db.Column(db.Text(50))
 
     
     festival = db.relationship("Festival", back_populates="type")

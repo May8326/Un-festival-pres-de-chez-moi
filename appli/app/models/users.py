@@ -1,4 +1,4 @@
-from app.app import db, login
+from app.app import db, login, app
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy import or_
@@ -80,3 +80,7 @@ class Users(db.Model, UserMixin):
 @login.user_loader
 def load_by_id(id):
     return Users.query.get(int(id))
+
+# Créez les tables
+with app.app_context():
+    db.create_all()

@@ -3,6 +3,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy import or_
 from flask import flash
+from app.models.database import Festival, MonumentHistorique
+
+# table de relation many to many pour la gestion des favoris
+relation_user_favori = db.Table('relation_user_favori', db.Model.metadata,
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('id_festival', db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True),
+    db.Column('id_monument_historique', db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), primary_key=True),
+    db.Column('id_commune', db.Integer, db.ForeignKey('communes.id_commune'), primary_key=True)
+)
 
 class Users(db.Model, UserMixin):
     __tablename__ = "users"

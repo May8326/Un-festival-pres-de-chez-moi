@@ -55,9 +55,12 @@ def recherche(page=1):  # Ajout d'une valeur par défaut pour `page`
                 if lieu_pre_traitement:
                     lieux = proximite(lieu_pre_traitement, dist)
                     app.logger.info(f"Lieux trouvés pour {lieu_pre_traitement} : {lieux}")
-                    query_results = query_results.join(LieuFestival).filter(
-                        LieuFestival.GeoPoint_festival.in_(lieux)
-                    )
+                    if lieux:
+                        query_results = query_results.join(LieuFestival).join(Commune).filter(
+                            Commune.nom_commune.in_(lieux)
+                        )
+                    else:
+                        app.logger.warning(f"Aucun lieu trouvé pour {lieu_pre_traitement} dans un rayon de {dist} km.")
 
                 app.logger.info(f"Requête générée : {query_results}")
                 donnees = query_results.paginate(page=page, per_page=app.config["RESULTATS_PER_PAGE"])

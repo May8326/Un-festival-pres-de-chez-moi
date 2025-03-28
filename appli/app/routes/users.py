@@ -12,7 +12,7 @@ def ajout_utilisateur():
 
     if form.validate_on_submit():
         statut, donnees = Users.ajout(
-            prenom=clean_arg(request.form.get("prenom", None)),
+            identifiant=clean_arg(request.form.get("prenom", None)),
             password=clean_arg(request.form.get("password", None))
         )
         if statut is True:
@@ -20,11 +20,11 @@ def ajout_utilisateur():
             return redirect(url_for("accueil"))
         else:
             flash(",".join(donnees), "error")
-            return render_template("pages/ajout_utilisateur.html", form=form)
+            return render_template("/pages/ajout_utilisateur.html", form=form)
     else:
-        return render_template("pages/ajout_utilisateur.html", form=form)
+        return render_template("/pages/ajout_utilisateur.html", form=form)
     
-@app.route("/utilisateurs/connexion", methods=["GET","POST"])
+@app.route("/festivalchezmoi/utilisateurs/connexion", methods=["GET","POST"])
 def connexion():
     form = Connexion()
 
@@ -34,7 +34,7 @@ def connexion():
 
     if form.validate_on_submit():
         utilisateur = Users.identification(
-            prenom=clean_arg(request.form.get("prenom", None)),
+            identifiant=clean_arg(request.form.get("adresse email", None)),
             password=clean_arg(request.form.get("password", None))
         )
         if utilisateur:
@@ -43,12 +43,12 @@ def connexion():
             return redirect(url_for("accueil"))
         else:
             flash("Les identifiants n'ont pas été reconnus", "error")
-            return render_template("pages/connexion.html", form=form)
+            return render_template("/pages/connexion.html", form=form)
 
     else:
-        return render_template("pages/connexion.html", form=form)
+        return render_template("/pages/connexion.html", form=form)
 
-@app.route("/utilisateurs/deconnexion", methods=["POST", "GET"])
+@app.route("/festivalchezmoi/utilisateurs/deconnexion", methods=["POST", "GET"])
 def deconnexion():
     if current_user.is_authenticated is True:
         logout_user()
@@ -67,13 +67,13 @@ def deconnexion():
 #         flash("Vous êtes sur votre compte", "info")
 #     return render_template("pages/compte.html", form=form)
 
-@app.route("/utilisateurs/modification", methods=["GET", "POST"])
+@app.route("/festivalchezmoi/utilisateurs/modification", methods=["GET", "POST"])
 def modification():
     form = ModificationUtilisateur()
 
     if form.validate_on_submit():
         statut, donnees = Users.modification(
-            prenom=clean_arg(request.form.get("prenom", None)),
+            identifiant=clean_arg(request.form.get("adresse email", None)),
             password=clean_arg(request.form.get("password", None))
         )
         if statut is True:
@@ -81,17 +81,17 @@ def modification():
             return redirect(url_for("accueil"))
         else:
             flash(",".join(donnees), "error")
-            return render_template("pages/modification_utilisateur.html", form=form)
+            return render_template("/pages/modification_utilisateur.html", form=form)
     else:
-        return render_template("pages/modification_utilisateur.html", form=form)
+        return render_template("/pages/modification_utilisateur.html", form=form)
     
-@app.route("/utilisateurs/suppression", methods=["GET", "POST"])
+@app.route("/festivalchezmoi/utilisateurs/suppression", methods=["GET", "POST"])
 def suppression():
     form = SuppressionUtilisateur()
 
     if form.validate_on_submit():
         statut, donnees = Users.suppression(
-            prenom=clean_arg(request.form.get("prenom", None)),
+            identifiant=clean_arg(request.form.get("prenom", None)),
             password=clean_arg(request.form.get("password", None))
         )
         if statut is True:
@@ -99,9 +99,9 @@ def suppression():
             return redirect(url_for("accueil"))
         else:
             flash(",".join(donnees), "error")
-            return render_template("pages/suppression_utilisateur.html", form=form)
+            return render_template("/pages/suppression_utilisateur.html", form=form)
     else:
-        return render_template("pages/suppression_utilisateur.html", form=form)
+        return render_template("/pages/suppression_utilisateur.html", form=form)
 
 
 login.login_view = 'connexion'

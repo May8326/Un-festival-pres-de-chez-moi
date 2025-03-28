@@ -11,7 +11,7 @@ from ..models.formulaires import RechercheFestivalMonument, AjoutFavori, Modific
 from ..utils.transformations import clean_arg
 from ..utils.proximite import proximite
 
-@app.route("/")
+@app.route("/festivalchezmoi")
 def accueil():
     return redirect(url_for("accueil_festivalchezmoi"))
 
@@ -23,9 +23,13 @@ def accueil_festivalchezmoi():
     return render_template ("/pages/accueil.html",form=form)
    
 
+
+def recherche():
+
 @app.route("/recherche", methods=['GET', 'POST'])
 @app.route("/recherche/<int:page>", methods=['GET', 'POST'])
 def recherche(page=1):  # Ajout d'une valeur par défaut pour `page`
+
     form = Recherche()
     donnees = []
 
@@ -75,8 +79,10 @@ def recherche(page=1):  # Ajout d'une valeur par défaut pour `page`
 
     return render_template("/pages/resultats.html", form=form, donnees=donnees)
 
+
 @app.route("/recherche_rapide")
 @app.route("/recherche_rapide/resultat")
+
 def recherche_rapide():
     chaine =  request.args.get("chaine", None)
     try: 

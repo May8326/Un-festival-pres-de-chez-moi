@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.app import app, db
-from ..models.database import Festival,MonumentHistorique, Commune,relation_user_favori
+from ..models.database import Festival, MonumentHistorique, Commune, relation_user_favori
 from sqlalchemy import and_, func
 from ..models.formulaires import AjoutFavori, ModificationFavori, SuppressionFavori
 from ..models.users import Users

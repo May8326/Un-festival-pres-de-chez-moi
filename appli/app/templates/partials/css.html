@@ -2,3 +2,71 @@
         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous"> -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.css')}}">
+
+<style>
+    /* Général */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    /* Header */
+    header {
+        background-color: #800020; /* Rouge bordeaux */
+        color: white;
+        position: relative;
+    }
+
+    .navbar {
+        background-color: transparent; /* Navbar transparente pour s'intégrer à l'image */
+    }
+
+    .navbar-brand, .navbar-nav .nav-link {
+        color: white !important;
+    }
+
+    .navbar-nav .dropdown-menu {
+        background-color: #800020; /* Rouge bordeaux */
+    }
+
+    .navbar-nav .dropdown-item {
+        color: white !important;
+    }
+
+    .navbar-nav .dropdown-item:hover {
+        background-color: #a52a2a; /* Rouge plus clair pour le survol */
+    }
+
+    /* Footer */
+    footer {
+        background-color: #800020; /* Rouge bordeaux */
+        color: white;
+        text-align: center;
+        padding: 10px 0; /* Ajustement de la hauteur */
+    }
+
+    footer a {
+        color: white;
+        text-decoration: none;
+    }
+
+    footer a:hover {
+        text-decoration: underline;
+    }
+
+    /* Contenu principal */
+    main {
+        padding: 20px;
+    }
+
+    .container-fluid {
+        max-width: 100%;
+    }
+</style>

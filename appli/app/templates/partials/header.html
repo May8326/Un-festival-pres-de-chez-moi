@@ -1,37 +1,37 @@
-<div class="bg-image" style="
-          background-image: url('');
-          height: 450px; width:100%;overflow:hidden;margin-top: -200px;"></div>
-      
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="{{ url_for('accueil_festivalchezmoi') }}">Festivals en Fête</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-        <ul class="navbar-nav">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Favoris
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <li><a class="dropdown-item" href="{{ url_for('insertion_favori') }}">Nouveau</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('suppression_favori') }}">Supprimer</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('liste_favoris') }}">Liste</a></li>
-                </ul>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Utilisateurs
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
-                    <li><a class="dropdown-item" href="{{ url_for('ajout_utilisateur') }}">Nouvel Utilisateur</a></li>
-                    {% if current_user.is_authenticated %}
-                    <li><a class="dropdown-item" href="{{ url_for('deconnexion') }}">Se déconnecter</a></li>
-                    {% else %}
-                    <li><a class="dropdown-item" href="{{ url_for('connexion') }}">Se connecter</a></li>
-                    {% endif %}
-                </ul>
-            </li>
-        </ul>
-    </div>
-</nav>
+<header class="bg-image w-100" style="
+          background-image: url('/path/to/your/image.jpg');
+          height: 100px; background-size: cover; background-position: center;">
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="{{ url_for('accueil_festivalchezmoi') }}">Festivals en Fête</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Favoris
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <li><a class="dropdown-item" href="{{ url_for('insertion_favori') }}">Nouveau</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('suppression_favori') }}">Supprimer</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('liste_favoris') }}">Liste</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Utilisateurs
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
+                        <li><a class="dropdown-item" href="{{ url_for('ajout_utilisateur') }}">Nouvel Utilisateur</a></li>
+                        {% if current_user.is_authenticated %}
+                        <li><a class="dropdown-item" href="{{ url_for('deconnexion') }}">Se déconnecter</a></li>
+                        {% else %}
+                        <li><a class="dropdown-item" href="{{ url_for('connexion') }}">Se connecter</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>

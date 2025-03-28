@@ -1,0 +1,19 @@
+{% extends "partials/conteneur.html" %}
+
+{% block body %}
+
+    <div class="container">
+        <h2 class="mt-5">Modifier l'adresse e-mail</h2>
+        <form action="{{ url_for('modification_utilisateur') }}" method="post" name="modifier_email">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                <label for="email">Nouvelle adresse e-mail</label>
+                {{ form.email(class_="form-control", placeholder_="nouvel-email@example.com") }}
+                <small id="emailHelp" class="form-text text-muted">Entrez la nouvelle adresse e-mail de l'utilisateur.</small>
+            </div>
+
+            <p><input type="submit" class="btn btn-primary" value="Modifier"></p>
+        </form>
+    </div>
+{% endblock %}

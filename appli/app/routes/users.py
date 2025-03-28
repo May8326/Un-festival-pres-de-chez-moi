@@ -14,9 +14,10 @@ def ajout_utilisateur():
     if form.validate_on_submit():  # Si le formulaire est valide
         # Appel de la méthode d'ajout d'utilisateur avec les données nettoyées
         statut, donnees = Users.ajout(
-            prenom=clean_arg(request.form.get("prenom", None)),
+            identifiant=clean_arg(request.form.get("prenom", None)),
             password=clean_arg(request.form.get("password", None))
         )
+
         if statut is True:  # Si l'ajout est réussi
             flash("Ajout effectué", "success")  # Message de succès
             return redirect(url_for("accueil"))  # Redirection vers la page d'accueil
@@ -28,7 +29,7 @@ def ajout_utilisateur():
         return render_template("pages/ajout_utilisateur.html", form=form)
 
 # Route pour la connexion d'un utilisateur
-@app.route("/utilisateurs/connexion", methods=["GET", "POST"])
+@app.route("/festivalchezmoi/utilisateurs/connexion", methods=["GET", "POST"])
 def connexion():
     form = Connexion()  # Formulaire de connexion
 
@@ -55,24 +56,26 @@ def connexion():
     return render_template("pages/connexion.html", form=form)
 
 # Route pour la déconnexion d'un utilisateur
-@app.route("/utilisateurs/deconnexion", methods=["POST", "GET"])
+@app.route("/festivalchezmoi/utilisateurs/deconnexion", methods=["POST", "GET"])
 def deconnexion():
     if current_user.is_authenticated is True:  # Si l'utilisateur est connecté
         logout_user()  # Déconnexion de l'utilisateur
     flash("Vous êtes déconnecté", "info")  # Message d'information
     return redirect(url_for("accueil"))  # Redirection vers la page d'accueil
 
+
 # Route pour modifier les informations d'un utilisateur
-@app.route("/utilisateurs/modification", methods=["GET", "POST"])
+@app.route("/festivalchezmoi/utilisateurs/modification", methods=["GET", "POST"])
 def modification():
     form = ModificationUtilisateur()  # Formulaire de modification
 
     if form.validate_on_submit():  # Si le formulaire est valide
         # Appel de la méthode de modification avec les données nettoyées
         statut, donnees = Users.modification(
-            prenom=clean_arg(request.form.get("prenom", None)),
+            identifiant=clean_arg(request.form.get("adresse email", None)),
             password=clean_arg(request.form.get("password", None))
         )
+
         if statut is True:  # Si la modification est réussie
             flash("Modification effectuée", "success")  # Message de succès
             return redirect(url_for("accueil"))  # Redirection vers la page d'accueil
@@ -84,16 +87,17 @@ def modification():
         return render_template("pages/modification_utilisateur.html", form=form)
 
 # Route pour supprimer un utilisateur
-@app.route("/utilisateurs/suppression", methods=["GET", "POST"])
+@app.route("/festivalchezmoi/utilisateurs/suppression", methods=["GET", "POST"])
 def suppression():
     form = SuppressionUtilisateur()  # Formulaire de suppression
 
     if form.validate_on_submit():  # Si le formulaire est valide
         # Appel de la méthode de suppression avec les données nettoyées
         statut, donnees = Users.suppression(
-            prenom=clean_arg(request.form.get("prenom", None)),
+            identifiant=clean_arg(request.form.get("prenom", None)),
             password=clean_arg(request.form.get("password", None))
         )
+        
         if statut is True:  # Si la suppression est réussie
             flash("Suppression effectuée", "success")  # Message de succès
             return redirect(url_for("accueil"))  # Redirection vers la page d'accueil

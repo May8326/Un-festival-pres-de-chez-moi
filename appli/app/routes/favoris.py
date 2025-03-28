@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.app import app, db
 from ..models.database import Festival,MonumentHistorique, Commune,relation_user_favori
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from ..models.formulaires import AjoutFavori, ModificationFavori, SuppressionFavori
 from ..models.users import Users
 
@@ -20,7 +20,7 @@ def insertion_favori():
             type = form.type.data
 
             if type == 'festival':
-                festival = Festival.query.filter_by(nom_festival=nom).first()
+                festival = Festival.query.filter(func.lower(Festival.nom_festival).like(f"%{nom.lower()}%")).first()
                 if festival:
                     # Vérifier si le festival est déjà dans les favoris
                     favori_existant = db.session.query(relation_user_favori).filter(
@@ -47,7 +47,7 @@ def insertion_favori():
         
             # Vérifier si le monument existe et est déjà dans les favoris
             elif type == 'monument':
-                monument = MonumentHistorique.query.filter_by(nom_monument=nom).first()
+                monument = MonumentHistorique.query.filter(func.lower(MonumentHistorique.nom_monument).like(f"%{nom.lower()}%")).first()
                 if monument:
                     # Vérifier si déjà en favori
                     favori_existant = db.session.query(relation_user_favori).filter(
@@ -72,7 +72,7 @@ def insertion_favori():
                     return render_template("pages/insertion_favori.html", sous_titre="Ajout Favori", form=form)
             # Vérifier si la commune existe et est déjà dans les favoris
             elif type == 'commune':
-                commune = Commune.query.filter_by(nom_commune=nom).first()
+                commune = Commune.query.filter(func.lower(Commune.nom_commune).like(f"%{nom.lower()}%")).first()
                 if commune:
                     # Vérifier si déjà en favori
                     favori_existant = db.session.query(relation_user_favori).filter(
@@ -128,21 +128,21 @@ def suppression_favori():
 
             favori = None
             if type == 'festival':
-                festival = Festival.query.filter_by(nom_festival=nom).first()
+                festival = Festival.query.filter(func.lower(Festival.nom_festival).like(f"%{nom.lower()}%")).first()
                 if festival:
                     favori = db.query.filter_by(user_id=user_id, festival_id=festival.id_festival).first()
                 else:
                     flash("Festival non trouvé", 'error')
                     return render_template("pages/suppression_favori.html", sous_titre="Suppression Favori", form=form)
             elif type == 'monument':
-                monument = MonumentHistorique.query.filter_by(nom_monument=nom).first()
+                monument = MonumentHistorique.query.filter(func.lower(MonumentHistorique.nom_monument).like(f"%{nom.lower()}%")).first()
                 if monument:
                     favori = db.session.query.filter_by(user_id=user_id, monument_id=monument.id_monument_historique).first()
                 else:
                     flash("Monument non trouvé", 'error')
                     return render_template("pages/suppression_favori.html", sous_titre="Suppression Favori", form=form)
             elif type == 'commune':
-                commune = Commune.query.filter_by(nom_commune=nom).first()
+                commune = Commune.query.filter(func.lower(Commune.nom_commune).like(f"%{nom.lower()}%")).first()
                 if commune:
                     favori = db.session.query.filter_by(user_id=user_id, commune_id=commune.id_commune).first()
                 else:

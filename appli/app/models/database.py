@@ -1,5 +1,4 @@
 from app.app import db
-from app.models.users import Users
 
 # Déclaration des tables de relation
 festival_monuments_geopoint = db.Table(

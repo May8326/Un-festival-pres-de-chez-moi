@@ -27,7 +27,6 @@ def accueil_festivalchezmoi():
 def recherche():
 
 @app.route("/recherche", methods=['GET', 'POST'])
-@app.route("/recherche/<int:page>", methods=['GET', 'POST'])
 def recherche(page=1):  # Ajout d'une valeur par défaut pour `page`
 
     form = Recherche()
@@ -80,7 +79,6 @@ def recherche(page=1):  # Ajout d'une valeur par défaut pour `page`
     return render_template("/pages/resultats.html", form=form, donnees=donnees)
 
 
-@app.route("/recherche_rapide")
 @app.route("/recherche_rapide/resultat")
 
 def recherche_rapide():

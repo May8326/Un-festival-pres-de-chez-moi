@@ -53,7 +53,7 @@
         <ul class="pagination">
             {% if donnees.has_prev %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('recherche', page=donnees.prev_num, **request.args.to_dict()) }}" aria-label="Précédent">
+                <a class="page-link" href="{{ url_for('recherche', page=donnees.prev_num, nom=nom, periode=periodes, discipline=disciplines, lieu=lieu) }}" aria-label="Précédent">
                     &laquo; Précédent
                 </a>
             </li>
@@ -66,7 +66,7 @@
             {% for page_num in donnees.iter_pages() %}
             {% if page_num %}
             <li class="page-item {% if donnees.page == page_num %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('recherche', page=page_num, **request.args.to_dict()) }}">{{ page_num }}</a>
+                <a class="page-link" href="{{ url_for('recherche', page=page_num, nom=nom, periode=periodes, discipline=disciplines, lieu=lieu) }}">{{ page_num }}</a>
             </li>
             {% else %}
             <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -75,7 +75,7 @@
 
             {% if donnees.has_next %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('recherche', page=donnees.next_num, **request.args.to_dict()) }}" aria-label="Suivant">
+                <a class="page-link" href="{{ url_for('recherche', page=donnees.next_num, nom=nom, periode=periodes, discipline=disciplines, lieu=lieu) }}" aria-label="Suivant">
                     Suivant &raquo;
                 </a>
             </li>

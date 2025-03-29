@@ -1,91 +1,186 @@
+# Importation des modules nécessaires
 from app.app import app
 from flask import render_template, request, flash, redirect, url_for, abort
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, and_
 from ..app import db, login
 from ..models.users import Users
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 
-from ..models.database import festival_monuments_geopoint, Commune, Festival, ContactFestival, DateFestival, LieuFestival, TypeFestival, MonumentHistorique,AspectJuridiqueMonumentHistorique
-from ..models.formulaires import RechercheFestivalMonument, AjoutFavori, ModificationFavori, SuppressionFavori, AjoutUtilisateur, Recherche
+from ..models.database import Commune, Festival, DateFestival, LieuFestival, TypeFestival, relation_user_favori
+from ..models.formulaires import Recherche
 from ..utils.transformations import clean_arg
 from ..utils.proximite import proximite
+from ..utils.pagination import Pagination, args_to_dict
+from sqlalchemy.dialects import sqlite  # Import pour compiler la requête SQL avec les valeurs réelles
 
-@app.route("/festivalchezmoi")
+# Route pour rediriger vers la page d'accueil principale
+@app.route("/")
 def accueil():
     return redirect(url_for("accueil_festivalchezmoi"))
 
-
-@app.route("/festivalchezmoi/accueil", methods = ['GET'])
+# Route pour afficher la page d'accueil avec un formulaire de recherche
+@app.route("/festivalchezmoi/accueil", methods=['GET'])
 def accueil_festivalchezmoi():
+    form = Recherche()  # Création d'une instance du formulaire de recherche
+    return render_template("/pages/accueil.html", form=form)
 
-    form = Recherche() #     flash("La recherche a rencontré une erreur "+ str(e), "info")
-    return render_template ("/pages/accueil.html",form=form)
-   
-
-
-def recherche():
-
-@app.route("/recherche", methods=['GET', 'POST'])
-def recherche(page=1):  # Ajout d'une valeur par défaut pour `page`
-
+# Route pour effectuer une recherche avec ou sans pagination
+@app.route("/festivalchezmoi/recherche", methods=['GET', 'POST'])
+@app.route("/festivalchezmoi/recherche/<int:page>", methods=['GET', 'POST'])
+def recherche(page=1):
+    
     form = Recherche()
     donnees = []
 
     try:
-        if form.validate_on_submit() or request.method == 'GET':  # Inclure les requêtes GET pour la pagination
-            nom_fest = clean_arg(request.form.get("nom", None))
-            periode = clean_arg(request.form.get("periode", None))
-            discipline = clean_arg(request.form.get("discipline", None))
-            lieu_pre_traitement = clean_arg(request.form.get("lieu", None))
-            dist = clean_arg(request.form.get("dist", None))
+        # Récupération des paramètres de recherche depuis le formulaire ou les arguments GET
+        nom_fest = clean_arg(request.form.get("nom", request.args.get("nom", None)))
+        periodes = request.form.getlist("periode") or request.args.getlist("periode")
+        disciplines = request.form.getlist("discipline") or request.args.getlist("discipline")
+        lieu_pre_traitement = clean_arg(request.form.get("lieu", request.args.get("lieu", None)))
 
-            app.logger.info(f"Recherche avec : nom={nom_fest}, periode={periode}, discipline={discipline}, lieu={lieu_pre_traitement}, dist={dist}")
+        # Log des données brutes du formulaire pour débogage
+        app.logger.info(f"Données brutes du formulaire : nom={nom_fest}, periodes={periodes}, disciplines={disciplines}, lieu={lieu_pre_traitement}")
+        
+        # Validation des périodes et disciplines
+        # IMPORTANT: Ajustez ces valeurs pour qu'elles correspondent exactement aux valeurs dans la base de données
+        periodes_valides = [p for p in periodes if p in ['Avant-Saison (1 Janvier-20 Juin)', 'Saison (21 Juin-5 Septembre)', 'Après-saison (6 septembre - 31 décembre)']]
+        
+        # Assurez-vous que ces valeurs correspondent exactement à celles dans votre base de données
+        disciplines_valides = [d for d in disciplines if d in ['arts visuels', 'cinéma', 'livre', 'musique', 'spectacle vivant', 'autre']]
+        
+        # Log après validation
+        app.logger.info(f"Après validation : nom={nom_fest}, periodes={periodes_valides}, disciplines={disciplines_valides}, lieu={lieu_pre_traitement}")
 
-            if nom_fest or periode or discipline or lieu_pre_traitement:
-                query_results = Festival.query
+        # Construction de la requête SQLAlchemy
+        query_results = db.session.query(
+            Festival.id_festival,
+            Festival.nom_festival,
+            Commune.nom_commune,
+            TypeFestival.discipline_dominante_festival,
+            DateFestival.periode_principale_deroulement_festival
+        ).distinct()
+        query_results = query_results.join(DateFestival, Festival.id_festival == DateFestival.id_festival, isouter=True)
+        query_results = query_results.join(TypeFestival, Festival.id_festival == TypeFestival.id_festival, isouter=True)
+        query_results = query_results.join(LieuFestival, Festival.id_festival == LieuFestival.id_festival, isouter=True)
+        query_results = query_results.join(Commune, LieuFestival.id_commune == Commune.id_commune, isouter=True)
 
-                if nom_fest:
-                    query_results = query_results.filter(Festival.nom_festival.ilike(f"%{nom_fest}%"))
-                if periode:
-                    query_results = query_results.join(DateFestival).filter(
-                        DateFestival.periode_principale_deroulement_festival.ilike(f"%{periode}%")
-                    )
-                if discipline:
-                    query_results = query_results.join(TypeFestival).filter(
-                        TypeFestival.discipline_dominante_festival.ilike(f"%{discipline}%")
-                    )
-                if lieu_pre_traitement:
-                    lieux = proximite(lieu_pre_traitement, dist)
-                    app.logger.info(f"Lieux trouvés pour {lieu_pre_traitement} : {lieux}")
-                    query_results = query_results.join(LieuFestival).filter(
-                        LieuFestival.GeoPoint_festival.in_(lieux)
-                    )
+        # Force une exécution pour obtenir la requête SQL actuelle
+        app.logger.info(f"Requête SQL avant filtres: {query_results}")
 
-                app.logger.info(f"Requête générée : {query_results}")
-                donnees = query_results.paginate(page=page, per_page=app.config["RESULTATS_PER_PAGE"])
+        # Application des filtres avec vérification des valeurs
+        if nom_fest:
+            query_results = query_results.filter(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
+            app.logger.info(f"Filtre appliqué pour nom: {nom_fest}")
+            
+        if periodes_valides:
+            # Créer une condition OR pour les périodes
+            periode_filters = []
+            for periode in periodes_valides:
+                periode_filters.append(DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%"))
+                app.logger.info(f"Filtre préparé pour période: {periode}")
+            
+            if periode_filters:
+                query_results = query_results.filter(or_(*periode_filters))
+                app.logger.info(f"Filtres de période appliqués: {periode_filters}")
 
-                # Log des résultats
-                app.logger.info(f"Résultats trouvés : {donnees.items}")
+        if disciplines_valides:
+            # Créer une condition OR pour les disciplines
+            discipline_filters = []
+            for discipline in disciplines_valides:
+                discipline_filters.append(TypeFestival.discipline_dominante_festival.like(f"%{discipline}%"))
+                app.logger.info(f"Filtre préparé pour discipline: {discipline}")
+                print(discipline_filters)
+            
+            if discipline_filters:
+                query_results = query_results.filter(or_(*discipline_filters))
+                app.logger.info(f"Filtres de discipline appliqués: {discipline_filters}")
+                
+        if lieu_pre_traitement:
+            lieux_post_traitement = proximite(lieu_pre_traitement, 20)
+            app.logger.info(f'filtre préparé pour le lieu : {lieu_pre_traitement}')
+            lieux_filter = []
+            print(lieux_post_traitement)
+            for i in lieux_post_traitement:
+                lieux_filter.append(Commune.nom_commune.like(f"{i}"))
+            if lieux_filter:
+                query_results= query_results.filter(or_(*lieux_filter))
+            # query_results = query_results.filter(
+            #     func.replace(func.lower(Commune.nom_commune), ' ', '').like(f"%{lieu_pre_traitement.lower().replace(' ', '')}%")
+            # )
+                app.logger.info(f"Filtre appliqué pour lieu: {lieu_pre_traitement}")
 
-                form.nom.data = nom_fest
-                form.periode.data = periode
-                form.discipline.data = discipline
-                form.lieu.data = lieu_pre_traitement
+        if form.discipline.data:
+            query_results = query_results.filter(
+                or_(*[TypeFestival.discipline_dominante_festival.ilike(f"%{discipline}%") for discipline in form.discipline.data])
+            )
+
+        if form.periode.data:
+            query_results = query_results.filter(
+                or_(*[DateFestival.periode_principale_deroulement_festival.ilike(f"%{periode}%") for periode in form.periode.data])
+            )
+        if form.nom.data:
+            query_results = query_results.filter(
+                and_(*[Festival.nom_festival.ilike(f"%{nom}%") for nom in form.nom.data])
+            )
+        if form.lieu.data:
+            query_results = query_results.filter(
+                and_(*[Commune.nom_commune.ilike(f"%{lieu}%") for lieu in form.lieu.data])
+            )
+        # Log de la requête SQL après application des filtres
+        app.logger.info(f"Requête SQL après application des filtres: {query_results}")
+        # Log des valeurs des filtres appliqués
+        app.logger.info(f"Filtres appliqués : nom={nom_fest}, periodes={periodes_valides}, disciplines={disciplines_valides}, lieu={lieu_pre_traitement}")
+
+
+        # Imprimer la requête SQL générée avec les valeurs
+        compiled_query = query_results.statement.compile(
+            dialect=sqlite.dialect(),
+            compile_kwargs={"literal_binds": True}
+        )
+        app.logger.info(f"Requête SQL compilée: {compiled_query}")
+
+
+        # Pagination
+        per_page = app.config["RESULTATS_PER_PAGE"]
+        all_results = query_results.all()
+        total = len(all_results)
+        start = (page - 1) * per_page
+        end = start + per_page
+
+        donnees_items = all_results[start:end]
+        donnees = Pagination(donnees_items, page, per_page, total)
+
+        # Pré-remplissage du formulaire
+        form.nom.data = nom_fest
+        form.periode.data = periodes_valides
+        form.discipline.data = disciplines_valides
+        form.lieu.data = lieu_pre_traitement
+
     except Exception as e:
         app.logger.error(f"Erreur lors de la recherche : {str(e)}", exc_info=True)
-        flash(f"La recherche a rencontré une erreur : {str(e)}", "info")
+        flash(f"La recherche a rencontré une erreur : {str(e)}", "error")
 
-    return render_template("/pages/resultats.html", form=form, donnees=donnees)
+    return render_template(
+        "/pages/resultats.html",
+        form=form,
+        donnees=donnees,
+        nom=nom_fest,
+        periodes=periodes_valides,
+        disciplines=disciplines_valides,
+        lieu=lieu_pre_traitement
+    )
 
-
-@app.route("/recherche_rapide/resultat")
-
+# Route pour effectuer une recherche rapide
+@app.route("/festivalchezmoi/recherche_rapide")
+@app.route("/festivalchezmoi/recherche_rapide/resultat")
 def recherche_rapide():
-    chaine =  request.args.get("chaine", None)
-    try: 
-
+    chaine = request.args.get("chaine", None)  # Récupération de la chaîne de recherche
+    try:
+        page = request.args.get("page", 1, type=int)  # Récupération de la page avec une valeur par défaut
         if chaine:
+            # Requêtes SQL pour rechercher dans les ressources et les cartes associées aux festivals
             resources = db.session.execute("""select a.id from Festival a 
                 inner join Festival_resources b on b.id = a.id 
                 inner join resources c on c.name = b.resource and (c.name like '%"""+chaine+"""%' or  c.id like '%"""+chaine+"""%')
@@ -96,6 +191,7 @@ def recherche_rapide():
                 inner join map  c on c.name = b.map_ref and (c.name like '%"""+chaine+"""%' or  c.id like '%"""+chaine+"""%')
                 """).fetchall()
 
+            # Filtrage des festivals correspondant à la chaîne de recherche
             resultats = Festival.query.\
                 filter(
                     or_(
@@ -111,51 +207,54 @@ def recherche_rapide():
         else:
             resultats = None
             
+        # Rendu de la page des résultats de recherche rapide
         return render_template("pages/resultats_recherche_pays.html", 
                 sous_titre= "Recherche | " + chaine, 
                 donnees=resultats,
                 requete=chaine)
     
     except Exception as e:
+        # Gestion des erreurs
         print(e)
         abort(500)
 
-@app.route("/test_bdd")
-def test_bdd():
+# Route pour déboguer les données en affichant un échantillon des tables
+@app.route("/festivalchezmoi/debug_donnees")
+def debug_donnees():
     try:
-        # Vérifier les données dans la table Commune
-        communes = db.session.query(Commune).limit(10).all()
-        communes_data = [{"id": c.id_commune, "nom": c.nom_commune} for c in communes]
+        # Récupération des données des différentes tables
+        festivals = db.session.query(Festival).limit(15).all()
+        dates = db.session.query(DateFestival).limit(15).all()
+        types = db.session.query(TypeFestival).limit(15).all()
+        lieux = db.session.query(LieuFestival).limit(15).all()
+        communes = db.session.query(Commune).limit(15).all()
 
-        # Vérifier les données dans la table Festival
-        festivals = db.session.query(Festival).limit(10).all()
-        festivals_data = [{"id": f.id_festival, "nom": f.nom_festival} for f in festivals]
-
-        # Vérifier les données dans la table MonumentHistorique
-        monuments = db.session.query(MonumentHistorique).limit(10).all()
-        monuments_data = [{"id": m.id_monument_historique, "nom": m.nom_monument} for m in monuments]
-
-        # Vérifier les jointures entre Festival et Commune via LieuFestival
-        jointures = (
-            db.session.query(Festival, Commune)
-            .select_from(Festival)
-            .join(LieuFestival, Festival.id_festival == LieuFestival.id_festival)
-            .join(Commune, LieuFestival.id_commune == Commune.id_commune)
-            .limit(10)
-            .all()
-        )
-        jointures_data = [
-            {"festival": f.nom_festival, "commune": c.nom_commune} for f, c in jointures
-        ]
-
-        app.logger.info(f"Jointures Festival-Commune : {jointures}")
-
-        return {
-            "communes": communes_data,
-            "festivals": festivals_data,
-            "monuments": monuments_data,
-            "jointures": jointures_data,
+        # Organisation des données dans un dictionnaire
+        donnees = {
+            "festivals": [{"id": f.id_festival, "nom": f.nom_festival} for f in festivals],
+            "dates": [{"id": d.id_festival, "periode": d.periode_principale_deroulement_festival} for d in dates],
+            "types": [{"id": t.id_festival, "discipline": t.discipline_dominante_festival} for t in types],
+            "lieux": [{"id": l.id_festival, "commune_id": l.id_commune} for l in lieux],
+            "communes": [{"id": c.id_commune, "nom": c.nom_commune} for c in communes],
+            "is_favori": [
+                {
+                    "id": f.id_festival,
+                    "favori": f.id_festival in {
+                        fav.id_festival for fav in db.session.query(relation_user_favori)
+                        .filter(relation_user_favori.c.user_id == current_user.id)
+                        .all()
+                    }
+                }
+                for f in festivals
+            ]
         }
+
+        # Log des données récupérées
+        app.logger.info(f"Données récupérées : {donnees}")
+
+        # Retour des données sous forme de réponse JSON
+        return donnees, 200
     except Exception as e:
-        app.logger.error(f"Erreur dans /test_bdd : {str(e)}", exc_info=True)
+        # Gestion des erreurs
+        app.logger.error(f"Erreur dans /debug_donnees : {str(e)}", exc_info=True)
         return {"error": str(e)}, 500

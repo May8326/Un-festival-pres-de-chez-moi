@@ -1,4 +1,3 @@
-
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, TextAreaField, PasswordField, SubmitField, FloatField
 from wtforms.validators import DataRequired, Length, Email, Optional
@@ -10,7 +9,7 @@ class RechercheFestivalMonument(FlaskForm):
 
 class AjoutFavori(FlaskForm):
     nom = StringField("Nom", validators=[DataRequired(), Length(min=2, max=100)])
-    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument')])
+    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument'), ('commune', 'Commune')])
     submit = SubmitField('Ajouter aux favoris')
 
 class ModificationFavori(FlaskForm):
@@ -21,7 +20,7 @@ class ModificationFavori(FlaskForm):
 
 class SuppressionFavori(FlaskForm):
     nom = StringField("Nom", validators=[DataRequired(), Length(min=2, max=100)])
-    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument')])
+    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument'), ('commune', 'Commune')])
     submit = SubmitField('Supprimer des favoris')
 
 class AjoutUtilisateur(FlaskForm):
@@ -48,10 +47,10 @@ class Connexion(FlaskForm):
 
 """
 class Recherche(FlaskForm):
-    nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max =50)])
+    nom = StringField("nom", validators=[Optional()])
     #potentiellement transformer les selectfield qui suivent en radiofield selon comment ça se présente au final
     periode = SelectField("Période", choices=[('avant','Avant-Saison (1 Janvier-20 Juin)'),('saison','Saison (21 Juin-5 Septembre)'),('apres','Après-saison (6 septembre - 31 décembre)')], validators=[DataRequired(), Length(min=5)])
-    discipline = SelectField('Discipline', choices =[('arts_visu','Arts visuels, arts numériques'),("cinema","Cinéma et audiovisuel"), ("livres","Livres et littérature"),("musique","Musique"),("spectacle_vivant","Spectacle vivant"),("autre","Autres")], validators=[Optional()])
+    discipline = SelectField('Discipline', choices =[('arts_visu','Arts visuels, arts numériques'),("cinema","Cinéma, audiovisuel"), ("livres","Livre, Littérature"),("musique","Musique"),("spectacle_vivant","Spectacle vivant"),("autre","Autres"), ("tout", Tout")], validators=[Optional()])
     lieu = StringField('Lieu', validators=[Optional()])
     if lieu:
         dist=FloatField('Distance maximum', validators=[DataRequired()])
@@ -60,18 +59,18 @@ class Recherche(FlaskForm):
 # correction proposée par Copilot
 class Recherche(FlaskForm):
     nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max=50)])
-    periode = SelectField("Période", choices=[
-        ('avant', 'Avant-Saison (1 Janvier-20 Juin)'),
-        ('saison', 'Saison (21 Juin-5 Septembre)'),
-        ('apres', 'Après-saison (6 septembre - 31 décembre)')
-    ], validators=[DataRequired(), Length(min=5)])
-    discipline = SelectField('Discipline', choices=[
-        ('arts_visu', 'Arts visuels, arts numériques'),
-        ("cinema", "Cinéma et audiovisuel"),
-        ("livres", "Livres et littérature"),
-        ("musique", "Musique"),
-        ("spectacle_vivant", "Spectacle vivant"),
-        ("autre", "Autres")
+    periode = SelectMultipleField("Période", choices=[
+        ('Avant-Saison (1 Janvier-20 Juin)', 'Avant-Saison (1 Janvier-20 Juin)'),
+        ('Saison (21 Juin-5 Septembre)', 'Saison (21 Juin-5 Septembre)'),
+        ('Après-saison (6 septembre - 31 décembre)', 'Après-saison (6 septembre - 31 décembre)')
+    ], validators=[Optional()])
+    discipline = SelectMultipleField('Discipline', choices=[
+        ('Arts visuels, arts numériques', 'Arts visuels, arts numériques'),
+        ("Cinéma, audiovisuel", "Cinéma, audiovisuel"),
+        ("Livre, littérature", "Livre, littérature"),
+        ("Musique", "Musique"),
+        ("Spectacle vivant", "Spectacle vivant"),
+        ("Autre", "Autres")
     ], validators=[Optional()])
     lieu = StringField('Lieu', validators=[Optional()])
     dist = FloatField('Distance maximum', validators=[Optional()])

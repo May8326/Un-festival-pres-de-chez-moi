@@ -21,22 +21,21 @@
         <tbody>
             {% for resultat in donnees.items %}
             <tr>
-                <td>{{ resultat[0] or "-" }}</td> <!-- Nom du festival -->
-                <td>
-                    {{ resultat[1] or "-" }}</td> <!-- Nom de la commune -->
-                <td>{{ resultat[2] or "-" }}</td><!-- Type du festival-->
-                <td>{{ resultat[3] or "-" }}</td> <!-- Type du festival -->
+                <td>{{ resultat[1] or "-" }}</td> <!-- Supprimé le lien -->
+                <td>{{ resultat[2] or "-" }}</td>
+                <td>{{ resultat[3] or "-" }}</td>
+                <td>{{ resultat[4] or "-" }}</td>
                 <td>
                     {% if current_user.is_authenticated %}
                     <form action="{{ url_for('insertion_favori') }}" method="post" style="display:inline;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <input type="hidden" name="nom_festival" value="{{ resultat[0] }}"> <!-- Nom du festival -->
-                        <input type="hidden" name="nom_commune" value="{{ resultat[1] }}"> <!-- Nom de la commune -->
+                        <input type="hidden" name="nom_festival" value="{{ resultat[1] }}">
+                        <input type="hidden" name="nom_commune" value="{{ resultat[2] }}">
                         <button type="submit" class="btn btn-link p-0" title="Ajouter aux favoris">
-                            {% if resultat[5] %} <!-- Vérifiez si c'est un favori -->
-                            <i class="fa fa-heart text-danger"></i> <!-- Cœur rouge -->
+                            {% if resultat[5] %}
+                            <i class="fa fa-heart text-danger"></i>
                             {% else %}
-                            <i class="fa fa-heart-o"></i> <!-- Cœur en contour -->
+                            <i class="fa fa-heart-o"></i>
                             {% endif %}
                         </button>
                     </form>

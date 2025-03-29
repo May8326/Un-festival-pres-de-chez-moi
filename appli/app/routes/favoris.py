@@ -181,6 +181,7 @@ def liste_favoris():
                 if festival:
                     app.logger.info(f"Festival trouvé : {festival.nom_festival}")
                     favoris_festivals.append({
+                        "id": festival.id_festival,  # Ajoutez l'ID ici
                         "nom": festival.nom_festival or "-",
                         "lieu": f"{festival.lieu.commune.nom_commune or '-'} ({str(festival.lieu.commune.code_departement).zfill(2) or '-'})" if festival.lieu and festival.lieu.commune else "-",
                         "type": festival.type.discipline_dominante_festival or "-" if festival.type else "-",
@@ -203,6 +204,7 @@ def liste_favoris():
                         liens.append(f"<a href='{monument.contact.lien_internet_externe}' target='_blank'>Externe</a>")
 
                     favoris_monuments.append({
+                        "id": monument.id_monument_historique,  # Ajoutez l'ID ici
                         "nom": monument.nom_monument or "-",
                         "lieu": f"{monument.commune.nom_commune or '-'} ({str(monument.commune.code_departement).zfill(2) or '-'})" if monument.commune else "-",
                         "date": monument.dates.datation_edifice or "-" if monument.dates else "-",

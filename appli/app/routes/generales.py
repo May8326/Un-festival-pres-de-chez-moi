@@ -38,11 +38,16 @@ def recherche(page=1):
         disciplines = request.form.getlist("discipline") or request.args.getlist("discipline")
         lieu_pre_traitement = clean_arg(request.form.get("lieu", request.args.get("lieu", None)))
 
+        # Validation des périodes et disciplines
+        periodes_valides = [p for p in periodes if p in ['avant', 'saison', 'apres']]
+        disciplines_valides = [d for d in disciplines if d in ['arts_visu', 'cinema', 'livre', 'musique', 'spectacle_vivant', 'autre']]
+
         # Log des paramètres
-        app.logger.info(f"Recherche avec : nom={nom_fest}, periodes={periodes}, disciplines={disciplines}, lieu={lieu_pre_traitement}")
+        app.logger.info(f"Recherche avec : nom={nom_fest}, periodes={periodes_valides}, disciplines={disciplines_valides}, lieu={lieu_pre_traitement}")
 
         # Construction de la requête SQLAlchemy
         query_results = db.session.query(
+            Festival.id_festival,  # Assurez-vous que l'ID est le premier champ
             Festival.nom_festival,
             Commune.nom_commune,
             TypeFestival.discipline_dominante_festival,
@@ -56,10 +61,10 @@ def recherche(page=1):
         # Application des filtres
         if nom_fest:
             query_results = query_results.filter(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
-        if periodes:
-            query_results = query_results.filter(DateFestival.periode_principale_deroulement_festival.in_(periodes))
-        if disciplines:
-            query_results = query_results.filter(TypeFestival.discipline_dominante_festival.in_(disciplines))
+        if periodes_valides:
+            query_results = query_results.filter(DateFestival.periode_principale_deroulement_festival.in_(periodes_valides))
+        if disciplines_valides:
+            query_results = query_results.filter(TypeFestival.discipline_dominante_festival.in_(disciplines_valides))
         if lieu_pre_traitement:
             query_results = query_results.filter(
                 func.replace(func.lower(Commune.nom_commune), ' ', '').like(f"%{lieu_pre_traitement.lower().replace(' ', '')}%")
@@ -73,12 +78,12 @@ def recherche(page=1):
         end = start + per_page
 
         donnees_items = all_results[start:end]
-        donnees = Pagination(donnees_items, page, per_page, total)  # Utilisation de Pagination
+        donnees = Pagination(donnees_items, page, per_page, total)
 
         # Pré-remplissage du formulaire
         form.nom.data = nom_fest
-        form.periode.data = periodes
-        form.discipline.data = disciplines
+        form.periode.data = periodes_valides
+        form.discipline.data = disciplines_valides
         form.lieu.data = lieu_pre_traitement
 
     except Exception as e:
@@ -88,10 +93,10 @@ def recherche(page=1):
     return render_template(
         "/pages/resultats.html",
         form=form,
-        donnees=donnees,  # Pagination est passée au template
+        donnees=donnees,
         nom=nom_fest,
-        periodes=periodes,
-        disciplines=disciplines,
+        periodes=periodes_valides,
+        disciplines=disciplines_valides,
         lieu=lieu_pre_traitement
     )
 

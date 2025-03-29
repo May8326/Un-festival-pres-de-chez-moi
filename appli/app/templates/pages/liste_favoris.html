@@ -45,7 +45,11 @@
             <tbody>
                 {% for festival in favoris_festivals %}
                 <tr>
-                    <td>{{ festival.nom }}</td>
+                    <td>
+                        <a href="{{ url_for('item_details', item_type='festival', item_id=festival['id']) }}">
+                            {{ festival.nom }}
+                        </a>
+                    </td>
                     <td>{{ festival.lieu|safe }}</td>
                     <td>{{ festival.type }}</td>
                     <td>{{ festival.date }}</td>
@@ -82,7 +86,11 @@
             <tbody>
                 {% for monument in favoris_monuments %}
                 <tr>
-                    <td>{{ monument.nom|safe }}</td>
+                    <td>
+                        <a href="{{ url_for('item_details', item_type='monument', item_id=monument['id']) }}">
+                            {{ monument.nom|safe }}
+                        </a>
+                    </td>
                     <td>{{ monument.lieu|safe }}</td>
                     <td>{{ monument.date }}</td>
                     <td>{{ monument.contact|safe }}</td>

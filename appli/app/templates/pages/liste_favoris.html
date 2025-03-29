@@ -1,6 +1,6 @@
 {% extends "partials/conteneur.html" %}
 
-{% block content %}
+{% block body %}
 <div class="container">
     <h1>Mes Favoris</h1>
 
@@ -60,7 +60,7 @@
                             <input type="hidden" name="nom" value="{{ festival.nom }}">
                             <input type="hidden" name="type" value="festival">
                             <button type="submit" class="btn btn-danger btn-sm" title="Supprimer">
-                                <i class="fa fa-trash"></i> <!-- Icône de poubelle -->
+                                <i class="bi bi-trash"></i> <!-- Icône Bootstrap pour la poubelle -->
                             </button>
                         </form>
                     </td>
@@ -100,7 +100,7 @@
                             <input type="hidden" name="nom" value="{{ monument.nom }}">
                             <input type="hidden" name="type" value="monument">
                             <button type="submit" class="btn btn-danger btn-sm" title="Supprimer">
-                                <i class="fa fa-trash"></i> <!-- Icône de poubelle -->
+                                <i class="bi bi-trash"></i> <!-- Icône Bootstrap pour la poubelle -->
                             </button>
                         </form>
                     </td>
@@ -134,7 +134,7 @@
                             <input type="hidden" name="nom" value="{{ commune.nom }}">
                             <input type="hidden" name="type" value="commune">
                             <button type="submit" class="btn btn-danger btn-sm" title="Supprimer">
-                                <i class="fa fa-trash"></i> <!-- Icône de poubelle -->
+                                <i class="bi bi-trash"></i> <!-- Icône Bootstrap pour la poubelle -->
                             </button>
                         </form>
                     </td>

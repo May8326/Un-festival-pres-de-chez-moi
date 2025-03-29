@@ -33,9 +33,9 @@
                         <input type="hidden" name="nom_commune" value="{{ resultat[2] }}">
                         <button type="submit" class="btn btn-link p-0" title="Ajouter aux favoris">
                             {% if resultat[5] %}
-                            <i class="fa fa-heart text-danger"></i>
+                            <i class="bi bi-heart-fill text-danger"></i> <!-- Icône Bootstrap pour le cœur rempli -->
                             {% else %}
-                            <i class="fa fa-heart-o"></i>
+                            <i class="bi bi-heart"></i> <!-- Icône Bootstrap pour le cœur vide -->
                             {% endif %}
                         </button>
                     </form>

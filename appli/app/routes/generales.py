@@ -43,7 +43,6 @@ def recherche(page=1):
         # Log des données brutes du formulaire pour débogage
         app.logger.info(f"Données brutes du formulaire : nom={nom_fest}, periodes={periodes}, disciplines={disciplines}, lieu={lieu_pre_traitement}")
         
-
         # Validation des périodes et disciplines
         # IMPORTANT: Ajustez ces valeurs pour qu'elles correspondent exactement aux valeurs dans la base de données
         periodes_valides = [p for p in periodes if p in ['Avant-Saison (1 Janvier-20 Juin)', 'Saison (21 Juin-5 Septembre)', 'Après-saison (6 septembre - 31 décembre)']]
@@ -141,6 +140,7 @@ def recherche(page=1):
             compile_kwargs={"literal_binds": True}
         )
         app.logger.info(f"Requête SQL compilée: {compiled_query}")
+
 
         # Pagination
         per_page = app.config["RESULTATS_PER_PAGE"]

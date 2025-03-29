@@ -9,7 +9,7 @@ class RechercheFestivalMonument(FlaskForm):
 
 class AjoutFavori(FlaskForm):
     nom = StringField("Nom", validators=[DataRequired(), Length(min=2, max=100)])
-    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument')])
+    type = SelectField('Type', choices=[('festival', 'Festival'), ('monument', 'Monument'), ('commune', 'Commune')])
     submit = SubmitField('Ajouter aux favoris')
 
 class ModificationFavori(FlaskForm):

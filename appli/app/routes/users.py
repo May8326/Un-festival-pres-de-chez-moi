@@ -14,8 +14,9 @@ def ajout_utilisateur():
     if form.validate_on_submit():  # Si le formulaire est valide
         # Appel de la méthode d'ajout d'utilisateur avec les données nettoyées
         statut, donnees = Users.ajout(
-            identifiant=clean_arg(request.form.get("prenom", None)),
-            password=clean_arg(request.form.get("password", None))
+            prenom=clean_arg(request.form.get("prenom", None)),  # Remplacez identifiant par prenom
+            password=clean_arg(request.form.get("password", None)),
+            email=clean_arg(request.form.get("email", None))  # Ajoutez l'email si nécessaire
         )
 
         if statut is True:  # Si l'ajout est réussi

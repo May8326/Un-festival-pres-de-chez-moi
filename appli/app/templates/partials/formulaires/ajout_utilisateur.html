@@ -2,6 +2,11 @@
     {{ form.hidden_tag() }}
 
     <div class="form-group">
+        <label for="prenom">Prénom de l'utilisateur</label>
+        {{ form.prenom(class_="form-control", placeholder_="Prénom") }}
+        <small id="prenom" class="form-text text-muted">Entrer le prénom de l'utilisateur</small>
+    </div>
+    <div class="form-group">
         <label for="email">Email de l'utilisateur</label>
         {{ form.email(class_="form-control", placeholder_="Email") }}
         <small id="email" class="form-text text-muted">Entrer l'email de l'utilisateur</small>

@@ -1,51 +1,68 @@
 <!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Festivals en fête</title>
-    <link rel="stylesheet" href="partials/css.html"/>
-    {% include "partials/css.html" %}
-    {% include "partials/metadata.html" %}
-    {% include "partials/js.html" %}
 
-    {% block js %}{%endblock%}
-    {% block css %}{%endblock%}
+<head>
+  <meta charset="UTF-8">
+  <title>Festivals en fête</title>
+  <link rel="stylesheet" href="partials/css.html" />
+  {% include "partials/css.html" %}
+  {% include "partials/metadata.html" %}
+  {% include "partials/js.html" %}
+
+  {% block js %}{%endblock%}
+  {% block css %}{%endblock%}
 
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            {% include "partials/header.html" %}
-        </header>
-        <main>
-            <div class="container">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                <div class="row">
-                  <div class="col">
-                    {% for category, message in messages %}
-                    <div class="alert alert-{{category}}" role="alert">{{ message }}</div>
-                    {% endfor %}
-                  </div>
-                </div>
-                {% endif %}
-                {% endwith %}
-                <div class="row">
-                  <div class="col">
-                    {% block body %}{% endblock %}
-                    <p> les résultats</p>
-    <table>
-        <tbody>
-            {{donnees}}
-        </tbody>
-    </table>  
-                  </div>
-                </div>
-              </div>
-        </main>
-        <footer>
-            {% include "partials/footer.html" %}
-        </footer>
-    </div>
-    <body>
+  <div class="container">
+    <header class="">
+      {% include "partials/header.html" %}
+    </header>
+    <main>
+      <div class="container bg-custom">
+
+        <div class="img-gallery">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_arts_visuels.jpg') }}" alt="Photo 1">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_cinema.jpg') }}" alt="Photo 2">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_litterature.jpg') }}" alt="Photo 3">
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="row">
+          <div class="col">
+            {% for category, message in messages %}
+            <div class="alert alert-{{category}}" role="alert">{{ message }}</div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+        <div class="row">
+          <div class="col">
+            {% block body %}{% endblock %}
+            <p> les résultats</p>
+            <table>
+              <tbody>
+                {{donnees}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="img-gallery">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_musique.jpg') }}" alt="Photo 4">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_spectacle_vivant.jpg') }}" alt="Photo 5">
+        </div>
+
+      </div>
+    </main>
+    <footer>
+      {% include "partials/footer.html" %}
+    </footer>
+  </div>
+
+  <body>
+
 </html>

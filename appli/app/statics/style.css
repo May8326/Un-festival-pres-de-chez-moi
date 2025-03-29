@@ -1,0 +1,9 @@
+.bg-custom {
+    background-color: #732e08 ;
+    background-image: url("https://www.transparenttextures.com/patterns/brick-wall.png");
+}
+
+img {
+    align-items: center;
+    justify-content: center;
+  }

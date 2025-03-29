@@ -15,7 +15,6 @@
                 <th>Lieu</th>
                 <th>Type</th>
                 <th>Dates</th>
-                <th>Site Internet</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -27,7 +26,6 @@
                     {{ resultat[1] or "-" }}</td> <!-- Nom de la commune -->
                 <td>{{ resultat[2] or "-" }}</td><!-- Type du festival-->
                 <td>{{ resultat[3] or "-" }}</td> <!-- Type du festival -->
-                <td>{{ resultat[4] or "-" }}</td> <!-- Dates du festival -->
                 <td>
                     {% if current_user.is_authenticated %}
                     <form action="{{ url_for('insertion_favori') }}" method="post" style="display:inline;">
@@ -56,7 +54,7 @@
         <ul class="pagination">
             {% if donnees.has_prev %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('recherche', page=donnees.prev_num) }}" aria-label="Précédent">
+                <a class="page-link" href="{{ url_for('recherche', page=donnees.prev_num, **request.args.to_dict()) }}" aria-label="Précédent">
                     &laquo; Précédent
                 </a>
             </li>
@@ -69,7 +67,7 @@
             {% for page_num in donnees.iter_pages() %}
             {% if page_num %}
             <li class="page-item {% if donnees.page == page_num %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('recherche', page=page_num) }}">{{ page_num }}</a>
+                <a class="page-link" href="{{ url_for('recherche', page=page_num, **request.args.to_dict()) }}">{{ page_num }}</a>
             </li>
             {% else %}
             <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -78,7 +76,7 @@
 
             {% if donnees.has_next %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('recherche', page=donnees.next_num) }}" aria-label="Suivant">
+                <a class="page-link" href="{{ url_for('recherche', page=donnees.next_num, **request.args.to_dict()) }}" aria-label="Suivant">
                     Suivant &raquo;
                 </a>
             </li>

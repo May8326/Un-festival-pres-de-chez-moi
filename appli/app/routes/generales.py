@@ -10,7 +10,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from ..models.database import Commune, Festival, DateFestival, LieuFestival, TypeFestival, relation_user_favori
 from ..models.formulaires import Recherche
 from ..utils.transformations import clean_arg
-from ..utils.pagination import Pagination
+from ..utils.pagination import Pagination, args_to_dict
 from sqlalchemy.dialects import sqlite  # Import pour compiler la requête SQL avec les valeurs réelles
 
 # Route pour rediriger vers la page d'accueil principale
@@ -28,86 +28,72 @@ def accueil_festivalchezmoi():
 @app.route("/festivalchezmoi/recherche", methods=['GET', 'POST'])
 @app.route("/festivalchezmoi/recherche/<int:page>", methods=['GET', 'POST'])
 def recherche(page=1):
-    form = Recherche()  # Création d'une instance du formulaire de recherche
-    donnees = []  # Liste pour stocker les résultats de la recherche
+    form = Recherche()
+    donnees = []
 
     try:
-        # Vérification si le formulaire est soumis ou si la méthode est GET
-        if form.validate_on_submit() or request.method == 'GET':
-            # Récupération des paramètres de recherche
-            nom_fest = clean_arg(request.form.get("nom", None))
-            periodes = request.form.getlist("periode")  # Périodes sélectionnées
-            disciplines = request.form.getlist("discipline")  # Disciplines sélectionnées
-            lieu_pre_traitement = clean_arg(request.form.get("lieu", None))
+        # Récupération des paramètres de recherche depuis le formulaire ou les arguments GET
+        nom_fest = clean_arg(request.form.get("nom", request.args.get("nom", None)))
+        periodes = request.form.getlist("periode") or request.args.getlist("periode")
+        disciplines = request.form.getlist("discipline") or request.args.getlist("discipline")
+        lieu_pre_traitement = clean_arg(request.form.get("lieu", request.args.get("lieu", None)))
 
-            # Log des paramètres de recherche
-            app.logger.info(f"Recherche avec : nom={nom_fest}, periodes={periodes}, disciplines={disciplines}, lieu={lieu_pre_traitement}")
+        # Log des paramètres
+        app.logger.info(f"Recherche avec : nom={nom_fest}, periodes={periodes}, disciplines={disciplines}, lieu={lieu_pre_traitement}")
 
-            # Construction de la requête SQLAlchemy
-            query_results = db.session.query(
-                Festival.nom_festival,
-                Commune.nom_commune,
-                TypeFestival.discipline_dominante_festival,
-                DateFestival.periode_principale_deroulement_festival
-            ).distinct()
-            query_results = query_results.join(DateFestival, Festival.id_festival == DateFestival.id_festival, isouter=True)
-            query_results = query_results.join(TypeFestival, Festival.id_festival == TypeFestival.id_festival, isouter=True)
-            query_results = query_results.join(LieuFestival, Festival.id_festival == LieuFestival.id_festival, isouter=True)
-            query_results = query_results.join(Commune, LieuFestival.id_commune == Commune.id_commune, isouter=True)
+        # Construction de la requête SQLAlchemy
+        query_results = db.session.query(
+            Festival.nom_festival,
+            Commune.nom_commune,
+            TypeFestival.discipline_dominante_festival,
+            DateFestival.periode_principale_deroulement_festival
+        ).distinct()
+        query_results = query_results.join(DateFestival, Festival.id_festival == DateFestival.id_festival, isouter=True)
+        query_results = query_results.join(TypeFestival, Festival.id_festival == TypeFestival.id_festival, isouter=True)
+        query_results = query_results.join(LieuFestival, Festival.id_festival == LieuFestival.id_festival, isouter=True)
+        query_results = query_results.join(Commune, LieuFestival.id_commune == Commune.id_commune, isouter=True)
 
-            # Application des filtres de recherche
-            if nom_fest:
-                query_results = query_results.filter(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
-            if periodes:
-                query_results = query_results.filter(DateFestival.periode_principale_deroulement_festival.in_(periodes))
-            if disciplines:
-                query_results = query_results.filter(TypeFestival.discipline_dominante_festival.in_(disciplines))
-            if lieu_pre_traitement:
-                # Filtrage par lieu en ignorant les espaces
-                query_results = query_results.filter(
-                    func.replace(func.lower(Commune.nom_commune), ' ', '').like(f"%{lieu_pre_traitement.lower().replace(' ', '')}%")
-                )
-                app.logger.info(f"Filtrage par lieu (sans espaces) : {lieu_pre_traitement.lower().replace(' ', '')}")
+        # Application des filtres
+        if nom_fest:
+            query_results = query_results.filter(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
+        if periodes:
+            query_results = query_results.filter(DateFestival.periode_principale_deroulement_festival.in_(periodes))
+        if disciplines:
+            query_results = query_results.filter(TypeFestival.discipline_dominante_festival.in_(disciplines))
+        if lieu_pre_traitement:
+            query_results = query_results.filter(
+                func.replace(func.lower(Commune.nom_commune), ' ', '').like(f"%{lieu_pre_traitement.lower().replace(' ', '')}%")
+            )
 
-            # Gestion de la pagination
-            per_page = app.config["RESULTATS_PER_PAGE"]
-            all_results = query_results.all()
-            total = len(all_results)
-            start = (page - 1) * per_page
-            end = start + per_page
+        # Pagination
+        per_page = app.config["RESULTATS_PER_PAGE"]
+        all_results = query_results.all()
+        total = len(all_results)
+        start = (page - 1) * per_page
+        end = start + per_page
 
-            # Ajoutez une vérification pour savoir si chaque résultat est un favori
-            favoris = db.session.query(relation_user_favori).filter(
-                relation_user_favori.c.user_id == current_user.id
-            ).all()
-            favoris_ids = {
-                "festivals": {f.id_festival for f in favoris if f.id_festival},
-                "communes": {f.id_commune for f in favoris if f.id_commune},
-                "monuments": {f.id_monument_historique for f in favoris if f.id_monument_historique},
-            }
+        donnees_items = all_results[start:end]
+        donnees = Pagination(donnees_items, page, per_page, total)  # Utilisation de Pagination
 
-            # Ajoutez une colonne pour indiquer si le résultat est un favori
-            donnees_items = []
-            for result in all_results[start:end]:
-                is_favori = False
-                if result[0] in favoris_ids["festivals"]:  # Vérifiez si c'est un favori
-                    is_favori = True
-                donnees_items.append((*result, is_favori))
+        # Pré-remplissage du formulaire
+        form.nom.data = nom_fest
+        form.periode.data = periodes
+        form.discipline.data = disciplines
+        form.lieu.data = lieu_pre_traitement
 
-            donnees = Pagination(donnees_items, page, per_page, total)
-
-            # Pré-remplissage du formulaire avec les valeurs saisies
-            form.nom.data = nom_fest
-            form.periode.data = periodes
-            form.discipline.data = disciplines
-            form.lieu.data = lieu_pre_traitement
     except Exception as e:
-        # Gestion des erreurs et affichage d'un message à l'utilisateur
         app.logger.error(f"Erreur lors de la recherche : {str(e)}", exc_info=True)
-        flash(f"La recherche a rencontré une erreur : {str(e)}", "info")
+        flash(f"La recherche a rencontré une erreur : {str(e)}", "error")
 
-    # Rendu de la page des résultats avec les données et le formulaire
-    return render_template("/pages/resultats.html", form=form, donnees=donnees)
+    return render_template(
+        "/pages/resultats.html",
+        form=form,
+        donnees=donnees,  # Pagination est passée au template
+        nom=nom_fest,
+        periodes=periodes,
+        disciplines=disciplines,
+        lieu=lieu_pre_traitement
+    )
 
 # Route pour effectuer une recherche rapide
 @app.route("/festivalchezmoi/recherche_rapide")

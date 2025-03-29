@@ -31,7 +31,7 @@ def proximite(nom_ville, dist):
             if distance < float(dist):
                 communes_proches.append(commune.nom_commune)
 
-        print(f"Communes proches trouvées : {communes_proches}")
+        # print(f"Communes proches trouvées : {communes_proches}")
         return communes_proches
 
     except Exception as e:

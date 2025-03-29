@@ -181,10 +181,11 @@ def liste_favoris():
                 if festival:
                     app.logger.info(f"Festival trouvé : {festival.nom_festival}")
                     favoris_festivals.append({
-                        "nom": festival.nom_festival,
-                        "lieu": festival.lieu.commune.nom_commune if festival.lieu and festival.lieu.commune else "N/A",
-                        "date": festival.dates.periode_principale_deroulement_festival if festival.dates else "N/A",
-                        "contact": festival.contact.site_internet_festival if festival.contact else "N/A"
+                        "nom": festival.nom_festival or "-",
+                        "lieu": f"{festival.lieu.commune.nom_commune or '-'} ({str(festival.lieu.commune.code_departement).zfill(2) or '-'})" if festival.lieu and festival.lieu.commune else "-",
+                        "type": festival.type.discipline_dominante_festival or "-" if festival.type else "-",
+                        "date": festival.dates.periode_principale_deroulement_festival or "-" if festival.dates else "-",
+                        "contact": f"<a href='{festival.contact.site_internet_festival}' target='_blank'>Site Internet</a>" if festival.contact and festival.contact.site_internet_festival else "-"
                     })
 
             # Vérification pour les monuments
@@ -192,11 +193,20 @@ def liste_favoris():
                 monument = MonumentHistorique.query.get(favori.id_monument_historique)
                 if monument:
                     app.logger.info(f"Monument trouvé : {monument.nom_monument}")
+                    # Construire les liens uniquement si les URLs existent
+                    liens = []
+                    if monument.contact and monument.contact.lien_internet_vers_base_palissy:
+                        liens.append(f"<a href='{monument.contact.lien_internet_vers_base_palissy}' target='_blank'>Palissy</a>")
+                    if monument.contact and monument.contact.lien_internet_vers_base_archiv_mh:
+                        liens.append(f"<a href='{monument.contact.lien_internet_vers_base_archiv_mh}' target='_blank'>Base Archiv</a>")
+                    if monument.contact and monument.contact.lien_internet_externe:
+                        liens.append(f"<a href='{monument.contact.lien_internet_externe}' target='_blank'>Externe</a>")
+
                     favoris_monuments.append({
-                        "nom": monument.nom_monument,
-                        "lieu": monument.commune.nom_commune if monument.commune else "N/A",
-                        "date": monument.dates.datation_edifice if monument.dates else "N/A",
-                        "contact": monument.contact.lien_internet_externe if monument.contact else "N/A"
+                        "nom": monument.nom_monument or "-",
+                        "lieu": f"{monument.commune.nom_commune or '-'} ({str(monument.commune.code_departement).zfill(2) or '-'})" if monument.commune else "-",
+                        "date": monument.dates.datation_edifice or "-" if monument.dates else "-",
+                        "contact": ", ".join(liens) if liens else "-"
                     })
 
             # Vérification pour les communes
@@ -205,10 +215,9 @@ def liste_favoris():
                 if commune:
                     app.logger.info(f"Commune trouvée : {commune.nom_commune}")
                     favoris_communes.append({
-                        "nom": commune.nom_commune,
-                        "lieu": commune.nom_departement,
-                        "date": "N/A",
-                        "contact": "N/A"
+                        "nom": commune.nom_commune or "-",
+                        "lieu": f"{commune.nom_departement or '-'} ({str(commune.code_departement).zfill(5) or '-'})",
+                        "region": commune.nom_region or "-"
                     })
 
         # Log des résultats triés
@@ -217,6 +226,7 @@ def liste_favoris():
         app.logger.info(f"Favoris Communes : {favoris_communes}")
 
         app.logger.info("Rendu du template liste_favoris.html.")
+        
         return render_template(
             "pages/liste_favoris.html",
             sous_titre="Liste des Favoris",
@@ -228,78 +238,58 @@ def liste_favoris():
     except Exception as e:
         app.logger.error(f"Erreur dans la route liste_favoris : {str(e)}", exc_info=True)
         flash(f"Une erreur s'est produite : {str(e)}", "error")
-        return redirect(url_for("accueil_festivalchezmoi"))
+        return redirect(url_for("liste_favoris"))
 
-@app.route("/festivalchezmoi/suppression/favori", methods=['GET', 'POST'])
+@app.route("/festivalchezmoi/suppression/favori", methods=['POST'])
 @login_required
 def suppression_favori():
-    form = SuppressionFavori()
-    form.type.choices = [('festival', 'Festival'), ('monument', 'Monument')]
-
     try:
-        if form.validate_on_submit():
-            user_id = current_user.id
-            nom = form.nom.data
-            type = form.type.data
+        # Récupérer les données du formulaire
+        nom = request.form.get("nom")
+        type_favori = request.form.get("type")
+        user_id = current_user.id
 
-            favori = None
-            if type == 'festival':
-                festival = Festival.query.filter(func.lower(Festival.nom_festival).like(f"%{nom.lower()}%")).first()
-                if festival:
-                    favori = db.session.query(relation_user_favori).filter(
-                        and_(
-                            relation_user_favori.c.user_id == user_id,
-                            relation_user_favori.c.id_festival == festival.id_festival
-                        )
-                    ).first()
-                else:
-                    flash("Festival non trouvé", 'error')
-                    return render_template("pages/suppression_favori.html", sous_titre="Suppression Favori", form=form)
-            elif type == 'monument':
-                monument = MonumentHistorique.query.filter(func.lower(MonumentHistorique.nom_monument).like(f"%{nom.lower()}%")).first()
-                if monument:
-                    favori = db.session.query(relation_user_favori).filter(
-                        and_(
-                            relation_user_favori.c.user_id == user_id,
-                            relation_user_favori.c.id_monument_historique == monument.id_monument_historique
-                        )
-                    ).first()
-                else:
-                    flash("Monument non trouvé", 'error')
-                    return render_template("pages/suppression_favori.html", sous_titre="Suppression Favori", form=form)
-            elif type == 'commune':
-                commune = Commune.query.filter(func.lower(Commune.nom_commune).like(f"%{nom.lower()}%")).first()
-                if commune:
-                    favori = db.session.query(relation_user_favori).filter(
-                        and_(
-                            relation_user_favori.c.user_id == user_id,
-                            relation_user_favori.c.id_commune == commune.id_commune
-                        )
-                    ).first()
-                else:
-                    flash("Commune non trouvée", 'error')
-                    return render_template("pages/suppression_favori.html", sous_titre="Suppression Favori", form=form)
+        # Vérifier le type de favori et récupérer l'entrée correspondante
+        if type_favori == "festival":
+            favori = db.session.query(relation_user_favori).join(Festival).filter(
+                relation_user_favori.c.user_id == user_id,
+                Festival.nom_festival == nom
+            ).first()
+        elif type_favori == "monument":
+            favori = db.session.query(relation_user_favori).join(MonumentHistorique).filter(
+                relation_user_favori.c.user_id == user_id,
+                MonumentHistorique.titre_editorial_de_la_notice == nom
+            ).first()
+        elif type_favori == "commune":
+            favori = db.session.query(relation_user_favori).join(Commune).filter(
+                relation_user_favori.c.user_id == user_id,
+                Commune.nom_commune == nom
+            ).first()
+        else:
+            flash("Type de favori invalide.", "error")
+            return redirect(url_for("liste_favoris"))
 
-            if favori:
-                # Supprimez l'entrée de la table de relation
-                delete_stmt = relation_user_favori.delete().where(
-                    and_(
-                        relation_user_favori.c.user_id == user_id,
-                        relation_user_favori.c.id_commune == commune.id_commune if type == 'commune' else True,
-                        relation_user_favori.c.id_festival == festival.id_festival if type == 'festival' else True,
-                        relation_user_favori.c.id_monument_historique == monument.id_monument_historique if type == 'monument' else True
-                    )
-                )
-                db.session.execute(delete_stmt)
-                db.session.commit()
+        # Si le favori existe, le supprimer
+        if favori:
+            delete_stmt = relation_user_favori.delete().where(
+                relation_user_favori.c.user_id == user_id,
+                relation_user_favori.c.id_festival == favori.id_festival if type_favori == "festival" else True,
+                relation_user_favori.c.id_monument_historique == favori.id_monument_historique if type_favori == "monument" else True,
+                relation_user_favori.c.id_commune == favori.id_commune if type_favori == "commune" else True
+            )
+            db.session.execute(delete_stmt)
+            db.session.commit()
+            flash(f"Le favori '{nom}' a été supprimé avec succès.", "success")
+        else:
+            flash(f"Aucun favori trouvé pour '{nom}'.", "error")
 
-                flash("Le favori a été supprimé avec succès", 'info')
-    
     except Exception as e:
-        flash("Une erreur s'est produite lors de la suppression du favori : " + str(e), "error")
+        app.logger.error(f"Erreur lors de la suppression du favori : {str(e)}", exc_info=True)
         db.session.rollback()
-    
-    return render_template("pages/suppression_favori.html", sous_titre="Suppression Favori", form=form)
+        flash(f"Une erreur s'est produite lors de la suppression : {str(e)}", "error")
+
+    # Rediriger vers la liste des favoris
+    return redirect(url_for("liste_favoris"))
 
 @app.route("/festivalchezmoi/debug_favoris")
 @login_required
@@ -355,3 +345,42 @@ def debug_favoris():
 @app.route("/festivalchezmoi/test_liste_favoris")
 def test_liste_favoris():
     return render_template("pages/liste_favoris.html", favoris_festivals=[], favoris_monuments=[], favoris_communes=[])
+
+@app.route("/festivalchezmoi/autocomplete", methods=["GET"])
+def autocomplete():
+    try:
+        query = request.args.get("q", "").lower()  # Récupérer la chaîne tapée par l'utilisateur
+        type_favori = request.args.get("type", "festival")  # Type de favori (festival, monument, commune)
+        results = []
+
+        if query:
+            if type_favori == "festival":
+                results = db.session.query(Festival.nom_festival).filter(
+                    func.lower(Festival.nom_festival).like(f"%{query}%")
+                ).order_by(
+                    # Priorité aux résultats qui commencent par la chaîne
+                    func.lower(Festival.nom_festival).like(f"{query}%").desc(),
+                    # Ensuite, tri alphabétique
+                    Festival.nom_festival.asc()
+                ).limit(20).all()
+            elif type_favori == "monument":
+                results = db.session.query(MonumentHistorique.titre_editorial_de_la_notice).filter(
+                    func.lower(MonumentHistorique.titre_editorial_de_la_notice).like(f"%{query}%")
+                ).order_by(
+                    func.lower(MonumentHistorique.titre_editorial_de_la_notice).like(f"{query}%").desc(),
+                    MonumentHistorique.titre_editorial_de_la_notice.asc()
+                ).limit(20).all()
+            elif type_favori == "commune":
+                results = db.session.query(Commune.nom_commune).filter(
+                    func.lower(Commune.nom_commune).like(f"%{query}%")
+                ).order_by(
+                    func.lower(Commune.nom_commune).like(f"{query}%").desc(),
+                    Commune.nom_commune.asc()
+                ).limit(20).all()
+
+        # Transformer les résultats en une liste de chaînes
+        results = [r[0] for r in results]
+        return {"results": results}, 200
+    except Exception as e:
+        app.logger.error(f"Erreur dans /autocomplete : {str(e)}", exc_info=True)
+        return {"error": str(e)}, 500

@@ -28,8 +28,9 @@
                 <td>
                     {% if current_user.is_authenticated %}
                     <form action="{{ url_for('insertion_favori') }}" method="post">
-                        {{ csrf_token() }} <!-- Assurez-vous que cette ligne est présente -->
-                        <input type="hidden" name="nom_festival" value="{{ resultat[0] }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="nom_festival" value="{{ resultat[0] }}"> <!-- Nom du festival -->
+                        <input type="hidden" name="nom_commune" value="{{ resultat[1] }}"> <!-- Nom de la commune -->
                         <button type="submit" class="btn btn-primary btn-sm">Ajouter aux favoris</button>
                     </form>
                     {% else %}

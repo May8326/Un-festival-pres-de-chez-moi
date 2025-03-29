@@ -28,6 +28,24 @@ def accueil_festivalchezmoi():
 @app.route("/festivalchezmoi/recherche", methods=['GET', 'POST'])
 @app.route("/festivalchezmoi/recherche/<int:page>", methods=['GET', 'POST'])
 def recherche(page=1):
+    """
+    Handles the search functionality for festivals based on various criteria such as name, period, discipline, and location.
+    Args:
+        page (int, optional): The current page number for pagination. Defaults to 1.
+    Returns:
+        str: Renders the search results page with the filtered data and pre-filled form fields.
+    Raises:
+        Exception: Logs and flashes an error message if any issue occurs during the search process.
+    Details:
+    - Retrieves search parameters from the form or GET arguments.
+    - Validates the input values for periods and disciplines against predefined valid options.
+    - Constructs a SQLAlchemy query to filter festivals based on the provided criteria.
+    - Applies filters for name, periods, disciplines, and location.
+    - Logs the raw form data, validated data, and the generated SQL query for debugging purposes.
+    - Implements pagination to limit the number of results displayed per page.
+    - Pre-fills the search form with the validated input values for user convenience.
+    - Handles errors gracefully by logging the exception and displaying an error message to the user.
+    """
     form = Recherche()
     donnees = []
 
@@ -38,16 +56,23 @@ def recherche(page=1):
         disciplines = request.form.getlist("discipline") or request.args.getlist("discipline")
         lieu_pre_traitement = clean_arg(request.form.get("lieu", request.args.get("lieu", None)))
 
-        # Validation des périodes et disciplines
-        periodes_valides = [p for p in periodes if p in ['avant', 'saison', 'après']]
-        disciplines_valides = [d for d in disciplines if d in ['arts visuels', 'cinéma', 'livre', 'musique', 'spectacle vivant', 'autres']]
+        # Log des données brutes du formulaire pour débogage
+        app.logger.info(f"Données brutes du formulaire : nom={nom_fest}, periodes={periodes}, disciplines={disciplines}, lieu={lieu_pre_traitement}")
+        
 
-        # Log des paramètres
-        app.logger.info(f"Recherche avec : nom={nom_fest}, periodes={periodes_valides}, disciplines={disciplines_valides}, lieu={lieu_pre_traitement}")
+        # Validation des périodes et disciplines
+        # IMPORTANT: Ajustez ces valeurs pour qu'elles correspondent exactement aux valeurs dans la base de données
+        periodes_valides = [p for p in periodes if p in ['avant', 'saison', 'après']]
+        
+        # Assurez-vous que ces valeurs correspondent exactement à celles dans votre base de données
+        disciplines_valides = [d for d in disciplines if d in ['arts visuels', 'cinéma', 'livre', 'musique', 'spectacle vivant', 'autre']]
+        
+        # Log après validation
+        app.logger.info(f"Après validation : nom={nom_fest}, periodes={periodes_valides}, disciplines={disciplines_valides}, lieu={lieu_pre_traitement}")
 
         # Construction de la requête SQLAlchemy
         query_results = db.session.query(
-            Festival.id_festival,  # Assurez-vous que l'ID est le premier champ
+            Festival.id_festival,
             Festival.nom_festival,
             Commune.nom_commune,
             TypeFestival.discipline_dominante_festival,
@@ -58,21 +83,50 @@ def recherche(page=1):
         query_results = query_results.join(LieuFestival, Festival.id_festival == LieuFestival.id_festival, isouter=True)
         query_results = query_results.join(Commune, LieuFestival.id_commune == Commune.id_commune, isouter=True)
 
-        # Application des filtres
+        # Force une exécution pour obtenir la requête SQL actuelle
+        app.logger.info(f"Requête SQL avant filtres: {query_results}")
+
+        # Application des filtres avec vérification des valeurs
         if nom_fest:
             query_results = query_results.filter(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
+            app.logger.info(f"Filtre appliqué pour nom: {nom_fest}")
+            
         if periodes_valides:
-            # Utiliser AND pour les périodes
             for periode in periodes_valides:
                 query_results = query_results.filter(DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%"))
+                app.logger.info(f"Filtre appliqué pour période: {periode}")
+                
         if disciplines_valides:
-            # Utiliser AND pour les disciplines
+            # Créer une condition OR pour les disciplines
+            discipline_filters = []
             for discipline in disciplines_valides:
-                query_results = query_results.filter(TypeFestival.discipline_dominante_festival.like(f"%{discipline}%"))
+                discipline_filters.append(TypeFestival.discipline_dominante_festival.like(f"%{discipline}%"))
+                app.logger.info(f"Filtre préparé pour discipline: {discipline}")
+                
+            if discipline_filters:
+                query_results = query_results.filter(or_(*discipline_filters))
+                app.logger.info(f"Filtres de discipline appliqués: {discipline_filters}")
+                
         if lieu_pre_traitement:
             query_results = query_results.filter(
                 func.replace(func.lower(Commune.nom_commune), ' ', '').like(f"%{lieu_pre_traitement.lower().replace(' ', '')}%")
             )
+            app.logger.info(f"Filtre appliqué pour lieu: {lieu_pre_traitement}")
+
+        if form.discipline.data:
+            query_results = query_results.filter(
+                and_(*[TypeFestival.discipline_dominante_festival.ilike(f"%{discipline}%") for discipline in form.discipline.data])
+            )
+
+        # Force une exécution pour obtenir la requête SQL finale
+        app.logger.info(f"Requête SQL après filtres: {query_results}")
+
+        # Imprimer la requête SQL générée avec les valeurs
+        compiled_query = query_results.statement.compile(
+            dialect=sqlite.dialect(),
+            compile_kwargs={"literal_binds": True}
+        )
+        app.logger.info(f"Requête SQL compilée: {compiled_query}")
 
         # Pagination
         per_page = app.config["RESULTATS_PER_PAGE"]

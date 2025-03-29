@@ -13,9 +13,8 @@
                         Favoris
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <li><a class="dropdown-item" href="{{ url_for('insertion_favori') }}">Nouveau</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('suppression_favori') }}">Supprimer</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('liste_favoris') }}">Liste</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('liste_favoris') }}#nouveau-favori">Nouveau</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('liste_favoris') }}#liste-favoris">Liste</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">

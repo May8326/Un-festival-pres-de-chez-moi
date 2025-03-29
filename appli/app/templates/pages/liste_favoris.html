@@ -6,7 +6,7 @@
 
     <!-- Formulaire pour ajouter un favori -->
     <div class="mb-4">
-        <h2>Ajouter un favori</h2>
+        <h2 id="nouveau-favori">Ajouter un favori</h2>
         <form action="{{ url_for('liste_favoris') }}" method="post">
             {{ form_ajout_favori.hidden_tag() }}
             <div class="form-group">
@@ -29,7 +29,8 @@
     {% else %}
         <!-- Favoris Festivals -->
         {% if favoris_festivals %}
-        <h2>Festivals</h2>
+        <h2 id="liste-favoris">Liste des favoris</h2>
+        <h3>Festivals</h3>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -67,7 +68,7 @@
 
         <!-- Favoris Monuments -->
         {% if favoris_monuments %}
-        <h2>Monuments</h2>
+        <h3>Monuments</h3>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -103,7 +104,7 @@
 
         <!-- Favoris Communes -->
         {% if favoris_communes %}
-        <h2>Communes</h2>
+        <h3>Communes</h3>
         <table class="table table-striped">
             <thead>
                 <tr>

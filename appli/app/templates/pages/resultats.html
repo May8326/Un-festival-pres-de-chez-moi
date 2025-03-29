@@ -15,22 +15,32 @@
                 <th>Lieu</th>
                 <th>Type</th>
                 <th>Dates</th>
+                <th>Site Internet</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for resultat in donnees.items %}
             <tr>
-                <td>{{ resultat[0] }}</td> <!-- Nom du festival -->
-                <td>{{ resultat[1] }}</td> <!-- Nom de la commune -->
-                <td>{{ resultat[2] }}</td> <!-- Type du festival -->
-                <td>{{ resultat[3] }}</td> <!-- Dates du festival -->
+                <td>{{ resultat[0] or "-" }}</td> <!-- Nom du festival -->
+                <td>
+                    {{ resultat[1] or "-" }}</td> <!-- Nom de la commune -->
+                <td>{{ resultat[2] or "-" }}</td><!-- Type du festival-->
+                <td>{{ resultat[3] or "-" }}</td> <!-- Type du festival -->
+                <td>{{ resultat[4] or "-" }}</td> <!-- Dates du festival -->
                 <td>
                     {% if current_user.is_authenticated %}
-                    <form action="{{ url_for('insertion_favori') }}" method="post">
-                        {{ csrf_token() }} <!-- Assurez-vous que cette ligne est présente -->
-                        <input type="hidden" name="nom_festival" value="{{ resultat[0] }}">
-                        <button type="submit" class="btn btn-primary btn-sm">Ajouter aux favoris</button>
+                    <form action="{{ url_for('insertion_favori') }}" method="post" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="nom_festival" value="{{ resultat[0] }}"> <!-- Nom du festival -->
+                        <input type="hidden" name="nom_commune" value="{{ resultat[1] }}"> <!-- Nom de la commune -->
+                        <button type="submit" class="btn btn-link p-0" title="Ajouter aux favoris">
+                            {% if resultat[5] %} <!-- Vérifiez si c'est un favori -->
+                            <i class="fa fa-heart text-danger"></i> <!-- Cœur rouge -->
+                            {% else %}
+                            <i class="fa fa-heart-o"></i> <!-- Cœur en contour -->
+                            {% endif %}
+                        </button>
                     </form>
                     {% else %}
                     <span class="text-muted">Connectez-vous pour ajouter aux favoris</span>

@@ -3,39 +3,137 @@
 {% block content %}
 <div class="container">
     <h1>Mes Favoris</h1>
-    
-    {% if not favoris %}
+
+    <!-- Formulaire pour ajouter un favori -->
+    <div class="mb-4">
+        <h2>Ajouter un favori</h2>
+        <form action="{{ url_for('liste_favoris') }}" method="post">
+            {{ form_ajout_favori.hidden_tag() }}
+            <div class="form-group">
+                {{ form_ajout_favori.nom.label(class="form-label") }}
+                {{ form_ajout_favori.nom(class="form-control", id="nom_favori") }}
+                <div id="suggestions" class="suggestions-box"></div> <!-- Conteneur pour les suggestions -->
+            </div>
+            <div class="form-group">
+                {{ form_ajout_favori.type.label(class="form-label") }}
+                {{ form_ajout_favori.type(class="form-select", id="type_favori") }}
+            </div>
+            <button type="submit" class="btn btn-primary">{{ form_ajout_favori.submit.label }}</button>
+        </form>
+    </div>
+
+    {% if not favoris_festivals and not favoris_monuments and not favoris_communes %}
     <div class="alert alert-warning" role="alert">
         Vous n'avez pas encore de favori.
     </div>
     {% else %}
-        <div class="row">
-            {% for favori in favoris %}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ favori.festival.nom_festival }}</h5>
-                        <p class="card-text">
-                            Lieu : {{ favori.festival.lieu }}<br>
-                            Date : {{ favori.festival.dates }}
-                        </p>
-                        <form action="{{ url_for('supprimer_favori', festival_id=favori.festival_id) }}" method="post">
-                            <button type="submit" class="btn btn-danger">Retirer des favoris</button>
+        <!-- Favoris Festivals -->
+        {% if favoris_festivals %}
+        <h2>Festivals</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Lieu</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Contact</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for festival in favoris_festivals %}
+                <tr>
+                    <td>{{ festival.nom }}</td>
+                    <td>{{ festival.lieu|safe }}</td>
+                    <td>{{ festival.type }}</td>
+                    <td>{{ festival.date }}</td>
+                    <td>{{ festival.contact|safe }}</td>
+                    <td>
+                        <form action="{{ url_for('suppression_favori') }}" method="post" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="nom" value="{{ festival.nom }}">
+                            <input type="hidden" name="type" value="festival">
+                            <button type="submit" class="btn btn-danger btn-sm" title="Supprimer">
+                                <i class="fa fa-trash"></i> <!-- Icône de poubelle -->
+                            </button>
                         </form>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <!-- Favoris Monuments -->
+        {% if favoris_monuments %}
+        <h2>Monuments</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Lieu</th>
+                    <th>Datation</th>
+                    <th>Liens</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for monument in favoris_monuments %}
+                <tr>
+                    <td>{{ monument.nom|safe }}</td>
+                    <td>{{ monument.lieu|safe }}</td>
+                    <td>{{ monument.date }}</td>
+                    <td>{{ monument.contact|safe }}</td>
+                    <td>
+                        <form action="{{ url_for('suppression_favori') }}" method="post" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="nom" value="{{ monument.nom }}">
+                            <input type="hidden" name="type" value="monument">
+                            <button type="submit" class="btn btn-danger btn-sm" title="Supprimer">
+                                <i class="fa fa-trash"></i> <!-- Icône de poubelle -->
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <!-- Favoris Communes -->
+        {% if favoris_communes %}
+        <h2>Communes</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Département</th>
+                    <th>Région</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for commune in favoris_communes %}
+                <tr>
+                    <td>{{ commune.nom }}</td>
+                    <td>{{ commune.lieu }}</td>
+                    <td>{{ commune.region }}</td>
+                    <td>
+                        <form action="{{ url_for('suppression_favori') }}" method="post" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="nom" value="{{ commune.nom }}">
+                            <input type="hidden" name="type" value="commune">
+                            <button type="submit" class="btn btn-danger btn-sm" title="Supprimer">
+                                <i class="fa fa-trash"></i> <!-- Icône de poubelle -->
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     {% endif %}
 </div>
 {% endblock %}
-
-
-<!--- bouton pour ajouter un résultat de la recherche aux favoris {% if current_user.is_authenticated %}
-<form action="{{ url_for('ajouter_favori', festival_id=festival.id) }}" method="post">
-    <button type="submit" class="btn btn-primary">
-        Ajouter aux favoris
-    </button>
-</form>
-{% endif %}--->

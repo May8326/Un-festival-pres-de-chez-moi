@@ -7,7 +7,7 @@ from ..models.users import Users
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 
-from ..models.database import Commune, Festival, DateFestival, LieuFestival, TypeFestival
+from ..models.database import Commune, Festival, DateFestival, LieuFestival, TypeFestival, relation_user_favori
 from ..models.formulaires import Recherche
 from ..utils.transformations import clean_arg
 from ..utils.pagination import Pagination
@@ -75,10 +75,26 @@ def recherche(page=1):
             total = len(all_results)
             start = (page - 1) * per_page
             end = start + per_page
-            donnees = Pagination(all_results[start:end], page, per_page, total)
 
-            # Log des résultats paginés
-            app.logger.info(f"Résultats trouvés (page {page}) : {donnees.items}")
+            # Ajoutez une vérification pour savoir si chaque résultat est un favori
+            favoris = db.session.query(relation_user_favori).filter(
+                relation_user_favori.c.user_id == current_user.id
+            ).all()
+            favoris_ids = {
+                "festivals": {f.id_festival for f in favoris if f.id_festival},
+                "communes": {f.id_commune for f in favoris if f.id_commune},
+                "monuments": {f.id_monument_historique for f in favoris if f.id_monument_historique},
+            }
+
+            # Ajoutez une colonne pour indiquer si le résultat est un favori
+            donnees_items = []
+            for result in all_results[start:end]:
+                is_favori = False
+                if result[0] in favoris_ids["festivals"]:  # Vérifiez si c'est un favori
+                    is_favori = True
+                donnees_items.append((*result, is_favori))
+
+            donnees = Pagination(donnees_items, page, per_page, total)
 
             # Pré-remplissage du formulaire avec les valeurs saisies
             form.nom.data = nom_fest
@@ -157,6 +173,17 @@ def debug_donnees():
             "types": [{"id": t.id_festival, "discipline": t.discipline_dominante_festival} for t in types],
             "lieux": [{"id": l.id_festival, "commune_id": l.id_commune} for l in lieux],
             "communes": [{"id": c.id_commune, "nom": c.nom_commune} for c in communes],
+            "is_favori": [
+                {
+                    "id": f.id_festival,
+                    "favori": f.id_festival in {
+                        fav.id_festival for fav in db.session.query(relation_user_favori)
+                        .filter(relation_user_favori.c.user_id == current_user.id)
+                        .all()
+                    }
+                }
+                for f in festivals
+            ]
         }
 
         # Log des données récupérées

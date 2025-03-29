@@ -1,7 +1,7 @@
 <header class="header text-white text-align">
 <div class="bg-image" style="
-          background-image: url('{{ url_for('statics', filename='templates/statics/brick-wall-dark.png') }}');
-          height: 450px; width: 100%; overflow: hidden; margin-top: -200px">git
+          background-image: url('{{ url_for('static', filename='images/brick-wall-dark.png') }}');
+          height: 450px; width: 100%; overflow: hidden; margin-top: -200px">
           </div>
 
 <nav class="navbar navbar-expand-lg  fixed-top navbar-light" style="background-color: #e3f2fd;">
@@ -19,10 +19,8 @@
           Favoris
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="{{ url_for('insertion_favori') }}">Nouveau</a>
-          <a class="dropdown-item" href="{{ url_for('modification_favori') }}">Modifier</a>
-          <a class="dropdown-item" href="{{ url_for('suppression_favori') }}">Supprimer</a>
-          <a class="dropdown-item" href="{{ url_for('liste_favoris') }}">Liste</a>
+          <a class="dropdown-item" href="{{ url_for('liste_favoris') }}#nouveau-favori">Nouveau</a>
+          <a class="dropdown-item" href="{{ url_for('liste_favoris') }}#liste-favori">Liste</a>
         </div>
       </li>
 

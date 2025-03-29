@@ -23,10 +23,17 @@
     <main>
       <div class="container bg-custom">
 
-        <div class="img-gallery">
-          <img src="{{ url_for('statics', filename='templates/statics/festival_arts_visuels.jpg') }}" alt="Photo 1">
-          <img src="{{ url_for('statics', filename='templates/statics/festival_cinema.jpg') }}" alt="Photo 2">
-          <img src="{{ url_for('statics', filename='templates/statics/festival_litterature.jpg') }}" alt="Photo 3">
+        <!-- Bandeau d'images modifié pour apparaître plus plat et plus large -->
+        <div class="row no-gutters mb-4">
+          <div class="col-4 p-0">
+            <img src="{{ url_for('static', filename='images/festival_arts_visuels.jpg') }}" alt="Photo 1" class="img-fluid w-100" style="height: 100px; object-fit: cover;">
+          </div>
+          <div class="col-4 p-0">
+            <img src="{{ url_for('static', filename='images/festival_cinema.jpg') }}" alt="Photo 2" class="img-fluid w-100" style="height: 100px; object-fit: cover;">
+          </div>
+          <div class="col-4 p-0">
+            <img src="{{ url_for('static', filename='images/festival_litterature.jpg') }}" alt="Photo 3" class="img-fluid w-100" style="height: 100px; object-fit: cover;">
+          </div>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -54,9 +61,14 @@
           </div>
         </div>
 
-        <div class="img-gallery">
-          <img src="{{ url_for('statics', filename='templates/statics/festival_musique.jpg') }}" alt="Photo 4">
-          <img src="{{ url_for('statics', filename='templates/statics/festival_spectacle_vivant.jpg') }}" alt="Photo 5">
+        <!-- Images du bas également transformées en bandeau pour cohérence -->
+        <div class="row no-gutters mt-4">
+          <div class="col-6 p-0">
+            <img src="{{ url_for('static', filename='images/festival_musique.jpg') }}" alt="Photo 4" class="img-fluid w-100" style="height: 100px; object-fit: cover;">
+          </div>
+          <div class="col-6 p-0">
+            <img src="{{ url_for('static', filename='images/festival_spectacle_vivant.jpg') }}" alt="Photo 5" class="img-fluid w-100" style="height: 100px; object-fit: cover;">
+          </div>
         </div>
 
       </div>

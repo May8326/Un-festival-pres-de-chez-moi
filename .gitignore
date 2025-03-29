@@ -2,10 +2,10 @@
 **/__pycache__/
 *.py[cod]
 *$py.class
-
+.vscode
 tmp/
 
-
+*.sqlite
 # C extensions 
 *.so
 *- Copie*

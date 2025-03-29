@@ -3,33 +3,36 @@
 {% block body %}
     <div class="container mt-5">
         <h1 class="text-center">Mon Compte</h1>
+        <div class="text-center my-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/3177/3177440.png" 
+                 alt="Photo de profil" 
+                 class="rounded-circle" 
+                 style="width: 150px; height: 150px; object-fit: cover;">
+        </div>
 
         <!-- Informations de l'utilisateur -->
         <section class="my-4">
             <h2>Informations personnelles</h2>
-            <p><strong>Nom :</strong> {{ user.nom }}</p>
             <p><strong>Prénom :</strong> {{ user.prenom }}</p>
-            <p><strong>Email :</strong> {{ user.email }}</p>
+            <p><strong>Email :</strong> {{ user.email or "Non renseigné" }}</p>
         </section>
 
         <!-- Formulaire de modification des informations -->
-        {% include "partials/formulaires/modification_utilisateur.html" %}
-        
-
-        <!-- Affichage des favoris -->
         <section class="my-4">
-            <h2>Mes Favoris</h2>
-            {% if user.favoris %}
-                <ul class="list-group">
-                    {% for favori in user.favoris %}
-                        <li class="list-group-item">
-                            <a href="{{ url_for('detail_festival', id=favori.id) }}">{{ favori.nom }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>Vous n'avez pas encore de favoris.</p>
-            {% endif %}
+            <h2>Modifier mes informations</h2>
+            <form action="{{ url_for('mon_compte') }}" method="post">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label for="prenom">Prénom</label>
+                    {{ form.prenom(class_="form-control", placeholder_="Prénom") }}
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    {{ form.email(class_="form-control", placeholder_="Email") }}
+                </div>
+                <button type="submit" class="btn btn-primary">Mettre à jour</button>
+            </form>
         </section>
+
     </div>
 {% endblock %}

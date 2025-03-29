@@ -2,9 +2,10 @@ from flask import url_for, render_template, redirect, request, flash
 from ..models.users import Users
 from ..models.formulaires import AjoutUtilisateur, Connexion, SuppressionUtilisateur, ModificationUtilisateur
 from ..utils.transformations import clean_arg
-from app.app import app
+from app.app import app, db
 from flask_login import login_user, logout_user, current_user
 from app.app import login
+from flask_login import login_required
 
 # Route pour ajouter un utilisateur
 @app.route("/festivalchezmoi/utilisateurs/ajout", methods=["GET", "POST"])
@@ -108,6 +109,66 @@ def suppression():
     else:
         # Afficher le formulaire de suppression
         return render_template("pages/suppression_utilisateur.html", form=form)
+
+# Route pour afficher la page mon_compte.html
+@app.route("/festivalchezmoi/utilisateurs/mon_compte", methods=["GET", "POST"])
+@login_required
+def mon_compte():
+    """
+    Affiche les informations de l'utilisateur connecté et permet de modifier ses informations.
+    """
+    form = ModificationUtilisateur()  # Créez une instance du formulaire
+
+    if form.validate_on_submit():  # Si le formulaire est soumis et valide
+        try:
+            # Mise à jour des informations utilisateur
+            current_user.prenom = form.prenom.data
+            if form.email.data:
+                current_user.email = form.email.data
+
+            db.session.commit()
+            flash("Vos informations ont été mises à jour avec succès.", "success")
+            return redirect(url_for("mon_compte"))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Erreur lors de la modification des informations utilisateur : {str(e)}")
+            flash("Une erreur s'est produite lors de la mise à jour de vos informations.", "error")
+
+    # Pré-remplir le formulaire avec les informations actuelles
+    form.prenom.data = current_user.prenom
+    form.email.data = current_user.email
+
+    return render_template("pages/mon_compte.html", user=current_user, form=form)  # Transmettez le formulaire au template
+
+# Route pour modifier les informations d'un utilisateur
+@app.route("/festivalchezmoi/utilisateurs/modifier", methods=["GET", "POST"])
+@login_required
+def modifier_utilisateur():
+    """
+    Permet à l'utilisateur connecté de modifier ses informations personnelles.
+    """
+    form = ModificationUtilisateur()
+
+    if form.validate_on_submit():
+        try:
+            # Mise à jour des informations utilisateur
+            current_user.prenom = form.prenom.data
+            if form.email.data:
+                current_user.email = form.email.data
+
+            db.session.commit()
+            flash("Vos informations ont été mises à jour avec succès.", "success")
+            return redirect(url_for("mon_compte"))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Erreur lors de la modification des informations utilisateur : {str(e)}")
+            flash("Une erreur s'est produite lors de la mise à jour de vos informations.", "error")
+
+    # Pré-remplir le formulaire avec les informations actuelles
+    form.prenom.data = current_user.prenom
+    form.email.data = current_user.email
+
+    return render_template("pages/modification_utilisateur.html", form=form)
 
 # Configuration de la vue de connexion pour Flask-Login
 login.login_view = 'connexion'

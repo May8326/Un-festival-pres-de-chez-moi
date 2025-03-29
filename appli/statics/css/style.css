@@ -1,0 +1,26 @@
+/* Ajout d'un padding pour éviter que le contenu passe sous la navbar */
+body {
+    padding-top: 70px; /* Ajustez cette valeur en fonction de la hauteur de la navbar */
+    padding-bottom: 50px; /* Ajustez cette valeur en fonction de la hauteur du footer */
+}
+
+/* Fixer la navbar en haut */
+.navbar {
+    position:relative;
+    top: 0;
+    width: 100%;
+    background-color: #e3f2fd; /* Couleur de fond de la navbar */
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombre pour la navbar */
+    z-index: 1030; /* Assurez-vous que la navbar est au-dessus des autres éléments */
+}
+
+/* Fixer le footer en bas */
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1020; /* Assurez-vous que le footer est au-dessus des autres éléments */
+    background-color: #e3f2fd; /* Couleur de fond du footer */
+    padding: 10px 0;
+}

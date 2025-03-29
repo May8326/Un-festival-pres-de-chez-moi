@@ -5,7 +5,7 @@ from ..models.database import Festival, MonumentHistorique, Commune, relation_us
 from sqlalchemy import and_, func
 from ..models.formulaires import AjoutFavori, ModificationFavori, SuppressionFavori
 from ..models.users import Users
-from random import random
+from random import randint  # Correction ici: importe randint au lieu de random
 
 
 @app.route("/festivalchezmoi/insertion/favori", methods=['POST'])
@@ -62,7 +62,7 @@ def insertion_favori():
             flash("Ce favori est déjà enregistré.", "warning")
         else:
             #donner une PK à la relation
-            relation_id= int(str(user_id)+str(festival_id)+str(random.radint(1,100)))
+            relation_id = int(str(user_id) + str(festival_id) + str(randint(1,100)))  # Utilise randint directement
             # Ajouter le favori dans la table relation_user_favori
             db.session.execute(
                 relation_user_favori.insert().values(

@@ -25,6 +25,7 @@
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
                         <li><a class="dropdown-item" href="{{ url_for('ajout_utilisateur') }}">Nouvel Utilisateur</a></li>
                         {% if current_user.is_authenticated %}
+                        <li><a class="dropdown-item" href="{{ url_for('mon_compte') }}">Mon Compte</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('deconnexion') }}">Se déconnecter</a></li>
                         {% else %}
                         <li><a class="dropdown-item" href="{{ url_for('connexion') }}">Se connecter</a></li>

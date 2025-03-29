@@ -61,15 +61,15 @@ class Recherche(FlaskForm):
     nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max=50)])
     periode = SelectMultipleField("Période", choices=[
         ('avant', 'Avant-Saison (1 Janvier-20 Juin)'),
-        ('saison', 'Saison (21 Juin-5 Septembre)'),
-        ('apres', 'Après-saison (6 septembre - 31 décembre)')
+        ('21 juin', 'Saison (21 Juin-5 Septembre)'),
+        ('après', 'Après-saison (6 septembre - 31 décembre)')
     ], validators=[Optional()])
     discipline = SelectMultipleField('Discipline', choices=[
-        ('arts_visu', 'Arts visuels, arts numériques'),
-        ("cinema", "Cinéma, audiovisuel"),
+        ('arts visuels', 'Arts visuels, arts numériques'),
+        ("cinéma", "Cinéma, audiovisuel"),
         ("livre", "Livre, littérature"),
         ("musique", "Musique"),
-        ("spectacle_vivant", "Spectacle vivant"),
+        ("spectacle vivant", "Spectacle vivant"),
         ("autre", "Autres")
     ], validators=[Optional()])
     lieu = StringField('Lieu', validators=[Optional()])

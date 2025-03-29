@@ -1,5 +1,149 @@
 {% extends "partials/conteneur.html" %}
 
+{% block css %}
+<!-- Ajouter la feuille de style Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+      crossorigin=""/>
+{% endblock %}
+
+{% block js %}
+<!-- Ajouter le script Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Si nous avons des données géographiques et un élément de carte, initialiser la carte
+        {% if geo_data and lieu %}
+            const mapElement = document.getElementById('map');
+            if (mapElement) {
+                // Préparer les données pour JavaScript
+                const centre = [{{ geo_data.centre.lat }}, {{ geo_data.centre.lon }}];
+                const centreName = {{ geo_data.centre.nom|tojson }};
+                
+                // Initialiser la carte avec auto-resize
+                const map = L.map('map', {
+                    scrollWheelZoom: false,  // Désactiver le zoom par défaut avec la molette
+                    maxBounds: [[-90,-180], [90,180]],  // Limiter l'étendue de la carte
+                    minZoom: 2  // Empêcher un zoom trop grand
+                }).setView(centre, 10);  // Vue initiale sur le centre
+                
+                // Ajout d'un gestionnaire pour s'assurer que la carte s'adapte à son conteneur
+                setTimeout(function() {
+                    map.invalidateSize();
+                }, 100);
+                
+                // Ajouter une couche de carte OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+                
+                // Dessiner un cercle de 20 km autour du centre
+                L.circle(centre, {
+                    radius: 20000,  // Rayon en mètres (20 km)
+                    color: '#2ecc71',
+                    fillColor: '#2ecc71',
+                    fillOpacity: 0.1,
+                    weight: 1
+                }).addTo(map);
+                
+                // Ajouter un marqueur pour la commune centre
+                const centreMarker = L.marker(centre)
+                    .addTo(map)
+                    .bindPopup(`<div class="marker-info"><h5>${centreName}</h5><p>Centre de recherche</p></div>`);
+                
+                // Créer un groupe de marqueurs pour ajuster la vue automatiquement
+                const markersGroup = L.featureGroup();
+                
+                // Ajouter le centre au groupe de marqueurs
+                markersGroup.addLayer(centreMarker);
+                
+                // Ajouter des marqueurs pour les festivals
+                {% for festival in geo_data.festivals %}
+                    const festival{{ loop.index }} = {
+                        id: {{ festival.id }},
+                        nom: {{ festival.nom|tojson }},
+                        lat: {{ festival.lat }},
+                        lon: {{ festival.lon }},
+                        distance: {{ festival.distance }}
+                    };
+                    
+                    const festivalMarker = L.marker([festival{{ loop.index }}.lat, festival{{ loop.index }}.lon], {
+                        icon: L.divIcon({
+                            className: 'festival-marker',
+                            html: '<i class="bi bi-music-note" style="color:#e74c3c;font-size:24px;"></i>',
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                        })
+                    })
+                    .addTo(map)
+                    .bindPopup(`
+                        <div class="marker-info">
+                            <h5>${festival{{ loop.index }}.nom}</h5>
+                            <p>Festival</p>
+                            <p>Distance: ${festival{{ loop.index }}.distance} km</p>
+                            <a href="/festivalchezmoi/item/festival/${festival{{ loop.index }}.id}" class="btn btn-sm btn-details">Voir détails</a>
+                        </div>
+                    `);
+                    
+                    // Ajouter le marqueur au groupe
+                    markersGroup.addLayer(festivalMarker);
+                {% endfor %}
+                
+                // Ajouter des marqueurs pour les monuments
+                {% for monument in geo_data.monuments %}
+                    const monument{{ loop.index }} = {
+                        id: {{ monument.id }},
+                        nom: {{ monument.nom|tojson }},
+                        lat: {{ monument.lat }},
+                        lon: {{ monument.lon }},
+                        distance: {{ monument.distance }}
+                    };
+                    
+                    const monumentMarker = L.marker([monument{{ loop.index }}.lat, monument{{ loop.index }}.lon], {
+                        icon: L.divIcon({
+                            className: 'monument-marker',
+                            html: '<i class="bi bi-building" style="color:#3498db;font-size:24px;"></i>',
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                        })
+                    })
+                    .addTo(map)
+                    .bindPopup(`
+                        <div class="marker-info">
+                            <h5>${monument{{ loop.index }}.nom}</h5>
+                            <p>Monument</p>
+                            <p>Distance: ${monument{{ loop.index }}.distance} km</p>
+                            <a href="/festivalchezmoi/item/monument/${monument{{ loop.index }}.id}" class="btn btn-sm btn-details">Voir détails</a>
+                        </div>
+                    `);
+                    
+                    // Ajouter le marqueur au groupe
+                    markersGroup.addLayer(monumentMarker);
+                {% endfor %}
+                
+                // Ajouter le groupe à la carte
+                markersGroup.addTo(map);
+                
+                // Ajuster la vue pour englober tous les marqueurs
+                if (markersGroup.getLayers().length > 1) {
+                    map.fitBounds(markersGroup.getBounds(), {
+                        padding: [50, 50],
+                        maxZoom: 13
+                    });
+                }
+                
+                // Gestionnaire d'événement pour redimensionner correctement la carte
+                window.addEventListener('resize', function() {
+                    map.invalidateSize();
+                });
+            }
+        {% endif %}
+    });
+</script>
+{% endblock %}
+
 {% block body %}
 <div class="container">
     {% if not donnees.items %}
@@ -8,6 +152,25 @@
     </div>
     {% else %}
     <h1>Résultats de la recherche</h1>
+    
+    <!-- Carte Leaflet pour afficher les résultats géographiques -->
+    {% if geo_data and lieu %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Carte des résultats dans un rayon de 20 km autour de {{ geo_data.centre.nom }}</h3>
+        </div>
+        <div class="card-body">
+            <div id="map-container">
+                <div id="map"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-2">
+                <span><i class="bi bi-music-note" style="color:#e74c3c;"></i> Festivals ({{ geo_data.festivals|length }})</span>
+                <span><i class="bi bi-building" style="color:#3498db;"></i> Monuments ({{ geo_data.monuments|length }})</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
     <table class="table table-striped">
         <thead>
             <tr>

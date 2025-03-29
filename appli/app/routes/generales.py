@@ -1,7 +1,7 @@
 # Importation des modules nécessaires
 from app.app import app
 from flask import render_template, request, flash, redirect, url_for, abort
-from sqlalchemy import or_, func, and_
+from sqlalchemy import or_, func, and_, distinct
 from ..app import db, login
 from ..models.users import Users
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -10,9 +10,10 @@ from flask_login import login_user, logout_user, login_required, current_user
 from ..models.database import Commune, Festival, DateFestival, LieuFestival, TypeFestival, relation_user_favori
 from ..models.formulaires import Recherche
 from ..utils.transformations import clean_arg
-from ..utils.proximite import proximite
+from ..utils.proximite import proximite, proximite_geo
 from ..utils.pagination import Pagination, args_to_dict
 from sqlalchemy.dialects import sqlite  # Import pour compiler la requête SQL avec les valeurs réelles
+from sqlalchemy.orm import joinedload
 
 # Route pour rediriger vers la page d'accueil principale
 @app.route("/")
@@ -32,6 +33,7 @@ def recherche(page=1):
     
     form = Recherche()
     donnees = []
+    geo_data = None
 
     try:
         # Récupération des paramètres de recherche depuis le formulaire ou les arguments GET
@@ -53,103 +55,102 @@ def recherche(page=1):
         # Log après validation
         app.logger.info(f"Après validation : nom={nom_fest}, periodes={periodes_valides}, disciplines={disciplines_valides}, lieu={lieu_pre_traitement}")
 
-        # Construction de la requête SQLAlchemy
-        query_results = db.session.query(
+        # Construction de la requête SQLAlchemy OPTIMISÉE
+        # 1. Utilisation de joinedload pour les jointures gourmandes
+        # 2. Sélection uniquement des colonnes nécessaires
+        base_query = db.session.query(
             Festival.id_festival,
             Festival.nom_festival,
             Commune.nom_commune,
             TypeFestival.discipline_dominante_festival,
             DateFestival.periode_principale_deroulement_festival
         ).distinct()
-        query_results = query_results.join(DateFestival, Festival.id_festival == DateFestival.id_festival, isouter=True)
-        query_results = query_results.join(TypeFestival, Festival.id_festival == TypeFestival.id_festival, isouter=True)
-        query_results = query_results.join(LieuFestival, Festival.id_festival == LieuFestival.id_festival, isouter=True)
-        query_results = query_results.join(Commune, LieuFestival.id_commune == Commune.id_commune, isouter=True)
+        
+        # Utilisation de jointures avec l'option joinedload
+        base_query = base_query.options(
+            joinedload(Festival.dates),
+            joinedload(Festival.type),
+            joinedload(Festival.lieu).joinedload(LieuFestival.commune)
+        )
+        
+        # Jointures optimisées en utilisant 'JOIN' plutôt que 'LEFT JOIN' quand possible
+        base_query = base_query.join(
+            DateFestival, Festival.id_festival == DateFestival.id_festival
+        ).join(
+            TypeFestival, Festival.id_festival == TypeFestival.id_festival
+        ).join(
+            LieuFestival, Festival.id_festival == LieuFestival.id_festival
+        ).join(
+            Commune, LieuFestival.id_commune == Commune.id_commune
+        )
 
-        # Force une exécution pour obtenir la requête SQL actuelle
-        app.logger.info(f"Requête SQL avant filtres: {query_results}")
-
-        # Application des filtres avec vérification des valeurs
+        # Création d'une liste de filtres à appliquer
+        filters = []
+        
+        # Application des filtres avec des méthodes optimisées
         if nom_fest:
-            query_results = query_results.filter(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
-            app.logger.info(f"Filtre appliqué pour nom: {nom_fest}")
+            filters.append(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
             
         if periodes_valides:
-            # Créer une condition OR pour les périodes
-            periode_filters = []
-            for periode in periodes_valides:
-                periode_filters.append(DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%"))
-                app.logger.info(f"Filtre préparé pour période: {periode}")
-            
+            periode_filters = [DateFestival.periode_principale_deroulement_festival.like(f"%{p}%") for p in periodes_valides]
             if periode_filters:
-                query_results = query_results.filter(or_(*periode_filters))
-                app.logger.info(f"Filtres de période appliqués: {periode_filters}")
+                filters.append(or_(*periode_filters))
 
         if disciplines_valides:
-            # Créer une condition OR pour les disciplines
-            discipline_filters = []
-            for discipline in disciplines_valides:
-                discipline_filters.append(TypeFestival.discipline_dominante_festival.like(f"%{discipline}%"))
-                app.logger.info(f"Filtre préparé pour discipline: {discipline}")
-                print(discipline_filters)
-            
+            discipline_filters = [TypeFestival.discipline_dominante_festival.like(f"%{d}%") for d in disciplines_valides]
             if discipline_filters:
-                query_results = query_results.filter(or_(*discipline_filters))
-                app.logger.info(f"Filtres de discipline appliqués: {discipline_filters}")
+                filters.append(or_(*discipline_filters))
                 
         if lieu_pre_traitement:
-            lieux_post_traitement = proximite(lieu_pre_traitement, 20)
-            app.logger.info(f'filtre préparé pour le lieu : {lieu_pre_traitement}')
-            lieux_filter = []
-            print(lieux_post_traitement)
-            for i in lieux_post_traitement:
-                lieux_filter.append(Commune.nom_commune.like(f"{i}"))
-            if lieux_filter:
-                query_results= query_results.filter(or_(*lieux_filter))
-            # query_results = query_results.filter(
-            #     func.replace(func.lower(Commune.nom_commune), ' ', '').like(f"%{lieu_pre_traitement.lower().replace(' ', '')}%")
-            # )
-                app.logger.info(f"Filtre appliqué pour lieu: {lieu_pre_traitement}")
+            # Optimisation par mise en cache des résultats de proximite
+            from functools import lru_cache
+            
+            @lru_cache(maxsize=128)
+            def get_lieux_proches(nom_ville, distance):
+                return proximite(nom_ville, distance)
+            
+            lieux_post_traitement = get_lieux_proches(lieu_pre_traitement, 20)
+            if lieux_post_traitement:
+                lieux_filter = [Commune.nom_commune.like(f"{i}") for i in lieux_post_traitement]
+                filters.append(or_(*lieux_filter))
+                
+            # Pareil pour les données géographiques
+            @lru_cache(maxsize=128)
+            def get_geo_data(nom_ville, distance):
+                return proximite_geo(nom_ville, distance)
+            
+            geo_data = get_geo_data(lieu_pre_traitement, 20)
 
-        if form.discipline.data:
-            query_results = query_results.filter(
-                or_(*[TypeFestival.discipline_dominante_festival.ilike(f"%{discipline}%") for discipline in form.discipline.data])
-            )
+        # Appliquer tous les filtres à la fois
+        if filters:
+            base_query = base_query.filter(and_(*filters))
 
-        if form.periode.data:
-            query_results = query_results.filter(
-                or_(*[DateFestival.periode_principale_deroulement_festival.ilike(f"%{periode}%") for periode in form.periode.data])
-            )
-        if form.nom.data:
-            query_results = query_results.filter(
-                and_(*[Festival.nom_festival.ilike(f"%{nom}%") for nom in form.nom.data])
-            )
-        if form.lieu.data:
-            query_results = query_results.filter(
-                and_(*[Commune.nom_commune.ilike(f"%{lieu}%") for lieu in form.lieu.data])
-            )
-        # Log de la requête SQL après application des filtres
-        app.logger.info(f"Requête SQL après application des filtres: {query_results}")
-        # Log des valeurs des filtres appliqués
-        app.logger.info(f"Filtres appliqués : nom={nom_fest}, periodes={periodes_valides}, disciplines={disciplines_valides}, lieu={lieu_pre_traitement}")
-
-
-        # Imprimer la requête SQL générée avec les valeurs
-        compiled_query = query_results.statement.compile(
-            dialect=sqlite.dialect(),
-            compile_kwargs={"literal_binds": True}
-        )
-        app.logger.info(f"Requête SQL compilée: {compiled_query}")
-
-
+        # Optimisation de la pagination
+        # Utiliser une requête COUNT distincte pour le comptage total
+        count_q = db.session.query(func.count(distinct(Festival.id_festival)))
+        
+        # Appliquer les mêmes filtres à la requête de comptage
+        if filters:
+            count_q = count_q.select_from(
+                Festival
+            ).join(
+                DateFestival, Festival.id_festival == DateFestival.id_festival
+            ).join(
+                TypeFestival, Festival.id_festival == TypeFestival.id_festival
+            ).join(
+                LieuFestival, Festival.id_festival == LieuFestival.id_festival
+            ).join(
+                Commune, LieuFestival.id_commune == Commune.id_commune
+            ).filter(and_(*filters))
+            
+        total = count_q.scalar()
+        
         # Pagination
         per_page = app.config["RESULTATS_PER_PAGE"]
-        all_results = query_results.all()
-        total = len(all_results)
-        start = (page - 1) * per_page
-        end = start + per_page
-
-        donnees_items = all_results[start:end]
+        offset = (page - 1) * per_page
+        
+        # Appliquer limit et offset directement sur la requête
+        donnees_items = base_query.limit(per_page).offset(offset).all()
         donnees = Pagination(donnees_items, page, per_page, total)
 
         # Pré-remplissage du formulaire
@@ -169,7 +170,8 @@ def recherche(page=1):
         nom=nom_fest,
         periodes=periodes_valides,
         disciplines=disciplines_valides,
-        lieu=lieu_pre_traitement
+        lieu=lieu_pre_traitement,
+        geo_data=geo_data  # Passer les données géographiques au template
     )
 
 # Route pour effectuer une recherche rapide

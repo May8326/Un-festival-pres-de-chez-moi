@@ -27,12 +27,12 @@ class Commune(db.Model):
     geocodage_latitude_commune = db.Column(db.Float)
     geocodage_longitude_commune = db.Column(db.Float)
     code_commune = db.Column(db.Integer)
-    nom_commune = db.Column(db.Text(30))  # Assurez-vous que c'est du texte
+    nom_commune = db.Column(db.Text(30), index=True)  # Assurez-vous que c'est du texte
     code_departement = db.Column(db.Integer)
     nom_departement = db.Column(db.Text(30))
     code_region = db.Column(db.Integer)
     nom_region = db.Column(db.Text(30))
-    id_commune = db.Column(db.Integer, primary_key=True, unique=True)
+    id_commune = db.Column(db.Integer, primary_key=True, unique=True, index=True)
 
     # Spécifiez explicitement la clé étrangère utilisée
     lieux_festivals = db.relationship(
@@ -49,8 +49,8 @@ class Commune(db.Model):
 class Festival(db.Model):
     __tablename__ = 'titre_festival_data_gouv'
 
-    id_festival = db.Column(db.Integer, primary_key=True)
-    nom_festival = db.Column(db.Text)  # Assurez-vous que c'est du texte
+    id_festival = db.Column(db.Integer, primary_key=True, index=True)
+    nom_festival = db.Column(db.Text, index=True)  # Assurez-vous que c'est du texte
     
     contact = db.relationship("ContactFestival", back_populates="festival", uselist=False)
     dates = db.relationship("DateFestival", back_populates="festival", uselist=False)
@@ -88,7 +88,7 @@ class LieuFestival(db.Model):
     geocodage_xy_festival = db.Column(db.Float)
     latitude_festival = db.Column(db.Float)
     longitude_festival = db.Column(db.Float)
-    id_commune = db.Column(db.Integer, db.ForeignKey('communes.id_commune'))
+    id_commune = db.Column(db.Integer, db.ForeignKey('communes.id_commune'), index=True)
     GeoPoint_festival = db.Column(db.Text(50))
     
     festival = db.relationship("Festival", back_populates="lieu")
@@ -103,7 +103,7 @@ class TypeFestival(db.Model):
     __tablename__ = 'type_festival'
 
     id_festival = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), primary_key=True)
-    discipline_dominante_festival = db.Column(db.Text(50))
+    discipline_dominante_festival = db.Column(db.Text(50), index=True)  # Ajout d'index
     sous_categorie_spectacle_vivant = db.Column(db.Text(50))
     sous_categorie_musique = db.Column(db.Text(50))
     sous_categorie_cinema_et_audiovisuel = db.Column(db.Text(50))

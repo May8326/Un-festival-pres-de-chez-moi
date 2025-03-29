@@ -6,6 +6,13 @@
           <p>Ce site est réalisé avec l'aide du cours de Python - Flask donné dans le M2 TNAH à l'école nationale des Chartes.</p>
           <p>Les membres du groupe 4 à l'origine de ce site sont Maëlys Gioan, Fantin Le Ber, Mathieu Taybi, Bénédicte Tuza.</p>
         </div>
+        <div class="col-md-4">
+            <p>
+                <a href="{{ url_for('accueil_festivalchezmoi') }}">Accueil</a> |
+                <a href="{{ url_for('liste_favoris') }}">Favoris</a> |
+                <a href="{{ url_for('ajout_utilisateur') }}">Contact</a>
+            </p>
+        </div>
       </div>
       <hr class="my-4">
       <div class="text-center">

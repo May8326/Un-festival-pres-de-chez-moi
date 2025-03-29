@@ -1,8 +1,8 @@
 def to_bool(s:str):
     r = False 
-    if(s.lower() == "true"):
+    if(str(s).lower() == "true"):
         r = True
-    elif(s.lower() == "false"):
+    elif(str(s).lower() == "false"):
         r = False
     return r
 

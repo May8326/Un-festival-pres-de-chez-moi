@@ -1,7 +1,7 @@
 # Importation des modules nécessaires
 from app.app import app
 from flask import render_template, request, flash, redirect, url_for, abort
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, and_
 from ..app import db, login
 from ..models.users import Users
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -39,8 +39,8 @@ def recherche(page=1):
         lieu_pre_traitement = clean_arg(request.form.get("lieu", request.args.get("lieu", None)))
 
         # Validation des périodes et disciplines
-        periodes_valides = [p for p in periodes if p in ['avant', 'saison', 'apres']]
-        disciplines_valides = [d for d in disciplines if d in ['arts_visu', 'cinema', 'livre', 'musique', 'spectacle_vivant', 'autre']]
+        periodes_valides = [p for p in periodes if p in ['avant', 'saison', 'après']]
+        disciplines_valides = [d for d in disciplines if d in ['arts visuels', 'cinéma', 'livre', 'musique', 'spectacle vivant', 'autres']]
 
         # Log des paramètres
         app.logger.info(f"Recherche avec : nom={nom_fest}, periodes={periodes_valides}, disciplines={disciplines_valides}, lieu={lieu_pre_traitement}")
@@ -62,9 +62,13 @@ def recherche(page=1):
         if nom_fest:
             query_results = query_results.filter(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
         if periodes_valides:
-            query_results = query_results.filter(DateFestival.periode_principale_deroulement_festival.in_(periodes_valides))
+            # Utiliser AND pour les périodes
+            for periode in periodes_valides:
+                query_results = query_results.filter(DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%"))
         if disciplines_valides:
-            query_results = query_results.filter(TypeFestival.discipline_dominante_festival.in_(disciplines_valides))
+            # Utiliser AND pour les disciplines
+            for discipline in disciplines_valides:
+                query_results = query_results.filter(TypeFestival.discipline_dominante_festival.like(f"%{discipline}%"))
         if lieu_pre_traitement:
             query_results = query_results.filter(
                 func.replace(func.lower(Commune.nom_commune), ' ', '').like(f"%{lieu_pre_traitement.lower().replace(' ', '')}%")

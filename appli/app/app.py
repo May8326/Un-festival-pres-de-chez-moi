@@ -4,7 +4,8 @@ from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from app.config import Config
 
-app = Flask(__name__, template_folder="templates", static_folder='statics')
+# Utiliser 'static' comme endpoint et 'statics' comme dossier réel
+app = Flask(__name__, template_folder="templates", static_folder='statics', static_url_path='/static')
 app.config.from_object(Config)
 
 # Initialisez CSRFProtect

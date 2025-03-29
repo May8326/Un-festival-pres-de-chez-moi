@@ -2,45 +2,71 @@
 <html lang="fr">
 
 <head>
-    <title>Festivals en fête | {{ sous_titre }}</title>
-    {% include "partials/css.html" %}
-    {% include "partials/metadata.html" %}
-    {% include "partials/js.html" %}
-    {% block js %}{% endblock %}
-    {% block css %}{% endblock %}
+
+  <meta charset="UTF-8">
+  <title>Festivals en fête</title>
+  <link rel="stylesheet" href="partials/css.html" />
+  {% include "partials/css.html" %}
+  {% include "partials/metadata.html" %}
+  {% include "partials/js.html" %}
+
+  {% block js %}{%endblock%}
+  {% block css %}{%endblock%}
+
 </head>
 
 <body>
-    <!-- Inclure le header -->
-    {% include "partials/header.html" %}
+  <div class="container">
+    <header class="">
+      {% include "partials/header.html" %}
+    </header>
+    <main>
+      <div class="container bg-custom">
 
-    <!-- Contenu principal -->
-    <div class="container">
+        <div class="img-gallery">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_arts_visuels.jpg') }}" alt="Photo 1">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_cinema.jpg') }}" alt="Photo 2">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_litterature.jpg') }}" alt="Photo 3">
+        </div>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <div class="row">
-            <div class="col">
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
-                {% endfor %}
-            </div>
+          <div class="col">
+            {% for category, message in messages %}
+            <div class="alert alert-{{category}}" role="alert">{{ message }}</div>
+            {% endfor %}
+          </div>
+
         </div>
         {% endif %}
         {% endwith %}
         <div class="row">
-            <div class="col">
-                {% block body %}{% endblock %}
-            </div>
+
+          <div class="col">
+            {% block body %}{% endblock %}
+            <p> les résultats</p>
+            <table>
+              <tbody>
+                {{donnees}}
+              </tbody>
+            </table>
+          </div>
         </div>
-    </div>
 
-    <!-- Inclure le footer -->
-    {% include "partials/footer.html" %}
+        <div class="img-gallery">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_musique.jpg') }}" alt="Photo 4">
+          <img src="{{ url_for('statics', filename='templates/statics/festival_spectacle_vivant.jpg') }}" alt="Photo 5">
+        </div>
 
-    <!-- Scripts Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
-        crossorigin="anonymous"></script>
-</body>
+      </div>
+    </main>
+    <footer>
+      {% include "partials/footer.html" %}
+    </footer>
+  </div>
+
+  <body>
+
 
 </html>

@@ -10,6 +10,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from ..models.database import Commune, Festival, DateFestival, LieuFestival, TypeFestival, relation_user_favori
 from ..models.formulaires import Recherche
 from ..utils.transformations import clean_arg
+from ..utils.proximite import proximite
 from ..utils.pagination import Pagination, args_to_dict
 from sqlalchemy.dialects import sqlite  # Import pour compiler la requête SQL avec les valeurs réelles
 
@@ -91,25 +92,34 @@ def recherche(page=1):
             for discipline in disciplines_valides:
                 discipline_filters.append(TypeFestival.discipline_dominante_festival.like(f"%{discipline}%"))
                 app.logger.info(f"Filtre préparé pour discipline: {discipline}")
+                print(discipline_filters)
             
             if discipline_filters:
                 query_results = query_results.filter(or_(*discipline_filters))
                 app.logger.info(f"Filtres de discipline appliqués: {discipline_filters}")
                 
         if lieu_pre_traitement:
-            query_results = query_results.filter(
-                func.replace(func.lower(Commune.nom_commune), ' ', '').like(f"%{lieu_pre_traitement.lower().replace(' ', '')}%")
-            )
-            app.logger.info(f"Filtre appliqué pour lieu: {lieu_pre_traitement}")
+            lieux_post_traitement = proximite(lieu_pre_traitement, 20)
+            app.logger.info(f'filtre préparé pour le lieu : {lieu_pre_traitement}')
+            lieux_filter = []
+            print(lieux_post_traitement)
+            for i in lieux_post_traitement:
+                lieux_filter.append(Commune.nom_commune.like(f"{i}"))
+            if lieux_filter:
+                query_results= query_results.filter(or_(*lieux_filter))
+            # query_results = query_results.filter(
+            #     func.replace(func.lower(Commune.nom_commune), ' ', '').like(f"%{lieu_pre_traitement.lower().replace(' ', '')}%")
+            # )
+                app.logger.info(f"Filtre appliqué pour lieu: {lieu_pre_traitement}")
 
         if form.discipline.data:
             query_results = query_results.filter(
-                and_(*[TypeFestival.discipline_dominante_festival.ilike(f"%{discipline}%") for discipline in form.discipline.data])
+                or_(*[TypeFestival.discipline_dominante_festival.ilike(f"%{discipline}%") for discipline in form.discipline.data])
             )
 
         if form.periode.data:
             query_results = query_results.filter(
-                and_(*[DateFestival.periode_principale_deroulement_festival.ilike(f"%{periode}%") for periode in form.periode.data])
+                or_(*[DateFestival.periode_principale_deroulement_festival.ilike(f"%{periode}%") for periode in form.periode.data])
             )
         if form.nom.data:
             query_results = query_results.filter(

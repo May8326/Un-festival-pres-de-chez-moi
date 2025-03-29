@@ -11,7 +11,7 @@ def proximite(nom_ville, dist):
     """
     try:
         # Récupérer les coordonnées de la commune de départ
-        commune_depart = Commune.query.filter(Commune.nom_commune.ilike(f"%{nom_ville}%")).first()
+        commune_depart = Commune.query.filter(Commune.nom_commune.like(f"{nom_ville}")).first()
         if not commune_depart:
             print(f"Aucune commune trouvée pour le nom : {nom_ville}")
             return []
@@ -25,9 +25,10 @@ def proximite(nom_ville, dist):
 
         for commune in communes:
             coord_commune = (commune.geocodage_latitude_commune, commune.geocodage_longitude_commune)
-            distance = geodesic(coord_depart, coord_commune).kilometers
-
-            if distance <= float(dist):
+    
+            distance = geodesic(coord_depart, coord_commune)
+            # print(commune.nom_commune, distance)
+            if distance < float(dist):
                 communes_proches.append(commune.nom_commune)
 
         print(f"Communes proches trouvées : {communes_proches}")

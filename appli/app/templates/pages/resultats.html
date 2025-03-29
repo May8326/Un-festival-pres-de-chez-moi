@@ -21,7 +21,7 @@
         <tbody>
             {% for resultat in donnees.items %}
             <tr>
-                <td>{{ resultat[1] or "-" }}</td> <!-- Supprimé le lien -->
+                <td><a href="/festivalchezmoi/item/festival/{{resultat.id_festival}}">{{ resultat[1] or "-" }}</a></td> <!-- Supprimé le lien -->
                 <td>{{ resultat[2] or "-" }}</td>
                 <td>{{ resultat[3] or "-" }}</td>
                 <td>{{ resultat[4] or "-" }}</td>

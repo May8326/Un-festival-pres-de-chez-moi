@@ -13,7 +13,8 @@ festival_monuments_geopoint = db.Table(
 # Table de relation many-to-many pour la gestion des favoris
 relation_user_favori = db.Table(
     'relation_user_favori', db.Model.metadata,
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('id_relation', db.Integer, primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), nullable=False),
     db.Column('id_festival', db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), nullable=True),  # Permet NULL
     db.Column('id_monument_historique', db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), nullable=True),  # Permet NULL
     db.Column('id_commune', db.Integer, db.ForeignKey('communes.id_commune'), nullable=True)  # Permet NULL

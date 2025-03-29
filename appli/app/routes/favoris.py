@@ -5,6 +5,7 @@ from ..models.database import Festival, MonumentHistorique, Commune, relation_us
 from sqlalchemy import and_, func
 from ..models.formulaires import AjoutFavori, ModificationFavori, SuppressionFavori
 from ..models.users import Users
+from random import random
 
 
 @app.route("/festivalchezmoi/insertion/favori", methods=['POST'])
@@ -60,9 +61,12 @@ def insertion_favori():
         if favori_existant:
             flash("Ce favori est déjà enregistré.", "warning")
         else:
+            #donner une PK à la relation
+            relation_id= int(str(user_id)+str(festival_id)+str(random.radint(1,100)))
             # Ajouter le favori dans la table relation_user_favori
             db.session.execute(
                 relation_user_favori.insert().values(
+                    id_relation = relation_id,
                     user_id=user_id,
                     id_festival=festival_id,
                     id_monument_historique=monument_id,

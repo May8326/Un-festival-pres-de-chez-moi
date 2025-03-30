@@ -1,7 +1,14 @@
 {% extends "partials/conteneur.html" %}
 
+{% block carousel %}
+<!-- Le carrousel est intentionnellement supprimé sur cette page -->
+{% endblock %}
+
 {% block body %}
 <div class="container">
+
+    <img src="{{ url_for('static', filename='images/connexion.jpg') }}" class="d-block w-100" alt="connexion" style="height: 500px; width: 100px; object-fit: cover">
+    
     <h1>Connexion</h1>
     <form action="{{ url_for('connexion') }}" method="post">
         {{ form.hidden_tag() }}

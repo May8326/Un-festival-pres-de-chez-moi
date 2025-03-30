@@ -1,8 +1,14 @@
 {% extends "partials/conteneur.html" %}
 
+{% block carousel %}
+<!-- Le carrousel est intentionnellement supprimé sur cette page -->
+{% endblock %}
+
 {% block body %}
 
 <div class="container">
+
+    <img src="{{ url_for('static', filename='images/nouvel-utilisateur.jpg') }}" class="d-block w-100" alt="nouvel-utilisateur" style="height: 500px; width: 100px; object-fit: cover">
 
     <div class="row">
         <div class="col-sm-2"></div>

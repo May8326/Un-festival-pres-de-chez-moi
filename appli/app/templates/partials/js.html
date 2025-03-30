@@ -8,23 +8,42 @@
 <!-- Autocomplétion -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const searchInput = document.querySelector("#nom_favori");
-    const suggestionsBox = document.querySelector("#suggestions");
-    let activeIndex = -1; // Index actif pour la navigation au clavier
+    // Fonction générique d'autocomplétion
+    function setupAutocomplete(inputSelector, suggestionsBoxId, type) {
+        const searchInput = document.querySelector(inputSelector);
+        if (!searchInput) return;
+        
+        // Créer la boîte de suggestions si elle n'existe pas déjà
+        let suggestionsBox = document.getElementById(suggestionsBoxId);
+        if (!suggestionsBox) {
+            suggestionsBox = document.createElement('div');
+            suggestionsBox.id = suggestionsBoxId;
+            suggestionsBox.className = 'suggestions-box';
+            suggestionsBox.style.position = 'absolute';
+            suggestionsBox.style.display = 'none';
+            suggestionsBox.style.zIndex = '1000';
+            suggestionsBox.style.backgroundColor = 'white';
+            suggestionsBox.style.border = '1px solid #ddd';
+            suggestionsBox.style.borderTop = 'none';
+            suggestionsBox.style.maxHeight = '200px';
+            suggestionsBox.style.overflowY = 'auto';
+            suggestionsBox.style.width = '100%';
+            document.body.appendChild(suggestionsBox);
+        }
+        
+        let activeIndex = -1; // Index actif pour la navigation au clavier
 
-    if (searchInput) {
         // Positionner dynamiquement la boîte de suggestions sous l'élément d'entrée
         function updateSuggestionsBoxPosition() {
             const rect = searchInput.getBoundingClientRect();
-            suggestionsBox.style.top = `${rect.bottom}px`; // Positionner juste sous l'élément
-            suggestionsBox.style.left = `${rect.left}px`; // Aligner à gauche de l'élément
-            suggestionsBox.style.width = `${rect.width}px`; // Ajuster la largeur à celle de l'élément
+            suggestionsBox.style.top = `${rect.bottom + window.scrollY}px`;
+            suggestionsBox.style.left = `${rect.left + window.scrollX}px`;
+            suggestionsBox.style.width = `${rect.width}px`;
         }
 
         // Mettre à jour la position lors de l'entrée de texte
         searchInput.addEventListener("input", function () {
             const query = searchInput.value.trim();
-            const type = document.querySelector("#type_favori").value; // Récupérer le type sélectionné
 
             if (query.length >= 1) {
                 fetch(`/festivalchezmoi/autocomplete?q=${query}&type=${type}`)
@@ -32,15 +51,27 @@ document.addEventListener("DOMContentLoaded", function () {
                     .then(data => {
                         suggestionsBox.innerHTML = ""; // Effacer les suggestions précédentes
                         activeIndex = -1; // Réinitialiser l'index actif
-                        if (data.results) {
+                        if (data.results && data.results.length > 0) {
                             updateSuggestionsBoxPosition(); // Mettre à jour la position
                             suggestionsBox.style.display = "block"; // Afficher la boîte
 
                             data.results.forEach((result, index) => {
                                 const suggestion = document.createElement("div");
                                 suggestion.className = "suggestion-item";
+                                suggestion.style.padding = "8px 12px";
+                                suggestion.style.cursor = "pointer";
+                                suggestion.style.borderBottom = "1px solid #eee";
                                 suggestion.textContent = result;
                                 suggestion.setAttribute("data-index", index);
+                                
+                                suggestion.addEventListener("mouseover", function() {
+                                    this.style.backgroundColor = "#f8f9fa";
+                                });
+                                
+                                suggestion.addEventListener("mouseout", function() {
+                                    this.style.backgroundColor = "";
+                                });
+                                
                                 suggestion.addEventListener("click", function () {
                                     searchInput.value = result; // Remplir le champ avec la suggestion
                                     suggestionsBox.innerHTML = ""; // Effacer les suggestions
@@ -48,6 +79,8 @@ document.addEventListener("DOMContentLoaded", function () {
                                 });
                                 suggestionsBox.appendChild(suggestion);
                             });
+                        } else {
+                            suggestionsBox.style.display = "none"; // Masquer la boîte s'il n'y a pas de résultats
                         }
                     })
                     .catch(error => console.error("Erreur lors de l'autocomplétion :", error));
@@ -85,6 +118,20 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
+        // Mettre à jour l'élément actif
+        function updateActiveItem(items) {
+            items.forEach((item, index) => {
+                if (index === activeIndex) {
+                    item.style.backgroundColor = "#007bff";
+                    item.style.color = "white";
+                    item.scrollIntoView({ block: "nearest" }); // Faire défiler jusqu'à l'élément actif
+                } else {
+                    item.style.backgroundColor = "";
+                    item.style.color = "";
+                }
+            });
+        }
+
         // Masquer la boîte de suggestions lorsqu'on clique en dehors
         document.addEventListener("click", function (event) {
             if (!suggestionsBox.contains(event.target) && event.target !== searchInput) {
@@ -96,18 +143,20 @@ document.addEventListener("DOMContentLoaded", function () {
         // Mettre à jour la position de la boîte lors du défilement ou du redimensionnement
         window.addEventListener("scroll", updateSuggestionsBoxPosition);
         window.addEventListener("resize", updateSuggestionsBoxPosition);
-
-        // Mettre à jour l'élément actif
-        function updateActiveItem(items) {
-            items.forEach((item, index) => {
-                if (index === activeIndex) {
-                    item.classList.add("active");
-                    item.scrollIntoView({ block: "nearest" }); // Faire défiler jusqu'à l'élément actif
-                } else {
-                    item.classList.remove("active");
-                }
-            });
-        }
     }
+
+    // Configurer l'autocomplétion pour le champ nom_favori (existant)
+    setupAutocomplete("#nom_favori", "suggestions-favori", "festival");
+    
+    // Configurer l'autocomplétion pour le champ lieu dans le formulaire de recherche
+    setupAutocomplete("[name='lieu']", "suggestions-lieu", "commune");
 });
 </script>
+
+<!-- Style pour l'autocomplétion -->
+<style>
+.suggestion-item.active {
+    background-color: #007bff !important;
+    color: white !important;
+}
+</style>

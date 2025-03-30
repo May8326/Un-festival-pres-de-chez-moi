@@ -297,60 +297,9 @@ def suppression_favori():
     # Rediriger vers la liste des favoris
     return redirect(url_for("liste_favoris"))
 
-@app.route("/festivalchezmoi/debug_favoris")
-@login_required
-def debug_favoris():
-    try:
-        # Récupérer les favoris de l'utilisateur connecté
-        favoris = db.session.query(relation_user_favori).filter(
-            relation_user_favori.c.user_id == current_user.id
-        ).all()
-
-        # Préparer les données brutes pour le débogage
-        debug_data = []
-        for favori in favoris:
-            favori_data = {
-                "user_id": favori.user_id,
-                "id_festival": favori.id_festival,
-                "id_monument_historique": favori.id_monument_historique,
-                "id_commune": favori.id_commune
-            }
-
-            # Ajouter les détails des relations
-            if favori.id_festival:
-                festival = Festival.query.get(favori.id_festival)
-                favori_data["festival"] = {
-                    "nom": festival.nom_festival if festival else "Non trouvé",
-                    "lieu": festival.lieu.commune.nom_commune if festival and festival.lieu and festival.lieu.commune else "N/A",
-                    "date": festival.dates.periode_principale_deroulement_festival if festival and festival.dates else "N/A",
-                    "contact": festival.contact.site_internet_festival if festival and festival.contact else "N/A"
-                }
-            if favori.id_monument_historique:
-                monument = MonumentHistorique.query.get(favori.id_monument_historique)
-                favori_data["monument"] = {
-                    "nom": monument.nom_monument if monument else "Non trouvé",
-                    "lieu": monument.commune.nom_commune if monument and monument.commune else "N/A",
-                    "date": monument.dates.datation_edifice if monument and monument.dates else "N/A",
-                    "contact": monument.contact.lien_internet_externe if monument and monument.contact else "N/A"
-                }
-            if favori.id_commune:
-                commune = Commune.query.get(favori.id_commune)
-                favori_data["commune"] = {
-                    "nom": commune.nom_commune if commune else "Non trouvé",
-                    "departement": commune.nom_departement if commune else "N/A"
-                }
-
-            debug_data.append(favori_data)
-
-        # Retourner les données brutes sous forme de JSON
-        return {"debug_favoris": debug_data}, 200
-    except Exception as e:
-        app.logger.error(f"Erreur dans /debug_favoris : {str(e)}", exc_info=True)
-        return {"error": str(e)}, 500
-
-@app.route("/festivalchezmoi/test_liste_favoris")
-def test_liste_favoris():
-    return render_template("pages/liste_favoris.html", favoris_festivals=[], favoris_monuments=[], favoris_communes=[])
+#@app.route("/festivalchezmoi/test_liste_favoris")
+#def test_liste_favoris():
+#    return render_template("pages/liste_favoris.html", favoris_festivals=[], favoris_monuments=[], favoris_communes=[])
 
 @app.route("/festivalchezmoi/autocomplete", methods=["GET"])
 def autocomplete():

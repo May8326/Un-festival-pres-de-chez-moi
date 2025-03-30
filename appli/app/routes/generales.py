@@ -67,14 +67,53 @@ def recherche(page=1):
         # Application des filtres de recherche
         if nom_fest:
             query_results = query_results.filter(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
+            app.logger.info(f"Filtre appliqué pour nom: {nom_fest}")
+        
         if periodes_valides:
-            query_results = query_results.filter(or_(*[DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%") for periode in periodes_valides]))
+            periode_filters = []
+            for periode in periodes_valides:
+                periode_filters.append(DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%"))
+            
+            if periode_filters:
+                query_results = query_results.filter(or_(*periode_filters))
+                app.logger.info(f"Filtres de période appliqués: {periode_filters}")
+        
         if disciplines_valides:
-            query_results = query_results.filter(or_(*[TypeFestival.discipline_dominante_festival.like(f"%{discipline}%") for discipline in disciplines_valides]))
+            discipline_filters = []
+            for discipline in disciplines_valides:
+                discipline_filters.append(TypeFestival.discipline_dominante_festival.like(f"%{discipline}%"))
+            
+            if discipline_filters:
+                query_results = query_results.filter(or_(*discipline_filters))
+                app.logger.info(f"Filtres de discipline appliqués: {discipline_filters}")
+        
         if lieu_pre_traitement:
-            lieux_post_traitement = proximite(lieu_pre_traitement, 20)  # Recherche des lieux proches
-            query_results = query_results.filter(or_(*[Commune.nom_commune.like(f"{lieu}") for lieu in lieux_post_traitement]))
-
+            lieux_post_traitement = proximite(lieu_pre_traitement, 20)
+            app.logger.info(f'Lieux trouvés: {lieux_post_traitement}')
+            
+            if not lieux_post_traitement:
+                flash(f"Aucun lieu trouvé correspondant à '{lieu_pre_traitement}'.", "warning")
+                return render_template(
+                    "/pages/resultats.html",
+                    form=form,
+                    donnees=[],
+                    nom=nom_fest,
+                    periodes=periodes_valides,
+                    disciplines=disciplines_valides,
+                    lieu=lieu_pre_traitement,
+                    festivals_coords=[],
+                    monuments_coords=[]
+                )
+            
+            lieux_filter = []
+            for lieu in lieux_post_traitement:
+                # Utiliser %{lieu}% pour une correspondance partielle au lieu de {lieu} pour une correspondance exacte
+                lieux_filter.append(Commune.nom_commune.like(f"%{lieu}%"))
+            
+            if lieux_filter:
+                query_results = query_results.filter(or_(*lieux_filter))
+                app.logger.info(f"Filtre appliqué pour lieu: {lieux_post_traitement}")
+        
         # Pagination des résultats
         per_page = app.config["RESULTATS_PER_PAGE"]
         all_results = query_results.all()

@@ -39,13 +39,15 @@ def recherche(page=1):
     try:
         # Récupération et nettoyage des paramètres de recherche
         nom_fest = clean_arg(request.form.get("nom", request.args.get("nom", None)))
+    
         periodes = request.form.getlist("periode") or request.args.getlist("periode")
+        
         disciplines = request.form.getlist("discipline") or request.args.getlist("discipline")
         lieu_pre_traitement = clean_arg(request.form.get("lieu", request.args.get("lieu", None)))
-
+        
         # Validation des périodes et disciplines pour correspondre aux valeurs en base de données
-        periodes_valides = [p for p in periodes if p in ['Avant-Saison (1 Janvier-20 Juin)', 'Saison (21 Juin-5 Septembre)', 'Après-saison (6 septembre - 31 décembre)']]
-        disciplines_valides = [d for d in disciplines if d in ['arts visuels', 'cinéma', 'livre', 'musique', 'spectacle vivant', 'autre']]
+        periodes_valides = [p for p in periodes if p in ['Avant-saison (1er janvier - 20 juin)', 'Saison (21 Juin - 5 Septembre)', 'Après-saison (6 septembre - 31 décembre)']]
+        disciplines_valides = [d for d in disciplines if d in ['Arts visuels, art numériques', 'Cinéma, audiovisuel', 'Livre, littérature', 'Musique', 'Spectacle vivant', 'Pluridisciplinaire']]
 
         # Construction de la requête SQLAlchemy pour récupérer les festivals
         query_results = db.session.query(
@@ -68,9 +70,27 @@ def recherche(page=1):
         if nom_fest:
             query_results = query_results.filter(func.lower(Festival.nom_festival).like(f"%{nom_fest.lower()}%"))
         if periodes_valides:
-            query_results = query_results.filter(or_(*[DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%") for periode in periodes_valides]))
+            periode_filters = []
+            for periode in periodes_valides:
+                    periode_filters.append(DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%"))
+                    app.logger.info(f"Filtre préparé pour période: {periode}")
+            
+            if periode_filters:
+                query_results = query_results.filter(or_(*periode_filters))
+                app.logger.info(f"Filtres de période appliqués: {periode_filters}")
+            
+            # query_results = query_results.filter(or_(*[DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%") for periode in periodes_valides]))
         if disciplines_valides:
-            query_results = query_results.filter(or_(*[TypeFestival.discipline_dominante_festival.like(f"%{discipline}%") for discipline in disciplines_valides]))
+            discipline_filters = []
+            for discipline in disciplines_valides:
+                    discipline_filters.append(TypeFestival.discipline_dominante_festival.like(f"%{discipline}%"))
+                    app.logger.info(f"Filtre préparé pour discipline: {discipline}")
+            
+            if discipline_filters:
+                query_results = query_results.filter(or_(*discipline_filters))
+                app.logger.info(f"Filtres de discipline appliqués: {discipline_filters}")
+            
+            # query_results = query_results.filter(or_(*[TypeFestival.discipline_dominante_festival.like(f"%{discipline}%") for discipline in disciplines_valides]))
         # if lieu_pre_traitement:
         #     lieux_post_traitement = proximite(lieu_pre_traitement, 20)  # Recherche des lieux proches
         #     query_results = query_results.filter(or_(*[Commune.nom_commune.like(f"{lieu}") for lieu in lieux_post_traitement]))
@@ -90,6 +110,22 @@ def recherche(page=1):
             monuments_coords=[]
         )
             query_results = query_results.filter(or_(*[Commune.nom_commune.like(f"{lieu}") for lieu in lieux_post_traitement]))
+        if form.discipline.data:
+            query_results = query_results.filter(
+                and_(*[TypeFestival.discipline_dominante_festival.ilike(f"%{discipline}%") for discipline in form.discipline.data])
+            )
+
+        if form.periode.data:
+            query_results = query_results.filter(
+                and_(*[DateFestival.periode_principale_deroulement_festival.ilike(f"%{periode}%") for periode in form.periode.data])
+            )
+        if form.nom.data:
+            query_results = query_results.filter(
+                and_(*[Festival.nom_festival.ilike(f"%{nom}%") for nom in form.nom.data])
+            )
+        if form.lieu.data:
+            query_results = query_results.filter(
+                and_(*[Commune.nom_commune.ilike(f"%{lieu}%") for lieu in form.lieu.data]))
         # Pagination des résultats
         per_page = app.config["RESULTATS_PER_PAGE"]
         all_results = query_results.all()
@@ -159,23 +195,23 @@ def recherche(page=1):
     )
 
 # Route pour effectuer une recherche rapide
-@app.route("/festivalchezmoi/recherche_rapide")
-@app.route("/festivalchezmoi/recherche_rapide/resultat")
-def recherche_rapide():
-    chaine = request.args.get("chaine", None)  # Récupération de la chaîne de recherche
-    try:
-        page = request.args.get("page", 1, type=int)  # Récupération de la page
-        if chaine:
-            # Recherche dans les ressources et cartes associées aux festivals
-            resources = db.session.execute("""...""").fetchall()
-            maps = db.session.execute("""...""").fetchall()
-            resultats = Festival.query.filter(...).paginate(page=page, per_page=app.config["PAYS_PER_PAGE"])
-        else:
-            resultats = None
-        return render_template("pages/resultats_recherche_pays.html", sous_titre="Recherche | " + chaine, donnees=resultats, requete=chaine)
-    except Exception as e:
-        print(e)
-        abort(500)
+# @app.route("/festivalchezmoi/recherche_rapide")
+# @app.route("/festivalchezmoi/recherche_rapide/resultat")
+# def recherche_rapide():
+#     chaine = request.args.get("chaine", None)  # Récupération de la chaîne de recherche
+#     try:
+#         page = request.args.get("page", 1, type=int)  # Récupération de la page
+#         if chaine:
+#             # Recherche dans les ressources et cartes associées aux festivals
+#             resources = db.session.execute("""...""").fetchall()
+#             maps = db.session.execute("""...""").fetchall()
+#             resultats = Festival.query.filter(...).paginate(page=page, per_page=app.config["PAYS_PER_PAGE"])
+#         else:
+#             resultats = None
+#         return render_template("pages/resultats_recherche_pays.html", sous_titre="Recherche | " + chaine, donnees=resultats, requete=chaine)
+#     except Exception as e:
+#         print(e)
+#         abort(500)
 
 # Route pour déboguer les données en affichant un échantillon des tables
 @app.route("/festivalchezmoi/debug_donnees")

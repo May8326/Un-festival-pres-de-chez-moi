@@ -59,18 +59,20 @@ class Recherche(FlaskForm):
 # correction proposée par Copilot
 class Recherche(FlaskForm):
     nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max=50)])
-    periode = SelectMultipleField("Période", choices=[
-        ('Avant-Saison (1 Janvier-20 Juin)', 'Avant-Saison (1 Janvier-20 Juin)'),
-        ('Saison (21 Juin-5 Septembre)', 'Saison (21 Juin-5 Septembre)'),
-        ('Après-saison (6 septembre - 31 décembre)', 'Après-saison (6 septembre - 31 décembre)')
+    periode = SelectField("Période", choices=[
+        ('Avant-Saison (1 Janvier - 20 Juin)', 'Avant-Saison (1 Janvier-20 Juin)'),
+        ('Saison (21 Juin - 5 Septembre)', 'Saison (21 Juin-5 Septembre)'),
+        ('Après-saison (6 septembre - 31 décembre)', 'Après-saison (6 septembre - 31 décembre)'),
+        ('',''),
     ], validators=[Optional()])
-    discipline = SelectMultipleField('Discipline', choices=[
+    discipline = SelectField('Discipline', choices=[
         ('Arts visuels, arts numériques', 'Arts visuels, arts numériques'),
         ("Cinéma, audiovisuel", "Cinéma, audiovisuel"),
         ("Livre, littérature", "Livre, littérature"),
         ("Musique", "Musique"),
         ("Spectacle vivant", "Spectacle vivant"),
-        ("Autre", "Autres")
+        ("Autre", "Pluridisciplinaire"),
+        ('',''),
     ], validators=[Optional()])
     lieu = StringField('Lieu', validators=[Optional()])
     dist = FloatField('Distance maximum', validators=[Optional()])

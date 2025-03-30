@@ -18,7 +18,7 @@ def proximite(nom_ville, dist):
             return []
 
         coord_depart = (commune_depart.geocodage_latitude_commune, commune_depart.geocodage_longitude_commune)
-        print(f"Coordonnées de la commune de départ ({nom_ville}) : {coord_depart}")
+        # print(f"Coordonnées de la commune de départ ({nom_ville}) : {coord_depart}")
 
         # Trouver toutes les communes
         communes = Commune.query.all()

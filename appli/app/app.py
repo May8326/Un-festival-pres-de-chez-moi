@@ -15,10 +15,10 @@ db = SQLAlchemy(app)
 login = LoginManager(app)
 
 # Définissez les configurations de login si nécessaire
-login.login_view = 'login'  # assurez-vous que cette route existe
+login.login_view = 'login' 
 
 # Importez les routes APRÈS avoir créé db et login
-from .routes import favoris, generales, users, errors, item  # Ajoutez errors ici
+from .routes import favoris, generales, users, errors, item 
 
 # Importez TOUS les modèles
 from app.models import *

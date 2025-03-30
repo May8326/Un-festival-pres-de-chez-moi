@@ -1,5 +1,72 @@
 from app.app import db
-
+"""
+Structure de la base de données :
+Cette base de données est conçue pour gérer des informations sur les festivals, les monuments historiques et leurs relations avec les communes et les utilisateurs. Voici un aperçu de la structure :
+1. Commune :
+    - Représente une commune géographique avec des attributs tels que le nom, le département, la région et la géolocalisation.
+    - Relations :
+      - lieux_festivals : Lien vers les festivals organisés dans la commune.
+      - monuments : Lien vers les monuments historiques situés dans la commune.
+2. Festival :
+    - Représente un festival avec des attributs tels que le nom et des relations avec ses contacts, dates, emplacement, type et monuments associés.
+    - Relations :
+      - contact : Informations de contact du festival.
+      - dates : Informations liées aux dates du festival.
+      - lieu : Détails sur l'emplacement du festival.
+      - type : Type et catégorie du festival.
+      - monuments : Relation many-to-many avec les monuments historiques.
+3. ContactFestival :
+    - Stocke les informations de contact d'un festival, telles que le site web et l'email.
+    - Relation :
+      - festival : Lien vers le festival associé.
+4. DateFestival :
+    - Stocke les informations liées aux dates d'un festival, telles que l'année de création et la période principale de déroulement.
+    - Relation :
+      - festival : Lien vers le festival associé.
+5. LieuFestival :
+    - Représente l'emplacement d'un festival, y compris la géolocalisation et les détails de l'adresse.
+    - Relations :
+      - festival : Lien vers le festival associé.
+      - commune : Lien vers la commune où le festival est organisé.
+6. TypeFestival :
+    - Représente le type et les sous-catégories d'un festival, comme la discipline dominante et les catégories spécifiques.
+    - Relation :
+      - festival : Lien vers le festival associé.
+7. MonumentHistorique :
+    - Représente un monument historique avec des attributs tels que le nom, l'adresse, la géolocalisation et la commune associée.
+    - Relations :
+      - aspects_juridiques : Aspects juridiques du monument.
+      - commune : Lien vers la commune où le monument est situé.
+      - festivals : Relation many-to-many avec les festivals.
+      - contact : Informations de contact du monument.
+      - dates : Informations liées aux dates du monument.
+      - personnes : Personnes associées au monument.
+      - types : Type et classification du monument.
+8. AspectJuridiqueMonumentHistorique :
+    - Stocke les informations juridiques sur un monument historique, comme son statut juridique.
+    - Relation :
+      - monument : Lien vers le monument associé.
+9. ContactMonumentHistorique :
+    - Stocke les informations de contact d'un monument historique, comme des liens externes.
+    - Relation :
+      - monument : Lien vers le monument associé.
+10. DateMonumentHistorique :
+     - Stocke les informations liées aux dates d'un monument historique, comme les dates de construction et de protection.
+     - Relation :
+        - monument : Lien vers le monument associé.
+11. PersonneMonumentHistorique :
+     - Représente les personnes associées à un monument historique, comme les auteurs ou les individus liés.
+     - Relation :
+        - monument : Lien vers le monument associé.
+12. TypeMonumentHistorique :
+     - Représente le type et la classification d'un monument historique, comme son domaine et sa dénomination.
+     - Relation :
+        - monument : Lien vers le monument associé.
+13. festival_monuments_geopoint :
+     - Une table de relation many-to-many reliant les festivals et les monuments historiques, avec des attributs supplémentaires comme la distance et les points de géolocalisation.
+14. relation_user_favori :
+     - Une table de relation many-to-many pour gérer les favoris des utilisateurs, reliant les utilisateurs aux festivals, monuments ou communes.
+"""
 # Déclaration des tables de relation
 festival_monuments_geopoint = db.Table(
     "festival_monuments_geopoint", db.Model.metadata,
@@ -194,17 +261,3 @@ class TypeMonumentHistorique(db.Model):
     precision_sur_protection_edifice = db.Column(db.Text(50))
     
     monument = db.relationship("MonumentHistorique", back_populates="types")
-
-"""
-class Favoris(db.Model):
-    __tablename__ = 'favoris'
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.User.id'), nullable=False)
-    festival_id = db.Column(db.Integer, db.ForeignKey('titre_festival_data_gouv.id_festival'), nullable=True)
-    monument_id = db.Column(db.Integer, db.ForeignKey('lieu_monument_historique.id_monument_historique'), nullable=True)
-
-    user = db.relationship("User", back_populates="favoris")
-    festival = db.relationship("Festival", back_populates="favoris")
-    monument = db.relationship("MonumentHistorique", back_populates="favoris")
-"""

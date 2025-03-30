@@ -43,20 +43,7 @@ class Connexion(FlaskForm):
     prenom = StringField("Prénom", validators=[DataRequired(), Length(min=2, max=50)])
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(min=6)])
     submit = SubmitField('Se connecter')
-#tentative de formulaire multifacette pr trouver un festival
 
-"""
-class Recherche(FlaskForm):
-    nom = StringField("nom", validators=[Optional()])
-    #potentiellement transformer les selectfield qui suivent en radiofield selon comment ça se présente au final
-    periode = SelectField("Période", choices=[('avant','Avant-Saison (1 Janvier-20 Juin)'),('saison','Saison (21 Juin-5 Septembre)'),('apres','Après-saison (6 septembre - 31 décembre)')], validators=[DataRequired(), Length(min=5)])
-    discipline = SelectField('Discipline', choices =[('arts_visu','Arts visuels, arts numériques'),("cinema","Cinéma, audiovisuel"), ("livres","Livre, Littérature"),("musique","Musique"),("spectacle_vivant","Spectacle vivant"),("autre","Autres"), ("tout", Tout")], validators=[Optional()])
-    lieu = StringField('Lieu', validators=[Optional()])
-    if lieu:
-        dist=FloatField('Distance maximum', validators=[DataRequired()])
-"""
-
-# correction proposée par Copilot
 class Recherche(FlaskForm):
     nom = StringField("Nom du festival", validators=[Optional(), Length(min=2, max=50)])
     periode = SelectField("Période", choices=[

@@ -1,4 +1,33 @@
 class Pagination:
+    """
+    Une classe utilitaire pour gérer la pagination des éléments.
+
+    Attributs :
+        items (list) : La liste des éléments à paginer.
+        page (int) : Le numéro de la page actuelle (index basé sur 1).
+        per_page (int) : Le nombre d'éléments par page.
+        total (int) : Le nombre total d'éléments.
+
+    Propriétés :
+        has_prev (bool) : Indique s'il existe une page précédente.
+        has_next (bool) : Indique s'il existe une page suivante.
+        prev_num (int ou None) : Le numéro de la page précédente, ou None s'il n'y a pas de page précédente.
+        next_num (int ou None) : Le numéro de la page suivante, ou None s'il n'y a pas de page suivante.
+
+    Méthodes :
+        iter_pages(left_edge=2, left_current=3, right_current=3, right_edge=2):
+            Génère un itérateur de numéros de pages pour l'affichage de la pagination.
+            Inclut des ellipses (None) là où il y a des écarts dans la plage de pages.
+
+            Arguments :
+                left_edge (int) : Nombre de pages à afficher au début de la plage.
+                left_current (int) : Nombre de pages à afficher à gauche de la page actuelle.
+                right_current (int) : Nombre de pages à afficher à droite de la page actuelle.
+                right_edge (int) : Nombre de pages à afficher à la fin de la plage.
+
+            Génère :
+                int ou None : Numéros de pages ou None.
+    """
     def __init__(self, items, page, per_page, total):
         self.items = items
         self.page = page

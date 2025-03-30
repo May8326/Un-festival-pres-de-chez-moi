@@ -229,36 +229,36 @@ def recherche(page=1):
 #         abort(500)
 
 # Route pour déboguer les données en affichant un échantillon des tables
-@app.route("/festivalchezmoi/debug_donnees")
-def debug_donnees():
-    try:
-        # Récupération des données des tables principales
-        festivals = db.session.query(Festival).limit(15).all()
-        dates = db.session.query(DateFestival).limit(15).all()
-        types = db.session.query(TypeFestival).limit(15).all()
-        lieux = db.session.query(LieuFestival).limit(15).all()
-        communes = db.session.query(Commune).limit(15).all()
+# @app.route("/festivalchezmoi/debug_donnees")
+# def debug_donnees():
+#     try:
+#         # Récupération des données des tables principales
+#         festivals = db.session.query(Festival).limit(15).all()
+#         dates = db.session.query(DateFestival).limit(15).all()
+#         types = db.session.query(TypeFestival).limit(15).all()
+#         lieux = db.session.query(LieuFestival).limit(15).all()
+#         communes = db.session.query(Commune).limit(15).all()
 
-        # Organisation des données dans un dictionnaire
-        donnees = {
-            "festivals": [{"id": f.id_festival, "nom": f.nom_festival} for f in festivals],
-            "dates": [{"id": d.id_festival, "periode": d.periode_principale_deroulement_festival} for d in dates],
-            "types": [{"id": t.id_festival, "discipline": t.discipline_dominante_festival} for t in types],
-            "lieux": [{"id": l.id_festival, "commune_id": l.id_commune} for l in lieux],
-            "communes": [{"id": c.id_commune, "nom": c.nom_commune} for c in communes],
-            "is_favori": [
-                {
-                    "id": f.id_festival,
-                    "favori": f.id_festival in {
-                        fav.id_festival for fav in db.session.query(relation_user_favori)
-                        .filter(relation_user_favori.c.user_id == current_user.id)
-                        .all()
-                    }
-                }
-                for f in festivals
-            ]
-        }
-        return donnees, 200
-    except Exception as e:
-        app.logger.error(f"Erreur dans /debug_donnees : {str(e)}", exc_info=True)
-        return {"error": str(e)}, 500
+#         # Organisation des données dans un dictionnaire
+#         donnees = {
+#             "festivals": [{"id": f.id_festival, "nom": f.nom_festival} for f in festivals],
+#             "dates": [{"id": d.id_festival, "periode": d.periode_principale_deroulement_festival} for d in dates],
+#             "types": [{"id": t.id_festival, "discipline": t.discipline_dominante_festival} for t in types],
+#             "lieux": [{"id": l.id_festival, "commune_id": l.id_commune} for l in lieux],
+#             "communes": [{"id": c.id_commune, "nom": c.nom_commune} for c in communes],
+#             "is_favori": [
+#                 {
+#                     "id": f.id_festival,
+#                     "favori": f.id_festival in {
+#                         fav.id_festival for fav in db.session.query(relation_user_favori)
+#                         .filter(relation_user_favori.c.user_id == current_user.id)
+#                         .all()
+#                     }
+#                 }
+#                 for f in festivals
+#             ]
+#         }
+#         return donnees, 200
+#     except Exception as e:
+#         app.logger.error(f"Erreur dans /debug_donnees : {str(e)}", exc_info=True)
+#         return {"error": str(e)}, 500

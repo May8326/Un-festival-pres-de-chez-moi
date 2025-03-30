@@ -160,3 +160,160 @@ document.addEventListener("DOMContentLoaded", function () {
     color: white !important;
 }
 </style>
+
+<!-- Scripts Leaflet pour la carte -->
+{% if request.endpoint == 'recherche' %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+});
+
+function initMap() {
+    const mapElement = document.getElementById('map');
+    
+    if (mapElement) {
+        // Initialiser la carte avec auto-resize
+        const map = L.map('map', {
+            scrollWheelZoom: false,  // Désactiver le zoom par défaut avec la molette
+            maxBounds: [[-90,-180], [90,180]],  // Limiter l'étendue de la carte
+            minZoom: 2  // Empêcher un zoom trop grand
+        }).setView([46.603354, 1.888334], 5);  // Vue initiale sur la France
+        
+        // Ajout d'un gestionnaire pour s'assurer que la carte s'adapte à son conteneur
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 100);
+        
+        // Ajouter une couche de carte OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Créer des groupes de clusters pour les festivals et monuments
+        const festivalClusterGroup = L.markerClusterGroup({
+            maxClusterRadius: 40,  // Rayon maximal des clusters en pixels
+            spiderfyOnMaxZoom: true,  // Déployer les marqueurs au zoom max
+            showCoverageOnHover: true,  // Montrer la zone couverte par le cluster au survol
+            zoomToBoundsOnClick: true,  // Zoomer sur les limites du cluster au clic
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                
+                if (count > 10) {
+                    size = 'large';
+                } else if (count > 5) {
+                    size = 'medium';
+                }
+                
+                return L.divIcon({
+                    html: '<div><span>' + count + '</span></div>',
+                    className: 'marker-cluster marker-cluster-' + size + ' festival-cluster',
+                    iconSize: L.point(40, 40)
+                });
+            }
+        });
+        
+        const monumentClusterGroup = L.markerClusterGroup({
+            maxClusterRadius: 40,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: true,
+            zoomToBoundsOnClick: true,
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                
+                if (count > 10) {
+                    size = 'large';
+                } else if (count > 5) {
+                    size = 'medium';
+                }
+                
+                return L.divIcon({
+                    html: '<div><span>' + count + '</span></div>',
+                    className: 'marker-cluster marker-cluster-' + size + ' monument-cluster',
+                    iconSize: L.point(40, 40)
+                });
+            }
+        });
+        
+        // Ajout des marqueurs pour les festivals
+        const festivals = {{ festivals_coords|tojson }};
+        const festivalCount = festivals.length;
+        
+        festivals.forEach(function(festival) {
+            const festivalMarker = L.marker([festival.latitude, festival.longitude], {
+                icon: L.divIcon({
+                    className: 'festival-marker',
+                    html: '<i class="bi bi-music-note" style="color:#e74c3c;font-size:24px;"></i>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                })
+            })
+            .bindPopup(`
+                <div class="marker-info">
+                    <h5>${festival.nom}</h5>
+                    <p>Festival</p>
+                    <a href="/festivalchezmoi/item/festival/${festival.id}" class="btn-details">Voir détails</a>
+                </div>
+            `);
+            
+            // Ajouter le marqueur au groupe de clusters pour les festivals
+            festivalClusterGroup.addLayer(festivalMarker);
+        });
+        
+        // Ajout des marqueurs pour les monuments
+        const monuments = {{ monuments_coords|tojson }};
+        const monumentCount = monuments.length;
+        
+        monuments.forEach(function(monument) {
+            const monumentMarker = L.marker([monument.latitude, monument.longitude], {
+                icon: L.divIcon({
+                    className: 'monument-marker',
+                    html: '<i class="bi bi-building" style="color:#3498db;font-size:24px;"></i>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                })
+            })
+            .bindPopup(`
+                <div class="marker-info">
+                    <h5>${monument.nom}</h5>
+                    <p>Monument</p>
+                    <a href="/festivalchezmoi/item/monument/${monument.id}" class="btn-details">Voir détails</a>
+                </div>
+            `);
+            
+            // Ajouter le marqueur au groupe de clusters pour les monuments
+            monumentClusterGroup.addLayer(monumentMarker);
+        });
+        
+        // Ajouter les groupes de clusters à la carte
+        map.addLayer(festivalClusterGroup);
+        map.addLayer(monumentClusterGroup);
+        
+        // Créer un groupe pour l'adaptation de la vue
+        const allMarkersGroup = L.featureGroup([festivalClusterGroup, monumentClusterGroup]);
+        
+        // Ajuster la vue pour englober tous les marqueurs
+        if (allMarkersGroup.getLayers().length > 0) {
+            map.fitBounds(allMarkersGroup.getBounds(), {
+                padding: [50, 50],
+                maxZoom: 13
+            });
+        } else {
+            // Si aucun marqueur, centrer sur la France
+            map.setView([46.603354, 1.888334], 5);
+        }
+        
+        // Gestionnaire d'événement pour redimensionner correctement la carte
+        window.addEventListener('resize', function() {
+            map.invalidateSize();
+        });
+    }
+}
+</script>
+{% endif %}

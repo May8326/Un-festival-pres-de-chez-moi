@@ -88,3 +88,174 @@ footer a:hover {
     border-radius: 0;
     margin-bottom: 20px;
 }
+
+/* Conteneur avec dimensions fixes pour éviter les débordements */
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#map {
+    height: 500px;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
+
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+.marker-info {
+    text-align: center;
+    padding: 5px;
+}
+
+.marker-info h5 {
+    margin-top: 5px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.marker-info p {
+    margin-bottom: 5px;
+}
+
+.btn-details {
+    background-color: #2c3e50;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.8rem;
+    transition: background-color 0.3s;
+}
+
+.btn-details:hover {
+    background-color: #1abc9c;
+    color: white;
+    text-decoration: none;
+}
+
+.festival-marker, .monument-marker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
+}
+
+/* Styles pour la carte */
+#map {
+    height: 500px;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
+
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+.marker-info {
+    text-align: center;
+    padding: 5px;
+}
+
+.marker-info h5 {
+    margin-top: 5px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.marker-info p {
+    margin-bottom: 5px;
+}
+
+.btn-details {
+    background-color: #171d23;
+    color: white !important; /* Force la couleur blanche */
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.8rem;
+}
+
+.btn-details:hover {
+    background-color: #1abc9c;
+    color: white !important; /* Maintient la couleur blanche au survol */
+    text-decoration: none;
+}
+
+/* Styles personnalisés pour les clusters */
+.marker-cluster-small {
+    background-color: rgba(181, 226, 140, 0.6);
+}
+.marker-cluster-small div {
+    background-color: rgba(110, 204, 57, 0.6);
+}
+
+.marker-cluster-medium {
+    background-color: rgba(241, 211, 87, 0.6);
+}
+.marker-cluster-medium div {
+    background-color: rgba(240, 194, 12, 0.6);
+}
+
+.marker-cluster-large {
+    background-color: rgba(253, 156, 115, 0.6);
+}
+.marker-cluster-large div {
+    background-color: rgba(241, 128, 23, 0.6);
+}
+
+.marker-cluster {
+    background-clip: padding-box;
+    border-radius: 20px;
+}
+
+.marker-cluster div {
+    width: 30px;
+    height: 30px;
+    margin-left: 5px;
+    margin-top: 5px;
+    text-align: center;
+    border-radius: 15px;
+    font-weight: bold;
+}
+
+.marker-cluster span {
+    line-height: 30px;
+}

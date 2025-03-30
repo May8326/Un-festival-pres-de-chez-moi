@@ -1,5 +1,106 @@
 {% extends "partials/conteneur.html" %}
 
+{% block css %}
+<!-- Ajouter la feuille de style Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+      crossorigin=""/>
+<!-- MarkerCluster CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .legend {
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+    }
+    .legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin-right: 8px;
+        opacity: 0.7;
+    }
+    .marker-info {
+        text-align: center;
+        padding: 5px;
+    }
+    .marker-info h5 {
+        margin-top: 5px;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+    .marker-info p {
+        margin-bottom: 5px;
+    }
+    .btn-details {
+        background-color: #171d23;
+        color: white !important; /* Force la couleur blanche */
+        padding: 3px 8px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 5px;
+        font-size: 0.8rem;
+    }
+    .btn-details:hover {
+        background-color: #1abc9c;
+        color: white !important; /* Maintient la couleur blanche au survol */
+        text-decoration: none;
+    }
+    /* Styles personnalisés pour les clusters */
+    .marker-cluster-small {
+        background-color: rgba(181, 226, 140, 0.6);
+    }
+    .marker-cluster-small div {
+        background-color: rgba(110, 204, 57, 0.6);
+    }
+    
+    .marker-cluster-medium {
+        background-color: rgba(241, 211, 87, 0.6);
+    }
+    .marker-cluster-medium div {
+        background-color: rgba(240, 194, 12, 0.6);
+    }
+    
+    .marker-cluster-large {
+        background-color: rgba(253, 156, 115, 0.6);
+    }
+    .marker-cluster-large div {
+        background-color: rgba(241, 128, 23, 0.6);
+    }
+    
+    .marker-cluster {
+        background-clip: padding-box;
+        border-radius: 20px;
+    }
+    
+    .marker-cluster div {
+        width: 30px;
+        height: 30px;
+        margin-left: 5px;
+        margin-top: 5px;
+        text-align: center;
+        border-radius: 15px;
+        font-weight: bold;
+    }
+    
+    .marker-cluster span {
+        line-height: 30px;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="container">
     {% if not donnees.items %}
@@ -8,6 +109,23 @@
     </div>
     {% else %}
     <h1>Résultats de la recherche</h1>
+    
+    <!-- Carte Leaflet - Modifié pour vérifier festivals_coords au lieu de geo_data -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Carte des résultats</h3>
+        </div>
+        <div class="card-body">
+            <div id="map-container">
+                <div id="map"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-2">
+                <span><i class="bi bi-music-note" style="color:#e74c3c;"></i> Festivals ({{ festivals_coords|length }})</span>
+                <span><i class="bi bi-building" style="color:#3498db;"></i> Monuments ({{ monuments_coords|length }})</span>
+            </div>
+        </div>
+    </div>
+    
     <table class="table table-striped">
         <thead>
             <tr>
@@ -88,4 +206,158 @@
     </nav>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block js %}
+<!-- Ajouter le script Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<!-- MarkerCluster JS -->
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mapElement = document.getElementById('map');
+        
+        if (mapElement) {
+            // Initialiser la carte avec auto-resize
+            const map = L.map('map', {
+                scrollWheelZoom: false,  // Désactiver le zoom par défaut avec la molette
+                maxBounds: [[-90,-180], [90,180]],  // Limiter l'étendue de la carte
+                minZoom: 2  // Empêcher un zoom trop grand
+            }).setView([46.603354, 1.888334], 5);  // Vue initiale sur la France
+            
+            // Ajout d'un gestionnaire pour s'assurer que la carte s'adapte à son conteneur
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 100);
+            
+            // Ajouter une couche de carte OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Créer des groupes de clusters pour les festivals et monuments
+            const festivalClusterGroup = L.markerClusterGroup({
+                maxClusterRadius: 40,  // Rayon maximal des clusters en pixels
+                spiderfyOnMaxZoom: true,  // Déployer les marqueurs au zoom max
+                showCoverageOnHover: true,  // Montrer la zone couverte par le cluster au survol
+                zoomToBoundsOnClick: true,  // Zoomer sur les limites du cluster au clic
+                iconCreateFunction: function(cluster) {
+                    const count = cluster.getChildCount();
+                    let size = 'small';
+                    
+                    if (count > 10) {
+                        size = 'large';
+                    } else if (count > 5) {
+                        size = 'medium';
+                    }
+                    
+                    return L.divIcon({
+                        html: '<div><span>' + count + '</span></div>',
+                        className: 'marker-cluster marker-cluster-' + size + ' festival-cluster',
+                        iconSize: L.point(40, 40)
+                    });
+                }
+            });
+            
+            const monumentClusterGroup = L.markerClusterGroup({
+                maxClusterRadius: 40,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: true,
+                zoomToBoundsOnClick: true,
+                iconCreateFunction: function(cluster) {
+                    const count = cluster.getChildCount();
+                    let size = 'small';
+                    
+                    if (count > 10) {
+                        size = 'large';
+                    } else if (count > 5) {
+                        size = 'medium';
+                    }
+                    
+                    return L.divIcon({
+                        html: '<div><span>' + count + '</span></div>',
+                        className: 'marker-cluster marker-cluster-' + size + ' monument-cluster',
+                        iconSize: L.point(40, 40)
+                    });
+                }
+            });
+            
+            // Ajout des marqueurs pour les festivals
+            const festivals = {{ festivals_coords|tojson }};
+            const festivalCount = festivals.length;
+            
+            festivals.forEach(function(festival) {
+                const festivalMarker = L.marker([festival.latitude, festival.longitude], {
+                    icon: L.divIcon({
+                        className: 'festival-marker',
+                        html: '<i class="bi bi-music-note" style="color:#e74c3c;font-size:24px;"></i>',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    })
+                })
+                .bindPopup(`
+                    <div class="marker-info">
+                        <h5>${festival.nom}</h5>
+                        <p>Festival</p>
+                        <a href="/festivalchezmoi/item/festival/${festival.id}" class="btn-details">Voir détails</a>
+                    </div>
+                `);
+                
+                // Ajouter le marqueur au groupe de clusters pour les festivals
+                festivalClusterGroup.addLayer(festivalMarker);
+            });
+            
+            // Ajout des marqueurs pour les monuments
+            const monuments = {{ monuments_coords|tojson }};
+            const monumentCount = monuments.length;
+            
+            monuments.forEach(function(monument) {
+                const monumentMarker = L.marker([monument.latitude, monument.longitude], {
+                    icon: L.divIcon({
+                        className: 'monument-marker',
+                        html: '<i class="bi bi-building" style="color:#3498db;font-size:24px;"></i>',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    })
+                })
+                .bindPopup(`
+                    <div class="marker-info">
+                        <h5>${monument.nom}</h5>
+                        <p>Monument</p>
+                        <a href="/festivalchezmoi/item/monument/${monument.id}" class="btn-details">Voir détails</a>
+                    </div>
+                `);
+                
+                // Ajouter le marqueur au groupe de clusters pour les monuments
+                monumentClusterGroup.addLayer(monumentMarker);
+            });
+            
+            // Ajouter les groupes de clusters à la carte
+            map.addLayer(festivalClusterGroup);
+            map.addLayer(monumentClusterGroup);
+            
+            // Créer un groupe pour l'adaptation de la vue
+            const allMarkersGroup = L.featureGroup([festivalClusterGroup, monumentClusterGroup]);
+            
+            // Ajuster la vue pour englober tous les marqueurs
+            if (allMarkersGroup.getLayers().length > 0) {
+                map.fitBounds(allMarkersGroup.getBounds(), {
+                    padding: [50, 50],
+                    maxZoom: 13
+                });
+            } else {
+                // Si aucun marqueur, centrer sur la France
+                map.setView([46.603354, 1.888334], 5);
+            }
+            
+            // Gestionnaire d'événement pour redimensionner correctement la carte
+            window.addEventListener('resize', function() {
+                map.invalidateSize();
+            });
+        
+        }
+    });
+</script>
 {% endblock %}

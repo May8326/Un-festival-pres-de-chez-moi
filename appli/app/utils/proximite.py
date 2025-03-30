@@ -1,5 +1,6 @@
-from ..models.database import Commune
+from ..models.database import Commune, Festival, MonumentHistorique, LieuFestival
 from geopy.distance import geodesic
+from sqlalchemy import func
 
 def proximite(nom_ville, dist):
     """

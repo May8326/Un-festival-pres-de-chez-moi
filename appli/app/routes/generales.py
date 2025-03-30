@@ -58,23 +58,11 @@ def recherche(page=1):
             LieuFestival.longitude_festival
         ).distinct()
         
-        # Utilisation de jointures avec l'option joinedload
-        base_query = base_query.options(
-            joinedload(Festival.dates),
-            joinedload(Festival.type),
-            joinedload(Festival.lieu).joinedload(LieuFestival.commune)
-        )
-        
-        # Jointures optimisées en utilisant 'JOIN' plutôt que 'LEFT JOIN' quand possible
-        base_query = base_query.join(
-            DateFestival, Festival.id_festival == DateFestival.id_festival
-        ).join(
-            TypeFestival, Festival.id_festival == TypeFestival.id_festival
-        ).join(
-            LieuFestival, Festival.id_festival == LieuFestival.id_festival
-        ).join(
-            Commune, LieuFestival.id_commune == Commune.id_commune
-        )
+        # Ici, remplacer base_query par query_results
+        query_results = query_results.join(DateFestival, Festival.id_festival == DateFestival.id_festival, isouter=True)
+        query_results = query_results.join(TypeFestival, Festival.id_festival == TypeFestival.id_festival, isouter=True)
+        query_results = query_results.join(LieuFestival, Festival.id_festival == LieuFestival.id_festival, isouter=True)
+        query_results = query_results.join(Commune, LieuFestival.id_commune == Commune.id_commune, isouter=True)
 
         # Application des filtres de recherche
         if nom_fest:

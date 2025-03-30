@@ -1,22 +1,22 @@
 <footer class="bg-dark text-white py-4 mt-5">
-    <div class="container">
-      <div class="row">
-        <div class="text-center">
-          <h5>À propos</h5>
-          <p>Ce site est réalisé avec l'aide du cours de Python - Flask donné dans le M2 TNAH à l'école nationale des Chartes.</p>
-          <p>Les membres du groupe 4 à l'origine de ce site sont Maëlys Gioan, Fantin Le Ber, Mathieu Taybi, Bénédicte Tuza.</p>
-        </div>
-        <div class="col-md-4">
-            <p>
-                <a href="{{ url_for('accueil_festivalchezmoi') }}">Accueil</a> |
-                <a href="{{ url_for('liste_favoris') }}">Favoris</a> |
-                <a href="{{ url_for('ajout_utilisateur') }}">Contact</a>
-            </p>
-        </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center">
+        <h5>À propos</h5>
+        <p>Ce site est réalisé avec l'aide du cours de Python - Flask donné dans le M2 TNAH à l'école nationale des Chartes.</p>
+        <p>Les membres du groupe 4 à l'origine de ce site sont Maëlys Gioan, Fantin Le Ber, Mathieu Taybi, Bénédicte Tuza.</p>
       </div>
-      <hr class="my-4">
-      <div class="text-center">
-        <p>&copy; 2025 Festivals en fête. Tous droits réservés.</p>
+      <div class="col-12 text-center mt-3">
+        <p>
+          <a href="{{ url_for('accueil_festivalchezmoi') }}" class="mx-2">Accueil</a> |
+          <a href="{{ url_for('liste_favoris') }}" class="mx-2">Favoris</a> |
+          <a href="{{ url_for('ajout_utilisateur') }}" class="mx-2">Contact</a>
+        </p>
       </div>
     </div>
-  </footer>
+    <hr class="my-4">
+    <div class="text-center">
+      <p>&copy; 2025 Festivals en fête. Tous droits réservés.</p>
+    </div>
+  </div>
+</footer>

@@ -71,10 +71,25 @@ def recherche(page=1):
             query_results = query_results.filter(or_(*[DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%") for periode in periodes_valides]))
         if disciplines_valides:
             query_results = query_results.filter(or_(*[TypeFestival.discipline_dominante_festival.like(f"%{discipline}%") for discipline in disciplines_valides]))
+        # if lieu_pre_traitement:
+        #     lieux_post_traitement = proximite(lieu_pre_traitement, 20)  # Recherche des lieux proches
+        #     query_results = query_results.filter(or_(*[Commune.nom_commune.like(f"{lieu}") for lieu in lieux_post_traitement]))
         if lieu_pre_traitement:
             lieux_post_traitement = proximite(lieu_pre_traitement, 20)  # Recherche des lieux proches
+            if not lieux_post_traitement:
+                flash(f"Aucun lieu trouvé correspondant à '{lieu_pre_traitement}'.", "warning")
+                return render_template(
+            "/pages/resultats.html",
+            form=form,
+            donnees=[],
+            nom=nom_fest,
+            periodes=periodes_valides,
+            disciplines=disciplines_valides,
+            lieu=lieu_pre_traitement,
+            festivals_coords=[],
+            monuments_coords=[]
+        )
             query_results = query_results.filter(or_(*[Commune.nom_commune.like(f"{lieu}") for lieu in lieux_post_traitement]))
-
         # Pagination des résultats
         per_page = app.config["RESULTATS_PER_PAGE"]
         all_results = query_results.all()

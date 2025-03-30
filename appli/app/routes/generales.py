@@ -71,9 +71,7 @@ def recherche(page=1):
             query_results = query_results.filter(or_(*[DateFestival.periode_principale_deroulement_festival.like(f"%{periode}%") for periode in periodes_valides]))
         if disciplines_valides:
             query_results = query_results.filter(or_(*[TypeFestival.discipline_dominante_festival.like(f"%{discipline}%") for discipline in disciplines_valides]))
-        # if lieu_pre_traitement:
-        #     lieux_post_traitement = proximite(lieu_pre_traitement, 20)  # Recherche des lieux proches
-        #     query_results = query_results.filter(or_(*[Commune.nom_commune.like(f"{lieu}") for lieu in lieux_post_traitement]))
+
         if lieu_pre_traitement:
             lieux_post_traitement = proximite(lieu_pre_traitement, 20)  # Recherche des lieux proches
             if not lieux_post_traitement:

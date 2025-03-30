@@ -120,3 +120,8 @@ Nous tenons à remercier chaleureusement :
 - Tous les professeurs qui nous ont transmis les compétences nécessaires pour mener à bien ce projet. 🎓
 
 ### Auteurs ✍️
+
+- @Baghate
+- @May8326
+- @FANT-1
+- @BT-TNAH

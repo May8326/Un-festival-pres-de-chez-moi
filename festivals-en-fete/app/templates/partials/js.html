@@ -150,6 +150,10 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Configurer l'autocomplétion pour le champ lieu dans le formulaire de recherche
     setupAutocomplete("[name='lieu']", "suggestions-lieu", "commune");
+    
+    // Configurer l'autocomplétion pour le champ nom festival dans le formulaire de recherche
+    // Correction du sélecteur pour correspondre au nom exact du champ dans le formulaire
+    setupAutocomplete("[name='nom']", "suggestions-festival", "festival");
 });
 </script>
 

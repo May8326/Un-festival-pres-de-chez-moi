@@ -8,38 +8,31 @@
     </div>
 
     <div class="form-group">
-        <label for="Période">Dates</label>
-        <div id="periode">
+        <label for="periode">Période</label>
+        <select class="form-control" name="periode" id="periode">
             {% for value, label in form.periode.choices %}
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="periode" id="periode_{{ value }}" value="{{ value }}"
-                       {% if form.periode.data and value in form.periode.data %}checked{% endif %}>
-                <label class="form-check-label" for="periode_{{ value }}">{{ label }}</label>
-            </div>
+            <option value="{{ value }}">{{ label }}</option>
             {% endfor %}
-        </div>
-        <small id="periode" class="form-text text-muted">Sélectionnez une ou plusieurs périodes</small>
+        </select>
+        <small class="form-text text-muted">Sélectionnez une période</small>
     </div>
-
+    
     <div class="form-group">
-        <label for="Discipline">Discipline</label>
-        <div id="discipline">
+        <label for="discipline">Discipline</label>
+        <select class="form-control" name="discipline" id="discipline">
             {% for value, label in form.discipline.choices %}
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="discipline" id="discipline_{{ value }}" value="{{ value }}"
-                       {% if form.discipline.data and value in form.discipline.data %}checked{% endif %}>
-                <label class="form-check-label" for="discipline_{{ value }}">{{ label }}</label>
-            </div>
+            <option value="{{ value }}">{{ label }}</option>
             {% endfor %}
-        </div>
-        <small id="discipline" class="form-text text-muted">Sélectionnez une ou plusieurs disciplines</small>
+        </select>
+        <small class="form-text text-muted">Sélectionnez une discipline</small>
     </div>
+    
 
     <div class="form-group">
         <label for="Lieu">Lieu</label>
-        {{ form.lieu(class_="form-control", id="lieu_recherche",placeholder_="Commune") }}
-        <small id="lieu_aide" class="form-text text-muted">Sélectionnez une commune</small>
-    </div>
+        {{ form.lieu(class_="form-control") }}
+        <small id="discipline" class="form-text text-muted">Sélectionnez une commune</small>
+    </div>  
 
     <input type="submit" value="Rechercher">
 </form>

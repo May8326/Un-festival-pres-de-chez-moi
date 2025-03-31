@@ -2,15 +2,16 @@
 <html lang="fr">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Festivals en fête</title>
-  <link rel="stylesheet" href="../static/style.css" />
-  {% include "partials/css.html" %}
+  {% block meta %}
   {% include "partials/metadata.html" %}
-  {% include "partials/js.html" %}
-
-  {% block js %}{%endblock%}
-  {% block css %}{%endblock%}
+  {% endblock %}
+  {% block title %}
+  <title>Festivals en fête</title>
+  {% endblock %}  
+  
+  {% block css %}
+  {% include "partials/css.html" %}
+  {%endblock%}
 </head>
 
 <body>
@@ -81,5 +82,8 @@
       {% include "partials/footer.html" %}
     </footer>
   </div>
+  {% block js %}
+  {% include "partials/js.html" %}
+  {%endblock%}
 </body>
 </html>

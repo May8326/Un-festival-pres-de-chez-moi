@@ -149,16 +149,57 @@ document.addEventListener("DOMContentLoaded", function () {
         window.addEventListener("resize", updateSuggestionsBoxPosition);
     }
 
-    // Configurer l'autocomplétion pour le champ nom_favori (existant)
-    setupAutocomplete("#nom_favori", "suggestions-favori", "festival");
+    // Configurer l'autocomplétion dynamique pour les favoris basée sur le type sélectionné
+    const nomFavoriInput = document.querySelector("#nom_favori");
+    const typeFavoriSelect = document.querySelector("[name='type']"); // Sélecteur correct pour le dropdown de type
     
-    // Configurer l'autocomplétion pour le champ lieu dans le formulaire de recherche
+    if (nomFavoriInput && typeFavoriSelect) {
+        // Configuration initiale avec le type actuellement sélectionné
+        let currentType = typeFavoriSelect.value || "festival";
+        setupAutocomplete("#nom_favori", "suggestions-favori", currentType);
+        
+        // Écouter les changements de type (festival, monument, commune)
+        typeFavoriSelect.addEventListener("change", function() {
+            // Récupérer le nouveau type sélectionné
+            const newType = this.value;
+            console.log("Type de favori changé:", newType);
+            
+            // Supprimer l'ancienne boîte de suggestions s'il y en a une
+            const oldSuggestionsBox = document.getElementById("suggestions-favori");
+            if (oldSuggestionsBox) {
+                oldSuggestionsBox.remove();
+            }
+            
+            // Configurer l'autocomplétion avec le nouveau type
+            setupAutocomplete("#nom_favori", "suggestions-favori", newType);
+        });
+    }
+    
+    // Configurer l'autocomplétion pour les autres champs de formulaire
     setupAutocomplete("[name='lieu']", "suggestions-lieu", "commune");
-    
-    // Configurer l'autocomplétion pour le champ nom festival dans le formulaire de recherche
-    // Correction du sélecteur pour correspondre au nom exact du champ dans le formulaire
     setupAutocomplete("[name='nom']", "suggestions-festival", "festival");
 });
+
+// Modifier la fonction setupAutocomplete pour gérer les instances multiples
+function setupAutocomplete(inputSelector, suggestionsBoxId, type) {
+    const searchInput = document.querySelector(inputSelector);
+    if (!searchInput) return;
+    
+    // Créer une référence à l'instance d'autocomplétion
+    const autocompleteInstance = {
+        destroy: function() {
+            // Nettoyer les événements et éléments créés
+            if (suggestionsBox) {
+                suggestionsBox.remove();
+            }
+        }
+    };
+    
+    // Stocker l'instance sur l'élément d'entrée pour pouvoir y accéder plus tard
+    searchInput.autocompleteInstance = autocompleteInstance;
+    
+    // ...existing code for setupAutocomplete...
+}
 </script>
 
 

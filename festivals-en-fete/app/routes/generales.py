@@ -18,7 +18,11 @@ from sqlalchemy.dialects import sqlite  # Pour compiler les requêtes SQL avec l
 # Route pour rediriger vers la page d'accueil principale
 @app.route("/")
 def accueil():
-    return redirect(url_for("accueil_festivalchezmoi"))  # Redirection vers la page d'accueil spécifique
+    return redirect(url_for("accueil_festivalchezmoi")) 
+
+@app.route("/festivalchezmoi")
+def redirect_to_accueil():
+    return redirect(url_for("accueil_festivalchezmoi"))
 
 # Route pour afficher la page d'accueil avec un formulaire de recherche
 @app.route("/festivalchezmoi/accueil", methods=['GET'])
@@ -223,25 +227,6 @@ def recherche(page=1):
         monuments_coords=monuments_coords,
         favoris_ids=favoris_ids  # Ajout de la liste des IDs de festivals favoris
     )
-
-# Route pour effectuer une recherche rapide
-# @app.route("/festivalchezmoi/recherche_rapide")
-# @app.route("/festivalchezmoi/recherche_rapide/resultat")
-# def recherche_rapide():
-#     chaine = request.args.get("chaine", None)  # Récupération de la chaîne de recherche
-#     try:
-#         page = request.args.get("page", 1, type=int)  # Récupération de la page
-#         if chaine:
-#             # Recherche dans les ressources et cartes associées aux festivals
-#             resources = db.session.execute("""...""").fetchall()
-#             maps = db.session.execute("""...""").fetchall()
-#             resultats = Festival.query.filter(...).paginate(page=page, per_page=app.config["PAYS_PER_PAGE"])
-#         else:
-#             resultats = None
-#         return render_template("pages/resultats_recherche_pays.html", sous_titre="Recherche | " + chaine, donnees=resultats, requete=chaine)
-#     except Exception as e:
-#         print(e)
-#         abort(500)
 
 # Route pour déboguer les données en affichant un échantillon des tables
 # @app.route("/festivalchezmoi/debug_donnees")

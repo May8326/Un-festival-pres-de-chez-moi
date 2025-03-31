@@ -12,6 +12,7 @@
     <h1>Résultats de la recherche</h1>
     
     <!-- Carte Leaflet pour afficher les résultats sur une carte -->
+    {% if request.endpoint == 'recherche' %}
     <div class="card mb-4">
         <div class="card-header">
             <h3>Carte des résultats</h3>
@@ -27,6 +28,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     
     <!-- Tableau des résultats de la recherche -->
     <table class="table table-striped">

@@ -259,3 +259,10 @@ footer a:hover {
 .marker-cluster span {
     line-height: 30px;
 }
+
+/* Style pour l'autocomplétion */
+
+.suggestion-item.active {
+    background-color: #007bff !important;
+    color: white !important;
+}

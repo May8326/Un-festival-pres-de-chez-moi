@@ -1,15 +1,17 @@
 {% extends "partials/conteneur.html" %}
+<!-- Hérite du modèle de base "conteneur.html" -->
 
 {% block body %}
 <div class="container">
     {% if not donnees.items %}
+    <!-- Affiche un message d'alerte si aucune donnée n'est trouvée -->
     <div class="alert alert-warning" role="alert">
         Aucun résultat trouvé pour votre recherche.
     </div>
     {% else %}
     <h1>Résultats de la recherche</h1>
     
-    <!-- Carte Leaflet - Modifié pour vérifier festivals_coords au lieu de geo_data -->
+    <!-- Carte Leaflet pour afficher les résultats sur une carte -->
     <div class="card mb-4">
         <div class="card-header">
             <h3>Carte des résultats</h3>
@@ -18,6 +20,7 @@
             <div id="map-container">
                 <div id="map"></div>
             </div>
+            <!-- Affiche le nombre de festivals et de monuments sur la carte -->
             <div class="d-flex justify-content-between mt-2">
                 <span><i class="bi bi-music-note" style="color:#e74c3c;"></i> Festivals ({{ festivals_coords|length }})</span>
                 <span><i class="bi bi-building" style="color:#3498db;"></i> Monuments ({{ monuments_coords|length }})</span>
@@ -25,6 +28,7 @@
         </div>
     </div>
     
+    <!-- Tableau des résultats de la recherche -->
     <table class="table table-striped">
         <thead>
             <tr>
@@ -37,26 +41,33 @@
         </thead>
         <tbody>
             {% for resultat in donnees.items %}
+            <!-- Parcourt les résultats et affiche chaque ligne dans le tableau -->
             <tr>
-                <td><a href="/festivalchezmoi/item/festival/{{resultat.id_festival}}">{{ resultat[1] or "-" }}</a></td> <!-- Supprimé le lien -->
+                <td><a href="/festivalchezmoi/item/festival/{{resultat[0]}}">{{ resultat[1] or "-" }}</a></td>
                 <td>{{ resultat[2] or "-" }}</td>
                 <td>{{ resultat[3] or "-" }}</td>
                 <td>{{ resultat[4] or "-" }}</td>
                 <td>
                     {% if current_user.is_authenticated %}
-                    <form action="{{ url_for('insertion_favori') }}" method="post" style="display:inline;">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <!-- Formulaire pour ajouter ou retirer un festival des favoris -->
+                    <form action="{{ url_for('insertion_favori') }}" method="post" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="nom_festival" value="{{ resultat[1] }}">
-                        <input type="hidden" name="nom_commune" value="{{ resultat[2] }}">
-                        <button type="submit" class="btn btn-link p-0" title="Ajouter aux favoris">
-                            {% if resultat[5] %}
-                            <i class="bi bi-heart-fill text-danger"></i> <!-- Icône Bootstrap pour le cœur rempli -->
-                            {% else %}
-                            <i class="bi bi-heart"></i> <!-- Icône Bootstrap pour le cœur vide -->
-                            {% endif %}
-                        </button>
+                        
+                        {% if resultat[0] in favoris_ids %}
+                            <!-- Bouton pour retirer des favoris -->
+                            <button type="submit" class="btn btn-link p-0 ml-2 fav-btn">
+                                <i class="bi bi-heart-fill text-danger"></i>
+                            </button>
+                        {% else %}
+                            <!-- Bouton pour ajouter aux favoris -->
+                            <button type="submit" class="btn btn-link p-0 ml-2 fav-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        {% endif %}
                     </form>
                     {% else %}
+                    <!-- Message pour les utilisateurs non connectés -->
                     <span class="text-muted">Connectez-vous pour ajouter aux favoris</span>
                     {% endif %}
                 </td>
@@ -65,16 +76,18 @@
         </tbody>
     </table>
 
-    <!-- Pagination -->
+    <!-- Pagination pour naviguer entre les pages de résultats -->
     <nav aria-label="Pagination">
         <ul class="pagination">
             {% if donnees.has_prev %}
+            <!-- Lien vers la page précédente -->
             <li class="page-item">
                 <a class="page-link" href="{{ url_for('recherche', page=donnees.prev_num, nom=nom, periode=periodes, discipline=disciplines, lieu=lieu) }}" aria-label="Précédent">
                     &laquo; Précédent
                 </a>
             </li>
             {% else %}
+            <!-- Désactive le lien si aucune page précédente -->
             <li class="page-item disabled">
                 <span class="page-link">&laquo; Précédent</span>
             </li>
@@ -82,21 +95,25 @@
 
             {% for page_num in donnees.iter_pages() %}
             {% if page_num %}
+            <!-- Affiche les numéros de page -->
             <li class="page-item {% if donnees.page == page_num %}active{% endif %}">
                 <a class="page-link" href="{{ url_for('recherche', page=page_num, nom=nom, periode=periodes, discipline=disciplines, lieu=lieu) }}">{{ page_num }}</a>
             </li>
             {% else %}
+            <!-- Affiche "..." pour les pages non affichées -->
             <li class="page-item disabled"><span class="page-link">...</span></li>
             {% endif %}
             {% endfor %}
 
             {% if donnees.has_next %}
+            <!-- Lien vers la page suivante -->
             <li class="page-item">
                 <a class="page-link" href="{{ url_for('recherche', page=donnees.next_num, nom=nom, periode=periodes, discipline=disciplines, lieu=lieu) }}" aria-label="Suivant">
                     Suivant &raquo;
                 </a>
             </li>
             {% else %}
+            <!-- Désactive le lien si aucune page suivante -->
             <li class="page-item disabled">
                 <span class="page-link">Suivant &raquo;</span>
             </li>

@@ -141,6 +141,20 @@ def recherche(page=1):
         if form.lieu.data:
             query_results = query_results.filter(
                 and_(*[Commune.nom_commune.ilike(f"%{lieu}%") for lieu in form.lieu.data]))
+
+        # Récupération des IDs des festivals favoris pour l'utilisateur connecté
+        favoris_ids = []
+        if current_user.is_authenticated:
+            # Requête pour obtenir tous les IDs de festivals favoris de l'utilisateur
+            favoris = db.session.query(relation_user_favori.c.id_festival).filter(
+                relation_user_favori.c.user_id == current_user.id,
+                relation_user_favori.c.id_festival != None
+            ).all()
+            
+            # Convertir les résultats en une simple liste d'IDs
+            favoris_ids = [fav[0] for fav in favoris if fav[0] is not None]
+            app.logger.info(f"Favoris récupérés pour l'utilisateur {current_user.id}: {favoris_ids}")
+
         # Pagination des résultats
         per_page = app.config["RESULTATS_PER_PAGE"]
         all_results = query_results.all()
@@ -196,7 +210,7 @@ def recherche(page=1):
         app.logger.error(f"Erreur lors de la recherche : {str(e)}", exc_info=True)
         flash(f"La recherche a rencontré une erreur : {str(e)}", "error")
 
-    # Rendu de la page des résultats
+    # Rendu de la page des résultats avec la liste des favoris
     return render_template(
         "/pages/resultats.html",
         form=form,
@@ -206,7 +220,8 @@ def recherche(page=1):
         disciplines=disciplines_valides,
         lieu=lieu_pre_traitement,
         festivals_coords=festivals_coords,
-        monuments_coords=monuments_coords
+        monuments_coords=monuments_coords,
+        favoris_ids=favoris_ids  # Ajout de la liste des IDs de festivals favoris
     )
 
 # Route pour effectuer une recherche rapide

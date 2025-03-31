@@ -64,7 +64,7 @@ la base de donnée étant trop lourde pour GitHub, elle est téléchargeable jus
 3. **Créer un environnement virtuel** 🌐
 
 ```bash
-python -m venv env
+python -m venv .env
 ```
 
 4. **Activer l'environnement virtuel** 🚀
@@ -76,7 +76,7 @@ env\Scripts\activate
 * Sous macOS et Linux
 
 ```bash
-source env/bin/activate
+source .env/bin/activate
 ```
 
 5. **Installer les dépendances** 📋

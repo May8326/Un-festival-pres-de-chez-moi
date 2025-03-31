@@ -1,40 +1,123 @@
-# Un festival près de chez moi
+# 🎉 Un Festival Près de Chez Moi 🎶
 
-Dépôt en ligne de l'application web Flask réalisée dans le cours de Python donné à l'école des Chartes en M2TNAH
+## 1. Présentation du projet
 
-## Utilisation du Repo pour le travail en groupe
+"Un Festival Près de Chez Moi" est une application web développée avec Flask qui permet aux utilisateurs de découvrir des festivals et monuments historiques à proximité de leur localisation. Cette plateforme vise à promouvoir le patrimoine culturel et les événements artistiques en France. 🌍✨
 
+### Fonctionnalités principales
 
-### Cheat : alias à copier dans le bashrc pour démarrer dataiku en une commande
+- 🔍 **Recherche multicritères** : trouvez des festivals par nom, période (avant-saison, saison, après-saison), discipline artistique et localisation géographique
+- 🗺️ **Visualisation cartographique** : explorez les résultats sur une carte interactive avec regroupement intelligent de marqueurs
+- 🏛️ **Monuments à proximité** : découvrez les monuments historiques situés près des festivals
+- ⭐ **Gestion de favoris** : créez un compte utilisateur pour sauvegarder vos festivals, monuments ou communes préférés
+- 💡 **Autocomplétion** : bénéficiez de suggestions lors de vos recherches pour une expérience utilisateur optimisée
 
-```bash
-alias <nom_de_mon_alias> = "sudo docker run -u dss -v \$HOME/Documents/Volumes/dss:/home/dss -p 127.0.0.1:11000:11000 -it ghcr.io/ahpnils/ahp-dss:latest /home/dss/DSS_DATA_DIR/bin/dss run"
+## 2. Structure de l'application
+
+```
+appli/
+├── app/
+│   ├── app.py              # Configuration principale de l'application Flask
+│   ├── routes/             # Gestion des routes et des vues
+│   │   ├── generales.py    # Routes générales (accueil, recherche)
+│   │   ├── favoris.py      # Gestion des favoris utilisateurs
+│   │   └── ...
+│   ├── models/             # Modèles de données
+│   │   ├── database.py     # Définition des tables et relations
+│   │   ├── users.py        # Modèle utilisateur
+│   │   ├── formulaires.py  # Formulaires WTForms
+│   │   └── ...
+│   ├── templates/          # Templates Jinja2
+│   │   ├── pages/          # Pages principales
+│   │   └── partials/       # Composants réutilisables
+│   ├── statics/            # Fichiers statiques (CSS, JS, images)
+│   │   ├── css/            # Feuilles de style
+│   │   └── ...
+│   └── utils/              # Utilitaires et fonctions auxiliaires
+│       ├── transformations.py
+│       ├── proximite.py
+│       ├── pagination.py
+│       └── ...
+└── run.py                  # Point d'entrée pour lancer l'application
 ```
 
-### Utilisation de Dataiku
+## 3. Instructions d'installation
 
-> Attention aux fichiers de plus de 100mo qui ne sont pas pris en charge par GitHub et font bugger le push
+### Prérequis
 
-Avant chaque session de travail, aller dans son dossier cloné sur son travail
+- 🐍 Python 3.8 ou supérieur
+- 📦 pip (gestionnaire de paquets Python)
+- 🛠️ Git
 
-1. **Mettre à jour ses données**
-	- `git pull` => pour récupérer le travail des autres
-	- s'il faut mettre à jour sa branche par rapport au main (= pour récuperer le travail qui a été fait par qqn d'autre)
-		- `git switch <ma branche>`
-		- `git merge master`
-2. **Pour travailler sur dataiku**
-	- démarrer dataiku
-	- cliquer sur l'oiseau dataiku : dans projets > nouveau projet > importer un projet
-	- importer le dossier `ApplicationFlask.zip` qui se trouve dans le repo git
-	- rentrer dans le projet qui vient d'être importé
-	- faire ses manips
-3. **Partager son travail**
-	- Exporter le projet
-		- sur la vue du flow, cliquer sur 'ApplicationFlask' en haut à gauche
-		- en haut à droite : Actions > Exporter 
-		- enregistrer le nouveau `ApplicationFlask.zip` dans sa branche à la place de l'ancien, `git add ApplicationFlask.zip`, `git commit -m "décrire ce qu'on a fait"
-	- Partager à tous
-		- se positionner sur la branche master `git switch master`
-		- merger sa branche avec master `git merge <ma branche>`
+### Étapes d'installation
 
-C'EST BON, TOUT LE MONDE A ACCES AU TRAVAIL !
+1. **Cloner le dépôt** 📂
+
+```bash
+git clone https://github.com/[username]/Un-festival-pres-de-chez-moi.git
+cd Un-festival-pres-de-chez-moi
+```
+2. **Télécharger la base de donnée** 🗃️
+
+la base de donnée étant trop lourde pour GitHub, elle est téléchargeable jusqu'au 31/10/2025 à [cette adresse](https://univpsl-my.sharepoint.com/:u:/g/personal/maelys_gioan_chartes_psl_eu/EWkhErcLYQlPonwIXfYIttIBzUZuWAaWVdzW1WNECsXiaw?e=ZlKzep).
+
+3. **Créer un environnement virtuel** 🌐
+
+```bash
+python -m venv .env
+```
+
+4. **Activer l'environnement virtuel** 🚀
+
+* Sous Windows :
+```shell
+env\Scripts\activate
+```
+* Sous macOS et Linux
+
+```bash
+source .env/bin/activate
+```
+
+5. **Installer les dépendances** 📋
+
+```bash
+pip install -r requirements.txt
+```
+
+6. **Configurer le fichier .env** 🛡️
+
+Créez un fichier `.env` à la racine du projet avec les variables suivantes :
+
+```text
+# Clé secrète pour la sécurité de l'application
+SECRET_KEY=votre_clé_secrète_aléatoire
+
+# Configuration de la base de données
+SQLALCHEMY_DATABASE_URI=sqlite:////chemin/absolu/vers/bdd_festiv.sqlite
+
+# Nombre de résultats par page
+RESULTATS_PER_PAGE=20
+
+WTF_CSRF_ENABLED=True
+```
+
+**Note importante**: Utilisez la base de données fournie `bdd_festiv.sqlite` qui contient déjà toutes les données nécessaires. Assurez-vous d'indiquer le chemin absolu vers cette base de données dans la variable `SQLALCHEMY_DATABASE_URI`.
+
+7. **Lancer l'application** 🏃‍♂️
+
+```bash
+python3 festivals-en-fête/run.py
+```
+
+## 4. Crédits et remerciements 🙏
+
+Cette application utilise des données ouvertes sur les festivals et monuments historiques de France.
+
+### Remerciements
+
+Nous tenons à remercier chaleureusement :
+
+- **Maxime Challon**, professeur de Flask, pour ses enseignements précieux et son accompagnement. 👨‍🏫
+- **Mme Bermès**, responsable pédagogique, pour son soutien et sa disponibilité. 📚
+- Tous les professeurs qui nous ont transmis les compétences nécessaires pour mener à bien ce projet. 🎓

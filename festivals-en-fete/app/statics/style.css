@@ -1,0 +1,268 @@
+/* Styles généraux */
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Styles pour le header - s'applique à toutes les pages */
+.brick-wall-header {
+    background-image: url('../static/images/brick-wall.png');
+    background-position: center;
+    padding: 2rem 0;
+    width: 100%;
+}
+
+/* Styles pour le conteneur principal - s'applique à toutes les pages */
+.bg-brick-wall-dark {
+    background-image: url('../static/images/brick-wall-dark.png');
+    background-position: center;
+    min-height: 600px;
+    color: black;
+    padding: 20px 0;
+}
+
+/* Styles pour le carrousel */
+.carousel-item {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-indicators li {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 5px;
+}
+
+.carousel-control-prev, .carousel-control-next {
+    width: 5%;
+}
+
+/* Style pour les liens de navigation */
+.navbar-nav .nav-link {
+    font-size: 1.2rem;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #d63384 !important;
+}
+
+/* Style pour les dropdown menus */
+.dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+    color: black;
+    transition: background-color 0.3s;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #d63384;
+}
+
+/* Styles pour les liens du footer */
+footer a {
+    color: #17a2b8;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+footer a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* Style pour les alertes */
+.alert {
+    border-radius: 0;
+    margin-bottom: 20px;
+}
+
+/* Conteneur avec dimensions fixes pour éviter les débordements */
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#map {
+    height: 500px;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
+
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+.marker-info {
+    text-align: center;
+    padding: 5px;
+}
+
+.marker-info h5 {
+    margin-top: 5px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.marker-info p {
+    margin-bottom: 5px;
+}
+
+.btn-details {
+    background-color: #2c3e50;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.8rem;
+    transition: background-color 0.3s;
+}
+
+.btn-details:hover {
+    background-color: #1abc9c;
+    color: white;
+    text-decoration: none;
+}
+
+.festival-marker, .monument-marker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
+}
+
+/* Styles pour la carte */
+#map {
+    height: 500px;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
+
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+.marker-info {
+    text-align: center;
+    padding: 5px;
+}
+
+.marker-info h5 {
+    margin-top: 5px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.marker-info p {
+    margin-bottom: 5px;
+}
+
+.btn-details {
+    background-color: #171d23;
+    color: white !important; /* Force la couleur blanche */
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.8rem;
+}
+
+.btn-details:hover {
+    background-color: #1abc9c;
+    color: white !important; /* Maintient la couleur blanche au survol */
+    text-decoration: none;
+}
+
+/* Styles personnalisés pour les clusters */
+.marker-cluster-small {
+    background-color: rgba(181, 226, 140, 0.6);
+}
+.marker-cluster-small div {
+    background-color: rgba(110, 204, 57, 0.6);
+}
+
+.marker-cluster-medium {
+    background-color: rgba(241, 211, 87, 0.6);
+}
+.marker-cluster-medium div {
+    background-color: rgba(240, 194, 12, 0.6);
+}
+
+.marker-cluster-large {
+    background-color: rgba(253, 156, 115, 0.6);
+}
+.marker-cluster-large div {
+    background-color: rgba(241, 128, 23, 0.6);
+}
+
+.marker-cluster {
+    background-clip: padding-box;
+    border-radius: 20px;
+}
+
+.marker-cluster div {
+    width: 30px;
+    height: 30px;
+    margin-left: 5px;
+    margin-top: 5px;
+    text-align: center;
+    border-radius: 15px;
+    font-weight: bold;
+}
+
+.marker-cluster span {
+    line-height: 30px;
+}
+
+/* Style pour l'autocomplétion */
+
+.suggestion-item.active {
+    background-color: #007bff !important;
+    color: white !important;
+}

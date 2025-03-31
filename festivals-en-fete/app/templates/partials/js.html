@@ -1,0 +1,417 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Scripts de Bootstrap 4 -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+<!-- Autocomplétion -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Fonction générique d'autocomplétion
+    function setupAutocomplete(inputSelector, suggestionsBoxId, type) {
+        const searchInput = document.querySelector(inputSelector);
+        if (!searchInput) return;
+        
+        // Créer la boîte de suggestions si elle n'existe pas déjà
+        let suggestionsBox = document.getElementById(suggestionsBoxId);
+        if (!suggestionsBox) {
+            suggestionsBox = document.createElement('div');
+            suggestionsBox.id = suggestionsBoxId;
+            suggestionsBox.className = 'suggestions-box';
+            suggestionsBox.style.position = 'absolute';
+            suggestionsBox.style.display = 'none';
+            suggestionsBox.style.zIndex = '1000';
+            suggestionsBox.style.backgroundColor = 'white';
+            suggestionsBox.style.border = '1px solid #ddd';
+            suggestionsBox.style.borderTop = 'none';
+            suggestionsBox.style.maxHeight = '200px';
+            suggestionsBox.style.overflowY = 'auto';
+            suggestionsBox.style.width = '100%';
+            document.body.appendChild(suggestionsBox);
+        }
+        
+        let activeIndex = -1; // Index actif pour la navigation au clavier
+
+        // Positionner dynamiquement la boîte de suggestions sous l'élément d'entrée
+        function updateSuggestionsBoxPosition() {
+            const rect = searchInput.getBoundingClientRect();
+            suggestionsBox.style.top = `${rect.bottom + window.scrollY}px`;
+            suggestionsBox.style.left = `${rect.left + window.scrollX}px`;
+            suggestionsBox.style.width = `${rect.width}px`;
+        }
+
+        // Mettre à jour la position lors de l'entrée de texte
+        searchInput.addEventListener("input", function () {
+            const query = searchInput.value.trim();
+
+            if (query.length >= 1) {
+                fetch(`/festivalchezmoi/autocomplete?q=${query}&type=${type}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = ""; // Effacer les suggestions précédentes
+                        activeIndex = -1; // Réinitialiser l'index actif
+                        if (data.results && data.results.length > 0) {
+                            updateSuggestionsBoxPosition(); // Mettre à jour la position
+                            suggestionsBox.style.display = "block"; // Afficher la boîte
+
+                            data.results.forEach((result, index) => {
+                                const suggestion = document.createElement("div");
+                                suggestion.className = "suggestion-item";
+                                suggestion.style.padding = "8px 12px";
+                                suggestion.style.cursor = "pointer";
+                                suggestion.style.borderBottom = "1px solid #eee";
+                                suggestion.textContent = result;
+                                suggestion.setAttribute("data-index", index);
+                                
+                                suggestion.addEventListener("mouseover", function() {
+                                    this.style.backgroundColor = "#f8f9fa";
+                                });
+                                
+                                suggestion.addEventListener("mouseout", function() {
+                                    this.style.backgroundColor = "";
+                                });
+                                
+                                suggestion.addEventListener("click", function () {
+                                    searchInput.value = result; // Remplir le champ avec la suggestion
+                                    suggestionsBox.innerHTML = ""; // Effacer les suggestions
+                                    suggestionsBox.style.display = "none"; // Masquer la boîte
+                                });
+                                suggestionsBox.appendChild(suggestion);
+                            });
+                        } else {
+                            suggestionsBox.style.display = "none"; // Masquer la boîte s'il n'y a pas de résultats
+                        }
+                    })
+                    .catch(error => console.error("Erreur lors de l'autocomplétion :", error));
+            } else {
+                suggestionsBox.innerHTML = ""; // Effacer les suggestions si la saisie est vide
+                suggestionsBox.style.display = "none"; // Masquer la boîte
+            }
+        });
+
+        // Gérer les touches du clavier
+        searchInput.addEventListener("keydown", function (event) {
+            const items = suggestionsBox.querySelectorAll(".suggestion-item");
+            if (items.length > 0) {
+                if (event.key === "ArrowDown") {
+                    // Flèche bas
+                    event.preventDefault();
+                    activeIndex = (activeIndex + 1) % items.length;
+                    updateActiveItem(items);
+                } else if (event.key === "ArrowUp") {
+                    // Flèche haut
+                    event.preventDefault();
+                    activeIndex = (activeIndex - 1 + items.length) % items.length;
+                    updateActiveItem(items);
+                } else if (event.key === "Enter") {
+                    // Touche Entrée
+                    if (activeIndex >= 0) {
+                        event.preventDefault();
+                        items[activeIndex].click();
+                    }
+                } else if (event.key === "Escape") {
+                    // Touche Échap
+                    suggestionsBox.innerHTML = ""; // Effacer les suggestions
+                    suggestionsBox.style.display = "none"; // Masquer la boîte
+                }
+            }
+        });
+
+        // Mettre à jour l'élément actif
+        function updateActiveItem(items) {
+            items.forEach((item, index) => {
+                if (index === activeIndex) {
+                    item.style.backgroundColor = "#007bff";
+                    item.style.color = "white";
+                    item.scrollIntoView({ block: "nearest" }); // Faire défiler jusqu'à l'élément actif
+                } else {
+                    item.style.backgroundColor = "";
+                    item.style.color = "";
+                }
+            });
+        }
+
+        // Masquer la boîte de suggestions lorsqu'on clique en dehors
+        document.addEventListener("click", function (event) {
+            if (!suggestionsBox.contains(event.target) && event.target !== searchInput) {
+                suggestionsBox.innerHTML = ""; // Effacer les suggestions
+                suggestionsBox.style.display = "none"; // Masquer la boîte
+            }
+        });
+
+        // Mettre à jour la position de la boîte lors du défilement ou du redimensionnement
+        window.addEventListener("scroll", updateSuggestionsBoxPosition);
+        window.addEventListener("resize", updateSuggestionsBoxPosition);
+    }
+
+    // Configurer l'autocomplétion dynamique pour les favoris basée sur le type sélectionné
+    const nomFavoriInput = document.querySelector("#nom_favori");
+    const typeFavoriSelect = document.querySelector("[name='type']"); // Sélecteur correct pour le dropdown de type
+    
+    if (nomFavoriInput && typeFavoriSelect) {
+        // Configuration initiale avec le type actuellement sélectionné
+        let currentType = typeFavoriSelect.value || "festival";
+        setupAutocomplete("#nom_favori", "suggestions-favori", currentType);
+        
+        // Écouter les changements de type (festival, monument, commune)
+        typeFavoriSelect.addEventListener("change", function() {
+            // Récupérer le nouveau type sélectionné
+            const newType = this.value;
+            console.log("Type de favori changé:", newType);
+            
+            // Supprimer l'ancienne boîte de suggestions s'il y en a une
+            const oldSuggestionsBox = document.getElementById("suggestions-favori");
+            if (oldSuggestionsBox) {
+                oldSuggestionsBox.remove();
+            }
+            
+            // Configurer l'autocomplétion avec le nouveau type
+            setupAutocomplete("#nom_favori", "suggestions-favori", newType);
+        });
+    }
+    
+    // Configurer l'autocomplétion pour les autres champs de formulaire
+    setupAutocomplete("[name='lieu']", "suggestions-lieu", "commune");
+    setupAutocomplete("[name='nom']", "suggestions-festival", "festival");
+});
+
+// Modifier la fonction setupAutocomplete pour gérer les instances multiples
+function setupAutocomplete(inputSelector, suggestionsBoxId, type) {
+    const searchInput = document.querySelector(inputSelector);
+    if (!searchInput) return;
+    
+    // Créer une référence à l'instance d'autocomplétion
+    const autocompleteInstance = {
+        destroy: function() {
+            // Nettoyer les événements et éléments créés
+            if (suggestionsBox) {
+                suggestionsBox.remove();
+            }
+        }
+    };
+    
+    // Stocker l'instance sur l'élément d'entrée pour pouvoir y accéder plus tard
+    searchInput.autocompleteInstance = autocompleteInstance;
+    
+    // ...existing code for setupAutocomplete...
+}
+</script>
+
+
+
+<!-- Scripts Leaflet pour la carte -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+});
+
+function initMap() {
+    const mapElement = document.getElementById('map');
+    
+    if (mapElement) {
+        // Position par défaut centrée sur la France (utilisée seulement s'il n'y a aucun résultat)
+        const defaultView = {
+            center: [46.603354, 1.888334],
+            zoom: 5
+        };
+        
+        // Initialiser la carte avec auto-resize
+        const map = L.map('map', {
+            scrollWheelZoom: false,  // Désactiver le zoom par défaut avec la molette
+            maxBounds: [[-90,-180], [90,180]],  // Limiter l'étendue de la carte
+            minZoom: 2  // Empêcher un zoom trop grand
+        }).setView(defaultView.center, defaultView.zoom);  // Vue initiale temporaire
+        
+        // Ajout d'un gestionnaire pour s'assurer que la carte s'adapte à son conteneur
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 100);
+        
+        // Ajouter une couche de carte OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Créer des groupes de clusters pour les festivals et monuments
+        const festivalClusterGroup = L.markerClusterGroup({
+            maxClusterRadius: 40,  // Rayon maximal des clusters en pixels
+            spiderfyOnMaxZoom: true,  // Déployer les marqueurs au zoom max
+            showCoverageOnHover: true,  // Montrer la zone couverte par le cluster au survol
+            zoomToBoundsOnClick: true,  // Zoomer sur les limites du cluster au clic
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                
+                if (count > 10) {
+                    size = 'large';
+                } else if (count > 5) {
+                    size = 'medium';
+                }
+                
+                return L.divIcon({
+                    html: '<div><span>' + count + '</span></div>',
+                    className: 'marker-cluster marker-cluster-' + size + ' festival-cluster',
+                    iconSize: L.point(40, 40)
+                });
+            }
+        });
+        
+        const monumentClusterGroup = L.markerClusterGroup({
+            maxClusterRadius: 40,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: true,
+            zoomToBoundsOnClick: true,
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                
+                if (count > 10) {
+                    size = 'large';
+                } else if (count > 5) {
+                    size = 'medium';
+                }
+                
+                return L.divIcon({
+                    html: '<div><span>' + count + '</span></div>',
+                    className: 'marker-cluster marker-cluster-' + size + ' monument-cluster',
+                    iconSize: L.point(40, 40)
+                });
+            }
+        });
+        
+        // Ajouter des vérifications pour les variables undefined
+        const festivals = {{ festivals_coords|default([])|tojson }};
+        const festivalCount = festivals.length;
+        
+        festivals.forEach(function(festival) {
+            const festivalMarker = L.marker([festival.latitude, festival.longitude], {
+                icon: L.divIcon({
+                    className: 'festival-marker',
+                    html: '<i class="bi bi-music-note" style="color:#e74c3c;font-size:24px;"></i>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                })
+            })
+            .bindPopup(`
+                <div class="marker-info">
+                    <h5>${festival.nom}</h5>
+                    <p>Festival</p>
+                    <a href="/festivalchezmoi/item/festival/${festival.id}" class="btn-details">Voir détails</a>
+                </div>
+            `);
+            
+            // Ajouter le marqueur au groupe de clusters pour les festivals
+            festivalClusterGroup.addLayer(festivalMarker);
+        });
+        
+        // Ajouter des vérifications pour les variables undefined
+        const monuments = {{ monuments_coords|default([])|tojson }};
+        const monumentCount = monuments.length;
+        
+        monuments.forEach(function(monument) {
+            const monumentMarker = L.marker([monument.latitude, monument.longitude], {
+                icon: L.divIcon({
+                    className: 'monument-marker',
+                    html: '<i class="bi bi-building" style="color:#3498db;font-size:24px;"></i>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                })
+            })
+            .bindPopup(`
+                <div class="marker-info">
+                    <h5>${monument.nom}</h5>
+                    <p>Monument</p>
+                    <a href="/festivalchezmoi/item/monument/${monument.id}" class="btn-details">Voir détails</a>
+                </div>
+            `);
+            
+            // Ajouter le marqueur au groupe de clusters pour les monuments
+            monumentClusterGroup.addLayer(monumentMarker);
+        });
+        
+        // Ajouter les groupes de clusters à la carte
+        map.addLayer(festivalClusterGroup);
+        map.addLayer(monumentClusterGroup);
+        
+        // Créer un groupe pour l'adaptation de la vue
+        const allMarkersGroup = L.featureGroup([festivalClusterGroup, monumentClusterGroup]);
+        
+        // Ajuster la vue pour englober tous les marqueurs
+        if (allMarkersGroup.getLayers().length > 0) {
+            // Ajuster la vue sur les résultats
+            map.fitBounds(allMarkersGroup.getBounds(), {
+                padding: [50, 50],
+                maxZoom: 13
+            });
+            
+            // Ajouter un bouton personnalisé pour recentrer la carte sur les résultats
+            L.Control.ResetView = L.Control.extend({
+                onAdd: function(map) {
+                    const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                    container.style.backgroundColor = 'white';
+                    container.style.width = '30px';
+                    container.style.height = '30px';
+                    container.innerHTML = '<a href="#" title="Recentrer sur les résultats" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;"><i class="bi bi-arrows-fullscreen"></i></a>';
+                    
+                    container.onclick = function() {
+                        // Recentrer sur les résultats plutôt que sur la France
+                        map.fitBounds(allMarkersGroup.getBounds(), {
+                            padding: [50, 50],
+                            maxZoom: 13
+                        });
+                        return false;
+                    };
+                    
+                    return container;
+                },
+                
+                options: {
+                    position: 'topright'
+                }
+            });
+        } else {
+            // S'il n'y a pas de marqueurs, centrer sur la France
+            map.setView(defaultView.center, defaultView.zoom);
+            
+            // Bouton de recentrage sur la France (uniquement si pas de résultats)
+            L.Control.ResetView = L.Control.extend({
+                onAdd: function(map) {
+                    const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                    container.style.backgroundColor = 'white';
+                    container.style.width = '30px';
+                    container.style.height = '30px';
+                    container.innerHTML = '<a href="#" title="Recentrer la carte" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;"><i class="bi bi-house"></i></a>';
+                    
+                    container.onclick = function() {
+                        map.setView(defaultView.center, defaultView.zoom);
+                        return false;
+                    };
+                    
+                    return container;
+                },
+                
+                options: {
+                    position: 'topright'
+                }
+            });
+        }
+        
+        L.control.resetView = function(opts) {
+            return new L.Control.ResetView(opts);
+        }
+        
+        L.control.resetView().addTo(map);
+        
+        // Gestionnaire d'événement pour redimensionner correctement la carte
+        window.addEventListener('resize', function() {
+            map.invalidateSize();
+        });
+    }
+}
+</script>

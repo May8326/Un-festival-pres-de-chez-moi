@@ -1,0 +1,28 @@
+{% extends "partials/conteneur.html" %}
+
+
+{% block titre %}Erreur {{ code }} - Un Festival Près de Chez Moi{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="error-template">
+                <h1>Oups ! 🤭</h1>
+                <h2>Erreur {{ code }}</h2>
+                <div class="error-details my-4">
+                    {{ message }}
+                </div>
+                <div class="error-actions">
+                    <a href="{{ url_for('accueil_festivalchezmoi') }}" class="btn btn-outline-primary btn-lg ms-3">
+                        <i class="bi bi-house"></i> Retour à l'accueil
+                    </a>
+                    <a href="{{ url_for('mon_compte') }}" class="btn btn-outline-primary btn-lg ms-3">
+                        <i class="bi bi-search"></i> Vers mon compte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -57,14 +57,17 @@ appli/
 git clone https://github.com/[username]/Un-festival-pres-de-chez-moi.git
 cd Un-festival-pres-de-chez-moi
 ```
+2. **Télécharger la base de donnée** 🗃️
 
-2. **Créer un environnement virtuel** 🌐
+la base de donnée étant trop lourde pour GitHub, elle est téléchargeable jusqu'au 31/10/2025 à [cette adresse](https://univpsl-my.sharepoint.com/:u:/g/personal/maelys_gioan_chartes_psl_eu/EWkhErcLYQlPonwIXfYIttIBzUZuWAaWVdzW1WNECsXiaw?e=ZlKzep).
+
+3. **Créer un environnement virtuel** 🌐
 
 ```bash
 python -m venv env
 ```
 
-3. **Activer l'environnement virtuel** 🚀
+4. **Activer l'environnement virtuel** 🚀
 
 * Sous Windows :
 ```shell
@@ -76,13 +79,13 @@ env\Scripts\activate
 source env/bin/activate
 ```
 
-4. **Installer les dépendances** 📋
+5. **Installer les dépendances** 📋
 
 ```bash
 pip install -r requirements.txt
 ```
 
-5. **Configurer le fichier .env** 🛡️
+6. **Configurer le fichier .env** 🛡️
 
 Créez un fichier `.env` à la racine du projet avec les variables suivantes :
 
@@ -101,7 +104,7 @@ WTF_CSRF_ENABLED=True
 
 **Note importante**: Utilisez la base de données fournie `bdd_festiv.sqlite` qui contient déjà toutes les données nécessaires. Assurez-vous d'indiquer le chemin absolu vers cette base de données dans la variable `SQLALCHEMY_DATABASE_URI`.
 
-6. **Lancer l'application** 🏃‍♂️
+7. **Lancer l'application** 🏃‍♂️
 
 ```bash
 python3 festivals-en-fête/run.py

@@ -1,11 +1,14 @@
 from flask import url_for, render_template, redirect, request, flash
 from ..models.users import Users
+from ..models.database import relation_user_favori
 from ..models.formulaires import AjoutUtilisateur, Connexion, SuppressionUtilisateur, ModificationUtilisateur
 from ..utils.transformations import clean_arg
 from app.app import app, db
 from flask_login import login_user, logout_user, current_user
 from app.app import login
 from flask_login import login_required
+from werkzeug.security import check_password_hash
+from sqlalchemy import delete
 
 # Route pour ajouter un utilisateur
 @app.route("/festivalchezmoi/utilisateurs/ajout", methods=["GET", "POST"])
@@ -64,51 +67,6 @@ def deconnexion():
         logout_user()  # Déconnexion de l'utilisateur
     flash("Vous êtes déconnecté", "info")  # Message d'information
     return redirect(url_for("accueil"))  # Redirection vers la page d'accueil
-
-
-# Route pour modifier les informations d'un utilisateur
-@app.route("/festivalchezmoi/utilisateurs/modification", methods=["GET", "POST"])
-def modification():
-    form = ModificationUtilisateur()  # Formulaire de modification
-
-    if form.validate_on_submit():  # Si le formulaire est valide
-        # Appel de la méthode de modification avec les données nettoyées
-        statut, donnees = Users.modification(
-            identifiant=clean_arg(request.form.get("adresse email", None)),
-            password=clean_arg(request.form.get("password", None))
-        )
-
-        if statut is True:  # Si la modification est réussie
-            flash("Modification effectuée", "success")  # Message de succès
-            return redirect(url_for("accueil"))  # Redirection vers la page d'accueil
-        else:  # Si la modification échoue
-            flash(",".join(donnees), "error")  # Afficher les erreurs
-            return render_template("pages/modification_utilisateur.html", form=form)
-    else:
-        # Afficher le formulaire de modification
-        return render_template("pages/modification_utilisateur.html", form=form)
-
-# Route pour supprimer un utilisateur
-@app.route("/festivalchezmoi/utilisateurs/suppression", methods=["GET", "POST"])
-def suppression():
-    form = SuppressionUtilisateur()  # Formulaire de suppression
-
-    if form.validate_on_submit():  # Si le formulaire est valide
-        # Appel de la méthode de suppression avec les données nettoyées
-        statut, donnees = Users.suppression(
-            identifiant=clean_arg(request.form.get("prenom", None)),
-            password=clean_arg(request.form.get("password", None))
-        )
-        
-        if statut is True:  # Si la suppression est réussie
-            flash("Suppression effectuée", "success")  # Message de succès
-            return redirect(url_for("accueil"))  # Redirection vers la page d'accueil
-        else:  # Si la suppression échoue
-            flash(",".join(donnees), "error")  # Afficher les erreurs
-            return render_template("pages/suppression_utilisateur.html", form=form)
-    else:
-        # Afficher le formulaire de suppression
-        return render_template("pages/suppression_utilisateur.html", form=form)
 
 # Route pour afficher la page mon_compte.html
 @app.route("/festivalchezmoi/utilisateurs/mon_compte", methods=["GET", "POST"])
@@ -169,6 +127,53 @@ def modifier_utilisateur():
     form.email.data = current_user.email
 
     return render_template("pages/modification_utilisateur.html", form=form)
+
+# Route pour supprimer un utilisateur
+@app.route("/festivalchezmoi/suppression/utilisateur", methods=['GET', 'POST'])
+@login_required
+def suppression_utilisateur():
+    """Route pour supprimer un compte utilisateur."""
+    form = SuppressionUtilisateur()
+    
+    if form.validate_on_submit():
+        try:
+            # Vérifier que l'utilisateur correspond bien à l'utilisateur connecté
+            user = Users.query.filter_by(prenom=form.prenom.data).first()
+            
+            if not user or user.id != current_user.id:
+                flash("Utilisateur introuvable ou vous n'avez pas les droits pour cette action.", "error")
+                return redirect(url_for("mon_compte"))
+            
+            # Vérifier le mot de passe
+            if not check_password_hash(user.password, form.password.data):
+                flash("Mot de passe incorrect.", "error")
+                return render_template("pages/suppression_utilisateur.html", form=form)
+            
+            # Récupérer l'ID de l'utilisateur avant de le supprimer
+            user_id = user.id
+            
+            # Supprimer d'abord les favoris de l'utilisateur
+            db.session.execute(
+                relation_user_favori.delete().where(relation_user_favori.c.user_id == user_id)
+            )
+            
+            # Déconnecter l'utilisateur avant suppression
+            logout_user()
+            
+            # Supprimer l'utilisateur
+            db.session.delete(user)
+            db.session.commit()
+            
+            flash("Votre compte a été supprimé avec succès.", "success")
+            return redirect(url_for("accueil"))
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Erreur lors de la suppression du compte: {str(e)}", exc_info=True)
+            flash(f"Une erreur s'est produite lors de la suppression de votre compte. Veuillez réessayer.", "error")
+            return render_template("pages/suppression_utilisateur.html", form=form)
+    
+    return render_template("pages/suppression_utilisateur.html", form=form)
 
 # Configuration de la vue de connexion pour Flask-Login
 login.login_view = 'connexion'

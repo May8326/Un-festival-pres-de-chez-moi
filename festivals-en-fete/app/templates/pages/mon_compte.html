@@ -34,5 +34,14 @@
             </form>
         </section>
 
+        <section class="my-4">
+            <h2>Supprimer mon compte</h2>
+            <p>Si vous souhaitez supprimer votre compte, veuillez cliquer sur le bouton ci-dessous.</p>
+            <form action="{{ url_for('suppression_utilisateur') }}" method="post">
+                {{ form.hidden_tag() }}
+                <button type="submit" class="btn btn-danger">Supprimer mon compte</button>
+            </form>
+        </section>
+
     </div>
 {% endblock %}

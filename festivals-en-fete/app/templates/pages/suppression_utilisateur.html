@@ -1,0 +1,60 @@
+{% extends "partials/conteneur.html" %}
+
+{% block titre %}Suppression de compte - Un Festival Près de Chez Moi{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h2>Suppression de compte</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Attention :</strong> La suppression de votre compte est définitive. 
+                        Toutes vos données personnelles et vos favoris seront supprimés.
+                    </div>
+
+                    <form method="POST" action="{{ url_for('suppression_utilisateur') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            <label for="prenom" class="form-label">{{ form.prenom.label }}</label>
+                            {{ form.prenom(class="form-control", placeholder="Votre prénom") }}
+                            {% if form.prenom.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.prenom.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">{{ form.password.label }}</label>
+                            {{ form.password(class="form-control", placeholder="Votre mot de passe") }}
+                            {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="text-muted">Veuillez saisir votre mot de passe pour confirmer la suppression.</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('mon_compte') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Annuler
+                            </a>
+                            {{ form.submit(class="btn btn-danger") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

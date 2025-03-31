@@ -1,24 +1,34 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from flask_wtf.csrf import CSRFProtect, CSRFError
+from flask_wtf.csrf import CSRFProtect
 from app.config import Config
+import jinja2
+import logging
 
-# Utiliser 'static' comme endpoint et 'statics' comme dossier réel
+
+# Pour désactiver complètement les logs, décommentez cette ligne:
+# logging.getLogger().setLevel(logging.CRITICAL)
+
+# Initialisation de l'application Flask
 app = Flask(__name__, template_folder="templates", static_folder='statics', static_url_path='/static')
 app.config.from_object(Config)
 
-# Initialisez CSRFProtect
+# Initialisation des extensions
 csrf = CSRFProtect(app)
-
 db = SQLAlchemy(app)
 login = LoginManager(app)
+login.login_view = 'login'
 
-# Définissez les configurations de login si nécessaire
-login.login_view = 'login' 
+# Configuration de Jinja pour gérer les erreurs de variables indéfinies
+app.jinja_env.undefined = jinja2.StrictUndefined
 
-# Importez les routes APRÈS avoir créé db et login
-from .routes import favoris, generales, users, errors, item 
+# Importation des routes et blueprints
+from .routes import favoris, generales, users, item, errors
 
-# Importez TOUS les modèles
+# Enregistrement du blueprint d'erreurs
+from .routes.errors import error_bp
+app.register_blueprint(error_bp)
+
+# Importation des modèles
 from app.models import *

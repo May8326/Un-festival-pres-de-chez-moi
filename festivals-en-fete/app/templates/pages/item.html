@@ -2,7 +2,17 @@
 
 {% block body %}
 <div class="container mt-5">
-    <h1 class="text-center">{{ item_type|capitalize }} : {{ item.nom }}</h1>
+    <h1 class="text-center">{{ item_type|capitalize }} : 
+        {% if item_type == 'festival' %}
+            {{ item.nom_festival }}
+        {% elif item_type == 'monument' %}
+            {{ item.nom_monument }}
+        {% elif item_type == 'commune' %}
+            {{ item.nom_commune }}
+        {% else %}
+            {{ item.nom if item.nom is defined else "Détails" }}
+        {% endif %}
+    </h1>
 
     {% if item_type == "festival" %}
     <!-- Informations spécifiques aux festivals -->

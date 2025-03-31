@@ -54,7 +54,7 @@ appli/
 1. **Cloner le dépôt** 📂
 
 ```bash
-git clone https://github.com/[username]/Un-festival-pres-de-chez-moi.git
+git clone https://github.com/May8326/Un-festival-pres-de-chez-moi
 cd Un-festival-pres-de-chez-moi
 ```
 2. **Télécharger la base de donnée** 🗃️
